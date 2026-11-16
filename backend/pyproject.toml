@@ -35,6 +35,9 @@ target-version = "py312"
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "SIM", "RUF"]
 
+[tool.ruff.lint.per-file-ignores]
+"migrations/versions/*" = ["E501"]
+
 [tool.mypy]
 python_version = "3.12"
 strict = true
@@ -43,7 +46,7 @@ plugins = ["pydantic.mypy"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
-# Celery y kombu no publican tipos: se relaja mypy solo en el borde de mensajería.
+# Celery and kombu ship no types: relax mypy only at the messaging edge.
 [[tool.mypy.overrides]]
 module = ["celery.*", "kombu.*"]
 ignore_missing_imports = true

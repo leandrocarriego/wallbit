@@ -31,3 +31,6 @@ test-results/
 .DS_Store
 .idea/
 .vscode/
+
+# Local progress tracking (not versioned)
+docs/STATUS.md
