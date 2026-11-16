@@ -1,0 +1,13 @@
+# Conventional Commits (docs/GITFLOW.md).
+extends:
+  - "@commitlint/config-conventional"
+rules:
+  type-enum:
+    - 2
+    - always
+    - [feat, fix, refactor, perf, test, docs, chore, ci, build, style, revert]
+  scope-enum:
+    - 2
+    - always
+    - [api, worker, web, mobile, tax-engine, classification, closing, infra, ci, docs, deps]
+  subject-case: [2, always, lower-case]
