@@ -191,3 +191,20 @@ RabbitMQ no es cuello a esta escala.
 - **Perfil de cliente**: identidad y etiquetas de comportamiento, acumulado vs. tope con proyección, facturado mes a mes, promedio y estabilidad, cierres a tiempo, tiempo de respuesta, contrapartes conocidas con su origen, historial de cierres (snapshots), alertas recurrentes, notas internas y conversaciones.
 - **UI de alta fidelidad**: shadcn/ui sobre un mini design system propio (tokens de color, tipografía, espaciado, radios, estados semánticos del cierre) definido antes de las pantallas finales.
 - Wireframes navegables: [wireframes.html](wireframes.html).
+
+## 10. Evolución: integración con ARCA vía AfipSDK (propuesta, fuera del prototipo)
+
+En la v1 Wallbit no ve ARCA: el usuario confirma o declara sus facturas (decisión 3). La propuesta es integrar ARCA con **AfipSDK** para dos cosas:
+
+1. **Leer los comprobantes emitidos** por el usuario y hacer el match cobro ↔ factura automáticamente. La alerta "cobro sin facturar" pasa a basarse en datos de ARCA y el paso "confirmá tus facturas" desaparece para la mayoría.
+2. **Emitir la Factura E desde la app**: un botón en el cobro detectado ("Facturar este cobro") que precarga cliente del exterior, monto y tipo de cambio. Cierra el ciclo en el mismo lugar donde el usuario ve el cobro.
+
+**Diseño para que entre sin reescribir**: las facturas llegan por un puerto `InvoiceSource` con dos implementaciones, `UserConfirmedSource` (v1) y `ArcaSource` (AfipSDK). La clasificación, el motor fiscal y las alertas no cambian: solo cambia de dónde salen las facturas y su `source` (`arca_issued` en vez de `confirmed_from_suggestion`). La emisión va por un puerto `InvoiceIssuer`.
+
+**En el prototipo**: mockeado. El botón "Facturar este cobro" existe en el usuario simulado y crea la factura con `source = arca_issued` sin llamar a ningún servicio.
+
+**A resolver antes de implementarlo**:
+- **Datos fuera del sistema**: si AfipSDK opera como servicio en la nube, el CUIT y los comprobantes del usuario pasan por un tercero, en tensión con "los datos no salen de nuestros sistemas". Opciones: usar la librería en infraestructura propia, o acuerdo de procesamiento de datos con el proveedor. Decisión del área legal/regulatoria.
+- **Autorización del usuario**: delegar en Wallbit (o en el contador) el acceso a los web services de facturación con clave fiscal; flujo de onboarding y revocación.
+- **Certificados**: custodia de los certificados digitales y rotación.
+- **Responsabilidad**: emitir una factura es un acto fiscal del usuario; el botón precarga y el usuario confirma, nunca se emite sin su acción explícita.
