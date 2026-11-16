@@ -24,7 +24,7 @@ precommit: ## Run every hook on the whole repo
 	uvx pre-commit run --all-files
 
 up: init ## Start everything (data, API, workers, web, observability)
-	$(COMPOSE) up -d --build
+	$(COMPOSE) up -d --build --renew-anon-volumes
 	@$(MAKE) --no-print-directory urls
 
 down: ## Stop services (keeps data)

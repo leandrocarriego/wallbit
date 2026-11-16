@@ -92,6 +92,7 @@ services:
     env_file: .env
     environment:
       WATCHPACK_POLLING: "true"
+      API_INTERNAL_URL: http://api:8000
     volumes:
       - ./web:/app
       - /app/node_modules

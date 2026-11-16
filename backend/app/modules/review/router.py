@@ -168,6 +168,17 @@ def write_message(
     )
 
 
+class PreviewOut(BaseModel):
+    message: str
+    template_version: int
+
+
+@router.get(P + "/{close_id}/message-preview")
+def message_preview(close_id: uuid.UUID, session: DbSession) -> PreviewOut:
+    """Exactly what the user will receive if the close is approved now."""
+    return PreviewOut(**service.preview(session, service.get_close(session, close_id)))
+
+
 @router.post(P + "/{close_id}/approve")
 def approve(close_id: uuid.UUID, body: ApproveIn, session: DbSession, actor: Actor) -> SnapshotOut:
     snapshot = service.approve(

@@ -156,6 +156,18 @@ def messages(session: Session, alert_id: uuid.UUID) -> list[AlertMessage]:
     )
 
 
+def preview(session: Session, close: PeriodClose) -> dict[str, Any]:
+    client = session.get(Client, close.client_id)
+    assert client is not None
+    template = notifications.active_template(session)
+    if close.result is None:
+        return {"message": "", "template_version": template.version}
+    message = notifications.render_close_message(
+        template, first_name=client.full_name.split()[0], period=close.period, result=close.result
+    )
+    return {"message": message, "template_version": template.version}
+
+
 def approve(
     session: Session,
     close: PeriodClose,
