@@ -76,11 +76,22 @@ Documentación en [`docs/`](docs/):
 ## Tests
 
 ```bash
-make test-back   # 65 tests: motor fiscal (golden cases), clasificador, alertas, y la API contra Postgres real
+make test-back   # 67 tests: dominio puro con golden cases + integración contra Postgres real
 make e2e         # la demo completa en un navegador real (Playwright); reinicia los datos
 make lint        # ruff
 make typecheck   # mypy estricto + tsc
 ```
+
+**Carga (k6), con 2.000 clientes:**
+
+```bash
+make seed-volume n=2000                  # 2.000 clientes activos con casos borde
+make load scenario=month_close_burst     # día 1: medido en 15 s (objetivo < 10 min)
+make load scenario=accountant_inbox      # bandeja p95 115 ms (objetivo < 300 ms)
+make seed                                # volver a la demo
+```
+
+Detalle de qué está implementado y qué queda como plan: [docs/TESTING.md](docs/TESTING.md). La CI (`.github/workflows/ci.yml`) corre lint, tipos, tests y e2e.
 
 `make e2e` necesita Node en la máquina. La primera vez: `cd web && npm ci && npx playwright install chromium`.
 
