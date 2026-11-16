@@ -5,7 +5,7 @@ API := $(COMPOSE) exec api
 WEB := $(COMPOSE) exec web
 
 .DEFAULT_GOAL := help
-.PHONY: help init hooks precommit e2e up down restart build ps logs urls health clean \
+.PHONY: help init hooks precommit e2e seed-volume up down restart build ps logs urls health clean \
         migrate migration seed shell psql rabbit \
         test test-back test-web lint fmt typecheck api-client load
 
@@ -69,6 +69,9 @@ migration: ## Create a migration: make migration m="add clients"
 seed: ## Load demo data (2 clients)
 	$(API) python -m seeds.run
 
+seed-volume: ## Load N active clients for load tests: make seed-volume n=2000
+	$(API) python -m seeds.volume --clients $(or $(n),2000)
+
 shell: ## Shell inside the API container
 	$(API) bash
 
@@ -105,5 +108,5 @@ typecheck: ## Type check (mypy + tsc)
 api-client: ## Regenerate the TS client from the API OpenAPI
 	$(WEB) npx openapi-typescript http://api:8000/api/v1/openapi.json -o src/lib/api/schema.d.ts
 
-load: ## k6 load test: make load scenario=accountant_inbox
-	docker run --rm -i --network cierre_default -v $(CURDIR)/tests/load:/scripts grafana/k6:0.54.0 run /scripts/$(or $(scenario),accountant_inbox).js
+load: ## k6 load test: make load scenario=month_close_burst (then accountant_inbox)
+	docker run --rm -i --network cierre_default -v $(CURDIR)/tests/load:/scripts grafana/k6:0.54.0 run /scripts/$(or $(scenario),month_close_burst).js
