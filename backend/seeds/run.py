@@ -18,6 +18,7 @@ from app.modules.clients.models import Client
 from app.modules.demo.models import DemoClock
 from app.modules.ingestion.models import Movement
 from app.modules.ingestion.service import counterparty_for
+from app.modules.notifications.models import NotificationTemplate
 from app.modules.parameters.models import MonotributoCategoryParam, TaxParameterSet
 from seeds.params import PARAMS_2026_08
 
@@ -25,6 +26,14 @@ FX = Decimal("1450.000000")
 DEMO_TODAY = date(2026, 10, 31)
 
 TABLES = [
+    "notifications",
+    "close_snapshots",
+    "batch_approvals",
+    "alert_messages",
+    "close_alerts",
+    "period_closes",
+    "movement_overrides",
+    "notification_templates",
     "user_prompts",
     "movement_classifications",
     "counterparty_declarations",
@@ -372,11 +381,31 @@ def seed_mateo(session: Session) -> None:
     )
 
 
+CLOSE_TEMPLATE = (
+    "Hola {nombre}, tu contador revisó tu cierre de {mes}.\n"
+    "Facturaste {facturado_usd} ({facturado_ars}).\n"
+    "Tenés que pagar {cuota} de monotributo antes del {vencimiento}."
+)
+
+
+def seed_templates(session: Session) -> None:
+    session.add(
+        NotificationTemplate(
+            name="close_approved",
+            version=1,
+            body=CLOSE_TEMPLATE,
+            approved_by="C.P. Laura Gómez (ficticia)",
+            approved_at=datetime(2026, 8, 1, tzinfo=UTC),
+        )
+    )
+
+
 def run() -> None:
     with SessionLocal() as session, session.begin():
         reset(session)
         seed_parameters(session)
         seed_rules(session)
+        seed_templates(session)
         seed_martina(session)
         seed_mateo(session)
         session.add(DemoClock(id=1, today=DEMO_TODAY))

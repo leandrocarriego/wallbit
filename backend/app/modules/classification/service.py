@@ -16,6 +16,7 @@ from app.modules.classification.models import (
     CounterpartyDeclaration,
     GlobalRuleRow,
     MovementClassification,
+    MovementOverride,
 )
 from app.modules.clients.models import Client
 from app.modules.ingestion.models import Counterparty, Movement
@@ -178,7 +179,16 @@ def _context(
         )
         if (key := key_of(m.counterparty_id))
     ]
+    overrides = {
+        str(o.movement_id): o.category
+        for o in session.scalars(
+            select(MovementOverride)
+            .join(Movement, Movement.id == MovementOverride.movement_id)
+            .where(Movement.client_id == client.id, Movement.period == period)
+        )
+    }
     return engine.ClassificationContext(
+        overrides=overrides,
         client_full_name=client.full_name,
         rules=rules,
         invoices=candidates,

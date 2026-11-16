@@ -97,6 +97,7 @@ def seeded(session: Session) -> Session:
 
     run.seed_parameters(session)
     run.seed_rules(session)
+    run.seed_templates(session)
     run.seed_martina(session)
     run.seed_mateo(session)
     from app.modules.demo.models import DemoClock

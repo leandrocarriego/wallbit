@@ -216,3 +216,13 @@ def test_invoice_issued_for_another_payment_is_not_reused() -> None:
         [incoming("m1", "1200", "Acme Corp")], ClassificationContext(CLIENT, invoices=[other])
     )[0]
     assert c.invoice_id is None
+
+
+def test_accountant_decision_wins_over_every_layer() -> None:
+    ctx = ClassificationContext(
+        CLIENT,
+        invoices=[invoice("41", "1200", "Acme Corp", date(2026, 10, 12))],
+        overrides={"m1": Category.PERSONAL_TRANSFER},
+    )
+    c = classify_period([incoming("m1", "1200", "Acme Corp")], ctx)[0]
+    assert (c.category, c.source) == (Category.PERSONAL_TRANSFER, Source.ACCOUNTANT)

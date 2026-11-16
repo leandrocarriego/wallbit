@@ -58,3 +58,15 @@ class MovementClassification(UUIDPrimaryKey, Timestamps, Base):
     suggestion: Mapped[dict[str, Any] | None]
     trace: Mapped[list[dict[str, str]]]
     classified_at: Mapped[datetime]
+
+
+class MovementOverride(UUIDPrimaryKey, Timestamps, Base):
+    """The accountant's decision for one movement (e.g. "J. Pérez is family" after day 5)."""
+
+    __tablename__ = "movement_overrides"
+
+    movement_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("movements.id"), unique=True)
+    category: Mapped[Category] = mapped_column(str_enum(Category, 30))
+    reason: Mapped[str | None] = mapped_column(String(200))
+    decided_by: Mapped[str] = mapped_column(String(120))
+    decided_at: Mapped[datetime]

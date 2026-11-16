@@ -7,7 +7,7 @@ Layers, the first one that decides wins:
      history with that counterparty)
 """
 
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import date
 from decimal import Decimal
@@ -148,6 +148,8 @@ class ClassificationContext:
     history: Sequence[PriorPayment] = ()
     # Counterparties this client has invoiced before in ARCA: evidence of a work relationship.
     invoiced_counterparties: frozenset[str] = frozenset()
+    # Accountant decisions per movement: they win over every other layer.
+    overrides: Mapping[str, Category] = field(default_factory=dict)
     # Invoice match tolerances: platforms deduct fees.
     match_tolerance: Decimal = Decimal("0.05")
     match_days_before: int = 45
@@ -191,6 +193,12 @@ def classify_period(
 
 def _classify(m: MovementIn, ctx: ClassificationContext, used: set[str]) -> Classification:
     trace: list[TraceStep] = []
+
+    # 0. Accountant decision on this movement
+    if m.id in ctx.overrides:
+        cat = ctx.overrides[m.id]
+        trace.append(TraceStep("contador", f"lo clasificó el contador → {cat.value}"))
+        return Classification(m.id, cat, Source.ACCOUNTANT, trace=tuple(trace))
 
     # 1. Structural
     if m.type in STRUCTURAL:

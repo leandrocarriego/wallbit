@@ -9,6 +9,8 @@ from app.core.errors import DomainError, domain_error_handler
 from app.modules.closing.router import router as closing_router
 from app.modules.demo.router import router as demo_router
 from app.modules.enrollment.router import router as user_router
+from app.modules.review.router import router as review_router
+from app.modules.review.router import user_router as review_user_router
 from app.worker import celery_app  # noqa: F401  (the API enqueues tasks with this config)
 
 app = FastAPI(
@@ -21,6 +23,8 @@ app = FastAPI(
 app.add_exception_handler(DomainError, domain_error_handler)
 app.include_router(user_router)
 app.include_router(demo_router)
+app.include_router(review_router)
+app.include_router(review_user_router)
 app.include_router(closing_router)
 
 REQUESTS = Counter("http_requests_total", "Requests HTTP", ["method", "route", "status"])
