@@ -12,6 +12,7 @@ from decimal import ROUND_HALF_UP, Decimal
 from app.core.enums import ActivityType, Currency, MonotributoCategory
 
 ENGINE_VERSION = "0.1.0"
+ACTIVITY_LABEL = {ActivityType.SERVICES: "servicios", ActivityType.GOODS: "bienes"}
 CENT = Decimal("0.01")
 
 
@@ -136,7 +137,7 @@ def compute_close(data: CloseInput) -> CloseResult:
     due = _due_date(data.period, params.fee_due_day)
     trace.append(
         TraceLine(
-            f"Cuota categoría {data.category}, {data.activity_type.value}",
+            f"Cuota categoría {data.category}, {ACTIVITY_LABEL[data.activity_type]}",
             f"{_ars(fee)} · vence {due:%d/%m}",
         )
     )
@@ -170,5 +171,9 @@ def _ars(value: Decimal) -> str:
     return f"$ {money(value):,.2f}".replace(",", "_").replace(".", ",").replace("_", ".")
 
 
+def _num(value: Decimal) -> str:
+    return f"{money(value):,.2f}".replace(",", "_").replace(".", ",").replace("_", ".")
+
+
 def _fmt_currencies(values: dict[str, Decimal]) -> str:
-    return " · ".join(f"{cur} {money(v):,.2f}" for cur, v in sorted(values.items())) or "0"
+    return " · ".join(f"{cur} {_num(v)}" for cur, v in sorted(values.items())) or "0"

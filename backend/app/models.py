@@ -8,6 +8,7 @@ from app.modules.classification.models import (
     MovementClassification,
 )
 from app.modules.clients.models import Client
+from app.modules.closing.models import CloseAlert, PeriodClose
 from app.modules.demo.models import DemoClock
 from app.modules.ingestion.models import Counterparty, Movement
 from app.modules.invoices.models import Invoice
@@ -19,6 +20,7 @@ __all__ = [
     "ArcaRegistration",
     "AuditEvent",
     "Client",
+    "CloseAlert",
     "Counterparty",
     "CounterpartyDeclaration",
     "DemoClock",
@@ -27,6 +29,7 @@ __all__ = [
     "MonotributoCategoryParam",
     "Movement",
     "MovementClassification",
+    "PeriodClose",
     "TaxParameterSet",
     "UserPrompt",
 ]

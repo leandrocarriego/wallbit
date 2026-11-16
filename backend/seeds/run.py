@@ -311,9 +311,10 @@ def seed_mateo(session: Session) -> None:
     )
     session.flush()
 
+    # Steady client: the last 3 months are close to October, so no "strong variation" alert.
     n = 5
-    for day in prior_months("2026-10", 11):
-        add_document(session, cuit, n, day, "Globex Inc", "1450", "US")
+    for i, day in enumerate(prior_months("2026-10", 11)):
+        add_document(session, cuit, n, day, "Globex Inc", "3100" if i >= 8 else "1450", "US")
         n += 1
     add_document(session, cuit, 17, date(2026, 10, 3), "Globex Inc", "2100", "US")
     add_document(session, cuit, 18, date(2026, 10, 18), "Globex Inc", "1100", "US")

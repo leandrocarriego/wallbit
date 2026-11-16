@@ -40,14 +40,14 @@ def reclassify(
     session: Session, client: Client, period: str, *, actor: str, now: datetime
 ) -> list[MovementClassification]:
     """Classify every movement of the client in the period and refresh the user's prompts."""
-    keys = _counterparty_keys(session)
+    keys = counterparty_keys(session)
     movements = list(
         session.scalars(
             select(Movement).where(Movement.client_id == client.id, Movement.period == period)
         )
     )
     ctx = _context(session, client, period, keys)
-    results = engine.classify_period([_to_engine(m, keys) for m in movements], ctx)
+    results = engine.classify_period([to_engine_movement(m, keys) for m in movements], ctx)
     by_id = {str(m.id): m for m in movements}
 
     existing = {
@@ -96,13 +96,13 @@ def reclassify(
     return stored
 
 
-def _counterparty_keys(session: Session) -> dict[uuid.UUID, tuple[str, str]]:
+def counterparty_keys(session: Session) -> dict[uuid.UUID, tuple[str, str]]:
     return {
         cp.id: (cp.normalized_name, cp.display_name) for cp in session.scalars(select(Counterparty))
     }
 
 
-def _to_engine(m: Movement, keys: dict[uuid.UUID, tuple[str, str]]) -> engine.MovementIn:
+def to_engine_movement(m: Movement, keys: dict[uuid.UUID, tuple[str, str]]) -> engine.MovementIn:
     key, display = keys.get(m.counterparty_id, (None, None)) if m.counterparty_id else (None, None)
     return engine.MovementIn(
         id=str(m.id),

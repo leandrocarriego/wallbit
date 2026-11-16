@@ -14,6 +14,7 @@ from app.modules.classification.engine import Category
 from app.modules.classification.models import CounterpartyDeclaration
 from app.modules.classification.service import reclassify
 from app.modules.clients.models import Client
+from app.modules.closing.service import mark_dirty
 from app.modules.ingestion.models import Movement
 from app.modules.invoices.models import Invoice
 from app.modules.invoices.service import sync_from_arca
@@ -157,6 +158,7 @@ def answer_who_is(
     )
     session.flush()
     reclassify(session, client, prompt.period, actor=actor, now=now)
+    mark_dirty(session, client.id, prompt.period)
     return prompt
 
 
@@ -216,4 +218,5 @@ def invoice_movement(
     invoice.issued_for_movement_id = movement.id
     session.flush()
     reclassify(session, client, movement.period, actor=actor, now=now)
+    mark_dirty(session, client.id, movement.period)
     return invoice
