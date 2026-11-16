@@ -1,4 +1,4 @@
-# Cierre: full local environment. `make up` starts everything; `make up-mobile` adds the simulator.
+# Cierre: full local environment. `make up` starts everything.
 name: cierre
 
 x-backend: &backend
@@ -102,21 +102,6 @@ services:
       api:
         condition: service_healthy
     restart: unless-stopped
-
-  mobile:
-    # User simulator (low priority). Only with `make up-mobile`.
-    profiles: ["mobile"]
-    build:
-      context: ./mobile
-    env_file: .env
-    volumes:
-      - ./mobile:/app
-      - /app/node_modules
-    ports:
-      - "8081:8081"
-    depends_on:
-      api:
-        condition: service_healthy
 
   # ---------- observability ----------
   prometheus:

@@ -5,7 +5,7 @@ API := $(COMPOSE) exec api
 WEB := $(COMPOSE) exec web
 
 .DEFAULT_GOAL := help
-.PHONY: help init hooks precommit up up-mobile down restart build ps logs urls health clean \
+.PHONY: help init hooks precommit up down restart build ps logs urls health clean \
         migrate migration seed shell psql rabbit \
         test test-back test-web lint fmt typecheck api-client load
 
@@ -27,12 +27,8 @@ up: init ## Start everything (data, API, workers, web, observability)
 	$(COMPOSE) up -d --build
 	@$(MAKE) --no-print-directory urls
 
-up-mobile: init ## Start everything plus the mobile simulator (Expo web)
-	@test -d mobile || (echo "mobile/ does not exist yet." && exit 1)
-	$(COMPOSE) --profile mobile up -d --build
-
 down: ## Stop services (keeps data)
-	$(COMPOSE) --profile mobile down
+	$(COMPOSE) down
 
 restart: ## Restart a service: make restart s=worker
 	$(COMPOSE) restart $(s)
@@ -60,7 +56,7 @@ health: ## Check the API responds
 	@curl -fsS http://localhost:8000/health && echo
 
 clean: ## Stop everything and DELETE volumes (DB, queues, metrics)
-	$(COMPOSE) --profile mobile down -v --remove-orphans
+	$(COMPOSE) down -v --remove-orphans
 
 # ---------- database ----------
 migrate: ## Apply pending migrations
