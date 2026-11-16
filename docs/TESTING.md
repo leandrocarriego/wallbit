@@ -9,7 +9,6 @@
 | Integration | `pytest` + Postgres/RabbitMQ (compose de test) | Repositorios, transacciones, tasks Celery end-to-end, aprobación en lote |
 | Contract | `schemathesis` | La API cumple su OpenAPI (fuzzing de endpoints) |
 | Unit (web) | `Vitest` + Testing Library | Componentes y hooks de la consola |
-| Mobile | `tsc` + `eslint` únicamente | Es un simulador del usuario; no lleva tests unitarios |
 | E2E | `Playwright` | Flujo del contador: bandeja → revisar → aprobar lote → ver notificado |
 | Carga | `k6` | Ver abajo |
 
@@ -30,13 +29,13 @@ Resultados exportados a Prometheus → dashboard de Grafana "Load tests".
 |---|---|---|
 | **pre-commit** | `ruff`, `ruff format`, `mypy` (archivos cambiados), `eslint`, `prettier`, `gitleaks`, `check-yaml/json`, unit del `tax_engine` | Feedback < 10 s |
 | **commit-msg** | `commitlint` | Conventional Commits |
-| **pre-push** | Unit completos backend + web; typecheck mobile | No pushear rojo |
+| **pre-push** | Unit completos backend + web | No pushear rojo |
 | **CI — PR** (GitHub Actions) | Lint + types, unit con cobertura, integration (services: postgres, rabbitmq), drift del cliente OpenAPI, build de imágenes, e2e Playwright sobre compose | Gate de merge |
-| **CI — develop (push)** | Todo lo anterior + `schemathesis` + k6 smoke (1 VU, 1 min) | Develop siempre verde |
+| **CI — dev (push)** | Todo lo anterior + `schemathesis` + k6 smoke (1 VU, 1 min) | `dev` siempre verde |
 | **CI — nightly / manual** | k6 completo (`month_close_burst`, etc.) sobre compose | Detectar regresiones de performance |
 | **CI — release/\*** | Suite completa + golden cases + reporte de cambios en cálculo fiscal para firma del contador | Validación regulatoria |
 
 ## Cobertura
 
 - `tax_engine`, `classification`, `alerts`, `closing`: ≥ 95%.
-- Global backend: ≥ 80%. Web/mobile: sin umbral duro, foco en flujos críticos.
+- Global backend: ≥ 80%. Web: sin umbral duro, foco en flujos críticos.

@@ -17,7 +17,7 @@
 | Cliente API | `openapi-typescript` generado desde el OpenAPI de FastAPI | Tipos compartidos web + mobile, sin drift |
 | Observabilidad | **Prometheus** + **Grafana** (+ exporters de Postgres, RabbitMQ, Celery) | Métricas técnicas y de negocio |
 | Orquestación local | **Docker Compose** + **Makefile** | `make up` levanta todo |
-| Calidad | pre-commit, pytest, Vitest, Playwright, Jest, **k6**, GitHub Actions | Ver [TESTING.md](TESTING.md) |
+| Calidad | pre-commit, pytest, Vitest, Playwright, Jest, k6, GitHub Actions | Ver [TESTING.md](TESTING.md) |
 
 **Restricción de datos:** ningún servicio llama a APIs externas con datos de usuarios. La clasificación es por reglas deterministas (no LLM externo). Las notificaciones del prototipo son in-app (sin push); si en producción se usara push, el payload sería genérico ("Tenés novedades de tu cierre") y el detalle se lee dentro de la app.
 
