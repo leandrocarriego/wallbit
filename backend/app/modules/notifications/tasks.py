@@ -1,4 +1,4 @@
-"""Tareas de notificaciones. Stubs hasta implementar el módulo notifications."""
+"""Notification tasks. Stubs until the notifications module lands."""
 
 import structlog
 from celery import shared_task

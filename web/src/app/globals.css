@@ -1,5 +1,5 @@
-/* Cierre Design System — tokens para shadcn/ui + Tailwind v4.
-   Fuente de los valores: docs/design-system/tokens.json (mantener en sync). */
+/* Cierre Design System: tokens for shadcn/ui + Tailwind v4.
+   Source of values: docs/design-system/tokens.json (keep in sync). */
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -112,7 +112,7 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  /* Cierre: utilidades propias (bg-status-review-tint, text-ink-subtle, …) */
+  /* Cierre: custom utilities (bg-status-review-tint, text-ink-subtle, ...) */
   --color-ink: var(--ink);
   --color-ink-muted: var(--ink-muted);
   --color-ink-subtle: var(--ink-subtle);

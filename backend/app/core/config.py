@@ -7,9 +7,9 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     env: str = "local"
-    database_url: str = "postgresql+psycopg://cierre:cierre@localhost:5432/cierre"
-    rabbitmq_url: str = "amqp://cierre:cierre@localhost:5672//"
-    # Zona horaria del negocio: Beat dispara el cierre el día 1 en hora argentina.
+    database_url: str = "postgresql+psycopg://wallbit:wallbit@localhost:5432/wallbit"
+    rabbitmq_url: str = "amqp://wallbit:wallbit@localhost:5672//"
+    # Business timezone: Beat starts the close on day 1, Argentina time.
     business_timezone: str = "America/Argentina/Buenos_Aires"
 
 

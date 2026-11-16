@@ -5,7 +5,7 @@ from fastapi import FastAPI, Request, Response
 from prometheus_client import CONTENT_TYPE_LATEST, Counter, Histogram, generate_latest
 
 from app.core.db import ping_db
-from app.worker import celery_app  # noqa: F401  (la API encola tasks con esta configuración)
+from app.worker import celery_app  # noqa: F401  (the API enqueues tasks with this config)
 
 app = FastAPI(
     title="Cierre · Servicio contable Wallbit",

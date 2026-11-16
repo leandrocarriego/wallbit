@@ -11,7 +11,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# Dependencias primero (capa cacheada); el venv vive fuera de /app para que el bind mount no lo pise.
+# Dependencies first (cached layer); the venv lives outside /app so the bind mount does not hide it.
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-install-project
 

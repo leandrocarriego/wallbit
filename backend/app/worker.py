@@ -1,6 +1,6 @@
 """Celery app + Beat.
 
-Los mensajes llevan solo ids: Postgres es la fuente de verdad (ARCHITECTURE §5).
+Messages carry ids only: Postgres is the source of truth (ARCHITECTURE §5).
 """
 
 from typing import Any
@@ -47,10 +47,10 @@ celery_app.conf.update(
     task_acks_late=True,
     task_reject_on_worker_lost=True,
     worker_prefetch_multiplier=1,
-    task_ignore_result=True,  # el avance se lee de la DB, no de un result backend
+    task_ignore_result=True,  # progress is read from the DB, not a result backend
     task_serializer="json",
     accept_content=["json"],
-    worker_send_task_events=True,  # para Flower y celery-exporter
+    worker_send_task_events=True,  # for Flower and celery-exporter
     task_send_sent_event=True,
     timezone=settings.business_timezone,
     enable_utc=True,
@@ -81,7 +81,7 @@ celery_app.conf.update(
 
 @worker_ready.connect
 def declare_dead_letter_queue(sender: Any, **_: Any) -> None:
-    """La DLQ no la consume ningún worker: se declara para no perder mensajes muertos."""
+    """No worker consumes the DLQ; declare it so dead messages are not lost."""
     with sender.app.connection_for_write() as conn:
         dead_letter.bind(conn).declare()
 

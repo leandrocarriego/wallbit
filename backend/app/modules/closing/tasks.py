@@ -1,4 +1,4 @@
-"""Tareas del cierre. Stubs: la lógica llega con el módulo closing (ver STATUS.md)."""
+"""Close tasks. Stubs until the closing module lands."""
 
 import structlog
 from celery import shared_task

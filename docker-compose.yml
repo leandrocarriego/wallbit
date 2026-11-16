@@ -1,4 +1,4 @@
-# Cierre · entorno local completo. `make up` levanta todo; `make up-mobile` suma el simulador.
+# Cierre: full local environment. `make up` starts everything; `make up-mobile` adds the simulator.
 name: cierre
 
 x-backend: &backend
@@ -15,7 +15,7 @@ x-backend: &backend
   restart: unless-stopped
 
 services:
-  # ---------- datos y mensajería ----------
+  # ---------- data and messaging ----------
   postgres:
     image: postgres:16.4-alpine
     environment:
@@ -41,7 +41,7 @@ services:
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
     ports:
       - "5672:5672"   # AMQP
-      - "15672:15672" # UI de management
+      - "15672:15672" # management UI
     volumes:
       - ./infra/rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins:ro
       - rabbitmqdata:/var/lib/rabbitmq
@@ -52,7 +52,7 @@ services:
       retries: 20
     restart: unless-stopped
 
-  # ---------- backend: un paquete, tres procesos ----------
+  # ---------- backend: one package, three processes ----------
   api:
     <<: *backend
     command: >
@@ -68,7 +68,7 @@ services:
 
   worker:
     <<: *backend
-    # Las tres colas en un proceso para el prototipo; en producción, un deployment por cola.
+    # All three queues in one process for the prototype; in production, one deployment per queue.
     command: celery -A app.worker worker -Q closing,recompute,notifications -c 2 -E -l info
 
   beat:
@@ -104,7 +104,7 @@ services:
     restart: unless-stopped
 
   mobile:
-    # Simulador del usuario (prioridad baja). Solo con `make up-mobile`.
+    # User simulator (low priority). Only with `make up-mobile`.
     profiles: ["mobile"]
     build:
       context: ./mobile
@@ -118,7 +118,7 @@ services:
       api:
         condition: service_healthy
 
-  # ---------- observabilidad ----------
+  # ---------- observability ----------
   prometheus:
     image: prom/prometheus:v2.53.2
     command:
