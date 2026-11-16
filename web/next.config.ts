@@ -5,6 +5,7 @@ const apiTarget = process.env.API_INTERNAL_URL ?? "http://localhost:8000";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  devIndicators: false,
   async rewrites() {
     return [{ source: "/api/:path*", destination: `${apiTarget}/api/:path*` }];
   },

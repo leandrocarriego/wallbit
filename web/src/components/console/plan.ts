@@ -10,7 +10,7 @@ export function estimate(inbox: S<"Inbox">) {
   const review = inbox.rows.filter((r) => r.status === "IN_REVIEW").length;
   const ready = inbox.counts.READY ?? 0;
   const minutes = (blocking.length * MASS_SECONDS) / 60 + review * REVIEW_MINUTES + (ready ? BATCH_MINUTES : 0);
-  const rounded = Math.max(1, Math.round(minutes));
-  const label = rounded >= 60 ? `~${Math.floor(rounded / 60)} h ${String(rounded % 60).padStart(2, "0")} min` : `~${rounded} min`;
+  const rounded = Math.ceil(minutes);
+  const label = rounded === 0 ? "nada" : rounded >= 60 ? `~${Math.floor(rounded / 60)} h ${String(rounded % 60).padStart(2, "0")} min` : `~${rounded} min`;
   return { blocking: blocking.length, review, ready, minutes: rounded, label };
 }

@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { ACCOUNTANT, api } from "@/lib/api/client";
 import { useInbox, useWorkingPeriod } from "@/lib/api/hooks";
-import { formatUsd, monthName } from "@/lib/format";
+import { formatUsd, monthName, plural } from "@/lib/format";
 import { ALERT_LABEL, STATUS_LABEL } from "@/lib/labels";
 import { Button, CapBar, Card, Chip, StatusPill } from "@/components/ui";
 import { estimate } from "@/components/console/plan";
@@ -52,10 +52,10 @@ export default function InboxPage() {
   }
 
   const plan = estimate(data);
-  const rows = filter ? data.rows.filter((r) => r.status === filter) : data.rows;
-  const firstReview = data.rows.find((r) => r.status === "IN_REVIEW");
   const total = data.rows.length || 1;
   const notified = data.counts.NOTIFIED ?? 0;
+  const rows = filter ? data.rows.filter((r) => r.status === filter) : data.rows;
+  const firstReview = data.rows.find((r) => r.status === "IN_REVIEW");
 
   return (
     <>
@@ -64,11 +64,19 @@ export default function InboxPage() {
           <h1 className="text-xl font-semibold">{title}</h1>
           <span className="text-ink-muted">Fecha simulada {data.today.split("-").reverse().join("/")} · vence el monotributo el 20</span>
         </div>
-        <Link href="/consola/lote" className="inline-flex min-h-9 items-center rounded-md border border-input bg-surface px-3.5 font-medium">
-          Aprobar {data.counts.READY ?? 0} listos
-        </Link>
+        {(data.counts.READY ?? 0) > 0 && (
+          <Link href="/consola/lote" className="inline-flex min-h-9 items-center rounded-md border border-input bg-surface px-3.5 font-medium">
+            Aprobar {plural(data.counts.READY ?? 0, "listo", "listos")}
+          </Link>
+        )}
       </div>
 
+      {notified === data.rows.length ? (
+        <Card className="grid gap-1 border-status-done bg-status-done-tint p-4 text-status-done">
+          <b className="text-[15px]">Cierre de {monthName(period)} completo</b>
+          <span className="text-sm">Todos los clientes fueron aprobados y notificados. Cada aviso salió de un snapshot inmutable.</span>
+        </Card>
+      ) : (
       <Card className="grid gap-3.5 p-4">
         <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
           <h2 className="text-[15px] font-semibold">Plan para cerrar {monthName(period)}</h2>
@@ -78,18 +86,19 @@ export default function InboxPage() {
           </span>
         </div>
         <ol className="grid gap-3 md:grid-cols-3">
-          <Step n={1} now={plan.blocking > 0} title="Resolver por alerta" sub={`${plan.blocking} casos bloqueantes`} href="/consola/alertas" cta="Empezar" />
+          <Step n={1} now={plan.blocking > 0} title="Resolver por alerta" sub={plural(plan.blocking, "caso bloqueante", "casos bloqueantes")} href="/consola/alertas" cta="Empezar" />
           <Step
             n={2}
             now={plan.blocking === 0 && plan.review > 0}
             title="Revisar uno por uno"
-            sub={`${plan.review} clientes en revisión`}
+            sub={plural(plan.review, "cliente en revisión", "clientes en revisión")}
             href={firstReview ? `/consola/cierres/${firstReview.close_id}` : "/consola"}
             cta="Revisión guiada"
           />
-          <Step n={3} now={plan.review === 0 && plan.ready > 0} title="Aprobar en lote" sub={`${plan.ready} listos`} href="/consola/lote" cta="Ir al lote" />
+          <Step n={3} now={plan.review === 0 && plan.ready > 0} title="Aprobar en lote" sub={plural(plan.ready, "listo", "listos")} href="/consola/lote" cta="Ir al lote" />
         </ol>
       </Card>
+      )}
 
       <section aria-label="Clientes por estado" className="grid gap-3">
         <div className="grid grid-cols-2 gap-3 md:grid-cols-5">

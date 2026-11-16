@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { ACCOUNTANT, api } from "@/lib/api/client";
 import { useInbox, useWorkingPeriod } from "@/lib/api/hooks";
-import { formatUsd, monthName } from "@/lib/format";
+import { formatUsd, monthName, plural } from "@/lib/format";
 import { ALERT_LABEL } from "@/lib/labels";
 import { Button, CapBar, Card, Chip, ErrorText, StatusPill } from "@/components/ui";
 
@@ -40,7 +40,7 @@ export default function BatchPage() {
     return (
       <Card className="grid justify-items-start gap-3 p-6">
         <StatusPill status="APPROVED" />
-        <b className="text-2xl">{run.data.approved} cierres aprobados</b>
+        <b className="text-2xl">{plural(run.data.approved, "cierre aprobado", "cierres aprobados")}</b>
         <span className="text-ink-muted">
           Cada uno guardó su snapshot inmutable y su aviso salió a la cola de notificaciones. {run.data.skipped > 0 && `${run.data.skipped} quedaron afuera.`}
         </span>
@@ -62,7 +62,7 @@ export default function BatchPage() {
           / {monthName(period)} · paso 3 de 3
         </div>
         <h1 className="text-xl font-semibold">
-          Aprobar {total} cierres de {monthName(period)}
+          Aprobar {plural(total, "cierre", "cierres")} de {monthName(period)}
         </h1>
         <span className="text-ink-muted">Ninguno tiene alertas bloqueantes. Mirá primero los que tienen alertas informativas.</span>
       </div>
@@ -135,7 +135,7 @@ export default function BatchPage() {
         <label className="flex items-start gap-2.5">
           <input type="checkbox" className="mt-0.5 size-4" checked={attested} onChange={(e) => setAttested(e.target.checked)} />
           <span>
-            Revisé los criterios de este lote y, como contador matriculado, apruebo los <b className="font-mono">{total}</b> cierres y su comunicación a los clientes.
+            Revisé los criterios de este lote y, como contador matriculado, apruebo {total === 1 ? "el cierre" : <>los <b className="font-mono">{total}</b> cierres</>} y su comunicación {total === 1 ? "al cliente" : "a los clientes"}.
           </span>
         </label>
         <div className="flex flex-wrap items-center gap-2.5">

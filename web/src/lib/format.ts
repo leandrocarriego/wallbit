@@ -28,10 +28,14 @@ export function monthName(period: string): string {
   return `${MONTHS[Number(month) - 1] ?? ""} ${year ?? ""}`;
 }
 
-/** The close being worked on: last month during the first days, else the current month. */
+/** The close being worked on: last month until its fee is due (day 20), then the current one. */
 export function workingPeriod(todayIso: string): string {
   const [y, m, d] = todayIso.split("-").map(Number) as [number, number, number];
-  if (d > 5) return `${y}-${String(m).padStart(2, "0")}`;
+  if (d > 20) return `${y}-${String(m).padStart(2, "0")}`;
   const prev = m === 1 ? [y - 1, 12] : [y, m - 1];
   return `${prev[0]}-${String(prev[1]).padStart(2, "0")}`;
+}
+
+export function plural(n: number, one: string, many: string): string {
+  return `${n} ${n === 1 ? one : many}`;
 }

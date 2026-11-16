@@ -14,6 +14,9 @@ def counterparty_for(
     key = normalize_name(raw_name)
     found = session.scalars(select(Counterparty).where(Counterparty.normalized_name == key)).first()
     if found is not None:
+        # Prefer a properly cased name ("Acme Corp") over a shouted one ("ACME CORP").
+        if found.display_name.isupper() and not raw_name.strip().isupper():
+            found.display_name = raw_name.strip()
         return found
     created = Counterparty(normalized_name=key, display_name=raw_name.strip(), country=country)
     session.add(created)

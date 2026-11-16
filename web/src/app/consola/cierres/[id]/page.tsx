@@ -85,7 +85,8 @@ export default function CloseDetailPage() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const el = e.target as HTMLElement | null;
-      if (el?.closest("input, textarea, select") || e.metaKey || e.ctrlKey) return;
+      // Shortcuts stay active on checkboxes (the attestation), not while typing.
+      if (el?.closest('textarea, select, input:not([type="checkbox"])') || e.metaKey || e.ctrlKey) return;
       if (e.key === "j" || e.key === "J") go(1);
       else if (e.key === "k" || e.key === "K") go(-1);
       else if ((e.key === "a" || e.key === "A") && canApprove) doApprove();

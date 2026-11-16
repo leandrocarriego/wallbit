@@ -151,7 +151,7 @@ export default function UserApp() {
       )}
       {(notices.data ?? []).map((n) => (
         <div key={n.id} className="grid gap-2 rounded-2xl border border-border bg-surface p-4">
-          <span className="self-start rounded-full bg-status-done-tint px-2.5 py-0.5 text-xs font-medium text-status-done">Revisado por tu contador</span>
+          <span className="justify-self-start rounded-full bg-status-done-tint px-2.5 py-0.5 text-xs font-medium text-status-done">Revisado por tu contador</span>
           <span className="text-xs text-ink-muted">Tu cierre de {monthName(n.period)}</span>
           <span className="font-mono text-[28px] font-semibold leading-[34px]">{formatArs(String(n.result.monthly_fee_ars))}</span>
           <span className="text-sm">
@@ -320,7 +320,7 @@ function Hello({ name }: { name?: string }) {
 }
 
 function Badge({ children }: { children: React.ReactNode }) {
-  return <span className="self-start rounded-full bg-status-ready-tint px-2.5 py-0.5 text-xs font-medium text-status-ready">{children}</span>;
+  return <span className="self-start justify-self-start rounded-full bg-status-ready-tint px-2.5 py-0.5 text-xs font-medium text-status-ready">{children}</span>;
 }
 
 function Primary({ children, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) {

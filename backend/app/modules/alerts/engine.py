@@ -74,6 +74,15 @@ class AlertInput:
     thresholds: AlertThresholds = field(default_factory=AlertThresholds)
 
 
+def _num(value: Decimal, decimals: int = 2) -> str:
+    text = f"{value:,.{decimals}f}".replace(",", "_").replace(".", ",").replace("_", ".")
+    return text.removesuffix(",00") if decimals == 2 else text
+
+
+def _money(currency: object, amount: Decimal) -> str:
+    return f"{currency} {_num(amount)}"
+
+
 def evaluate_alerts(data: AlertInput) -> list[Alert]:
     alerts: list[Alert] = []
     movements = {m.id: m for m in data.movements}
@@ -87,7 +96,7 @@ def evaluate_alerts(data: AlertInput) -> list[Alert]:
                     key=f"{AlertType.UNBILLED_COLLECTION}:{m.id}",
                     type=AlertType.UNBILLED_COLLECTION,
                     severity=Severity.BLOCKING,
-                    title=f"Cobro sin facturar · {m.currency} {m.amount}",
+                    title=f"Cobro sin facturar · {_money(m.currency, m.amount)}",
                     detail=f"{m.counterparty_name or 'Sin contraparte'}, {m.occurred_on:%d/%m}. "
                     "No hay una factura en ARCA para este cobro.",
                     subject_id=m.id,
@@ -102,7 +111,7 @@ def evaluate_alerts(data: AlertInput) -> list[Alert]:
                     key=f"{AlertType.UNCLASSIFIED}:{m.id}",
                     type=AlertType.UNCLASSIFIED,
                     severity=severity,
-                    title=f"Movimiento sin clasificar · {m.currency} {m.amount}",
+                    title=f"Movimiento sin clasificar · {_money(m.currency, m.amount)}",
                     detail=f"Transferencia de “{m.counterparty_name}”, {m.occurred_on:%d/%m}.",
                     subject_id=m.id,
                     amount=m.amount,
@@ -114,7 +123,8 @@ def evaluate_alerts(data: AlertInput) -> list[Alert]:
                     key=f"{AlertType.NON_BILLABLE_RISK}:{m.id}",
                     type=AlertType.NON_BILLABLE_RISK,
                     severity=Severity.BLOCKING,
-                    title=f"Declarado no facturable con señales de riesgo · {m.amount}",
+                    title="Declarado no facturable con señales de riesgo · "
+                    f"{_money(m.currency, m.amount)}",
                     detail=f"El usuario dijo que “{m.counterparty_name}” es {c.category.value}, "
                     "pero el monto o el memo parecen un cobro por trabajo.",
                     subject_id=m.id,
@@ -153,7 +163,7 @@ def evaluate_alerts(data: AlertInput) -> list[Alert]:
                 key=AlertType.EXCEEDS_CATEGORY.value,
                 type=AlertType.EXCEEDS_CATEGORY,
                 severity=Severity.BLOCKING,
-                title=f"Supera su categoría ({r.cap_usage_pct}% del tope {r.category})",
+                title=f"Supera su categoría ({_num(r.cap_usage_pct, 1)}% del tope {r.category})",
                 detail=f"Corresponde recategorizar a {r.required_category}.",
             )
         )
@@ -163,7 +173,7 @@ def evaluate_alerts(data: AlertInput) -> list[Alert]:
                 key=AlertType.NEAR_CAP.value,
                 type=AlertType.NEAR_CAP,
                 severity=Severity.INFO,
-                title=f"Acumulado de 12 meses al {r.cap_usage_pct}% del tope {r.category}",
+                title=f"Acumulado de 12 meses al {_num(r.cap_usage_pct, 1)}% del tope {r.category}",
                 detail="Se incluye en el mensaje al usuario.",
             )
         )

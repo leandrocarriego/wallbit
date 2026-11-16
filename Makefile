@@ -5,7 +5,7 @@ API := $(COMPOSE) exec api
 WEB := $(COMPOSE) exec web
 
 .DEFAULT_GOAL := help
-.PHONY: help init hooks precommit up down restart build ps logs urls health clean \
+.PHONY: help init hooks precommit e2e up down restart build ps logs urls health clean \
         migrate migration seed shell psql rabbit \
         test test-back test-web lint fmt typecheck api-client load
 
@@ -86,6 +86,9 @@ test-back: ## Backend tests
 
 test-web: ## Web console tests
 	$(WEB) npm test
+
+e2e: ## Demo e2e in a real browser (Playwright, against `make up`; resets demo data)
+	cd web && npm run e2e
 
 lint: ## Backend lint (web ESLint comes with the console)
 	$(API) ruff check .

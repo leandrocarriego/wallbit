@@ -31,7 +31,7 @@ def simulate_day_1(session: DbSession, actor: Actor) -> DayOut:
     """Same as Beat on day 1 at 00:05: move the clock and start the close of last month."""
     current = service.today(session)
     # Pressing it again after day 1 restarts the same close instead of jumping a month.
-    period = closing.previous_period(current) if current.day <= 5 else period_of(current)
+    period = closing.previous_period(current) if current.day <= 20 else period_of(current)
     new_today = first_day(shift(period, 1))
     service.set_today(session, new_today, actor=actor)
     closing.start_period_close(session, period, actor=actor)

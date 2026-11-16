@@ -34,7 +34,7 @@ export function SideNav() {
           );
         })}
       </nav>
-      {eta && inbox.data?.started && (
+      {eta && inbox.data?.started && eta.minutes > 0 && (
         <div className="grid gap-2 rounded-[10px] border border-border bg-surface p-3.5">
           <span className="text-[11px] font-medium uppercase tracking-[0.06em] text-ink-subtle">Te quedan</span>
           <span className="font-mono text-[22px] font-medium leading-7">{eta.label}</span>
