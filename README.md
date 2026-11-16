@@ -25,7 +25,8 @@ La primera vez tarda unos minutos porque construye las imágenes. Las migracione
 | API (Swagger) | http://localhost:8000/docs |
 | Flower (tareas de Celery) | http://localhost:5555 |
 | RabbitMQ | http://localhost:15672 (wallbit / wallbit) |
-| Prometheus · Grafana | http://localhost:9090 · http://localhost:3001 |
+| Grafana: dashboards *Cierre del mes* y *Plataforma* | http://localhost:3001 |
+| Prometheus | http://localhost:9090 |
 
 `make seed` deja los datos como al principio de la demo; se puede correr las veces que haga falta. `make down` apaga todo y `make clean` además borra los datos.
 
@@ -48,7 +49,7 @@ Abrí la **consola** y la **app** en dos pestañas. Todo está en fecha simulada
 7. **Lote.** *Aprobar en lote* → declaración → aprobar a Mateo.
 8. **App.** Los dos ven *Revisado por tu contador*, con la cuota, el vencimiento y el mensaje aprobado.
 
-En la pestaña *Historial* del detalle, o en la tabla `audit_events` (`make psql`), queda cada paso registrado con quién lo hizo.
+En la pestaña *Historial* del detalle, o en la tabla `audit_events` (`make psql`), queda cada paso registrado con quién lo hizo. En Grafana (*Cierre del mes*) se ve el avance del período y en *Plataforma*, las colas y los workers durante el día 1.
 
 ## Cómo está hecho
 

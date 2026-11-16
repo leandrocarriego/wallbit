@@ -159,8 +159,12 @@ RabbitMQ no es cuello a esta escala.
 
 ## 6. Observabilidad
 
-- **Técnicas**: latencia/errores de la API, profundidad de colas, throughput y fallos de tasks, conexiones Postgres.
-- **Negocio** (dashboard "Cierre del mes"): clientes por estado, % auto-aprobables, alertas por tipo, tiempo medio de revisión por cliente, tiempo hasta 100% notificado.
+Dashboards provisionados en Grafana (carpeta *Cierre*), generados como código con `infra/grafana/gen_dashboards.py`:
+
+- **Cierre del mes** (home de Grafana): usuarios por etapa de adhesión, cierres por estado y su evolución, % notificado, alertas abiertas por tipo, alertas bloqueantes, cierres recalculándose, aprobaciones individuales vs. en lote, avisos al usuario (respondidos en el momento vs. vencidos al día 5) y notificaciones. Las métricas `cierre_*` las calcula la API en cada scrape leyendo Postgres (`app/core/business_metrics.py`): cifras exactas, sin contadores que se desincronicen.
+- **Plataforma**: servicios arriba, workers de Celery, mensajes en la DLQ (debe ser 0), requests y latencia p95 por ruta, errores 5xx, mensajes esperando por cola (`closing`, `recompute`, `notifications`), tareas por segundo, duración p95 y fallas por tarea, conexiones y tamaño de Postgres.
+
+Fuentes: API (`/metrics`), RabbitMQ (`/metrics/per-object`, por cola), celery-exporter y postgres-exporter.
 
 ## 7. Sin autenticación (decisión del prototipo)
 

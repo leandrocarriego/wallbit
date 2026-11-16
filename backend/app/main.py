@@ -2,8 +2,9 @@ import time
 from collections.abc import Awaitable, Callable
 
 from fastapi import FastAPI, Request, Response
-from prometheus_client import CONTENT_TYPE_LATEST, Counter, Histogram, generate_latest
+from prometheus_client import CONTENT_TYPE_LATEST, REGISTRY, Counter, Histogram, generate_latest
 
+from app.core.business_metrics import BusinessMetricsCollector
 from app.core.db import ping_db
 from app.core.errors import DomainError, domain_error_handler
 from app.modules.closing.router import router as closing_router
@@ -21,6 +22,7 @@ app = FastAPI(
 )
 
 app.add_exception_handler(DomainError, domain_error_handler)
+REGISTRY.register(BusinessMetricsCollector())
 app.include_router(user_router)
 app.include_router(demo_router)
 app.include_router(review_router)
