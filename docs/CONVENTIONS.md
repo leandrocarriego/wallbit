@@ -37,7 +37,7 @@
 - Migraciones Alembic, una por PR, nombradas `YYYYMMDD_HHMM_<slug>`. Sin cambios destructivos sin migración en dos pasos.
 - Snapshots aprobados son inmutables: correcciones = reapertura + nuevo snapshot.
 
-## TypeScript (web y mobile)
+## TypeScript (web)
 
 - `strict: true`, `noUncheckedIndexedAccess: true`. Prohibido `any` (usar `unknown`).
 - ESLint + Prettier. Imports absolutos con alias `@/`.

@@ -1,0 +1,1549 @@
+<title>Wireframes Cierre Contable</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Kalam:wght@400;700&display=swap">
+<style>
+/* Layout: barra de navegación de pantallas arriba; marco de pantalla (desktop o teléfono) al centro; panel de anotaciones a la derecha que baja debajo en pantallas angostas. Wireframe en grises, azul solo para lo clickeable, ámbar a mano para anotaciones. */
+:root {
+  --bg: #eef0f3;
+  --paper: #ffffff;
+  --ink: #1d232d;
+  --ink-2: #5d6675;
+  --ink-3: #9aa2ae;
+  --line: #d4d9e0;
+  --fill: #f3f5f7;
+  --fill-2: #e6e9ee;
+  --hot: #2f6fe4;
+  --hot-bg: #e8effc;
+  --note: #c77700;
+  --note-bg: #fff3d6;
+  --crit: #c2412d;
+  --crit-bg: #fbe9e5;
+  --warn: #a86a00;
+  --warn-bg: #fdf1d8;
+  --ok: #18815f;
+  --ok-bg: #e2f3ec;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --font-hand: "Kalam", "Comic Sans MS", "Segoe Print", cursive;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11151b; --paper: #181d25; --ink: #e4e8ee; --ink-2: #a0a9b6; --ink-3: #6b7482; --line: #2c333f;
+    --fill: #1e242e; --fill-2: #262d39; --hot: #6d9ef5; --hot-bg: #1c2a44; --note: #f0aa3c; --note-bg: #3a2c12;
+    --crit: #f07c66; --crit-bg: #3b1d18; --warn: #e6b04d; --warn-bg: #352812; --ok: #4cc79a; --ok-bg: #153028; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11151b; --paper: #181d25; --ink: #e4e8ee; --ink-2: #a0a9b6; --ink-3: #6b7482; --line: #2c333f;
+  --fill: #1e242e; --fill-2: #262d39; --hot: #6d9ef5; --hot-bg: #1c2a44; --note: #f0aa3c; --note-bg: #3a2c12;
+  --crit: #f07c66; --crit-bg: #3b1d18; --warn: #e6b04d; --warn-bg: #352812; --ok: #4cc79a; --ok-bg: #153028; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 14px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 48px;
+}
+button, select, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--hot); outline-offset: 2px; }
+.mono { font-family: var(--font-mono); }
+.num { font-variant-numeric: tabular-nums; font-family: var(--font-mono); }
+.muted { color: var(--ink-2); }
+.small { font-size: 12px; }
+
+/* ---------- shell ---------- */
+.shell { max-width: 1400px; margin: 0 auto; display: grid; gap: 16px; }
+.topbar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
+.topbar h1 { margin: 0; font-size: 18px; font-weight: 600; }
+.topbar .tag { font-family: var(--font-mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); border: 1px dashed var(--ink-3); padding: 2px 8px; border-radius: 4px; }
+.spacer { flex: 1; }
+.toggle { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-2); }
+.screens { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; }
+.screens .grp { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.screens .grp > span { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-3); margin-right: 4px; }
+.screens a { text-decoration: none; color: var(--ink-2); font-size: 13px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--paper); }
+.screens a[aria-current="page"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.stage { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; align-items: start; }
+@media (max-width: 1100px) { .stage { grid-template-columns: minmax(0, 1fr); } }
+.frame-scroll { overflow-x: auto; min-width: 0; }
+.notes-panel { background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 16px; display: grid; gap: 12px; }
+.notes-panel h2 { margin: 0; font-family: var(--font-hand); font-size: 20px; color: var(--note); font-weight: 700; }
+.notes-panel ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+.notes-panel li { display: grid; grid-template-columns: 24px 1fr; gap: 8px; font-size: 13px; }
+.notes-panel .why { border-top: 1px dashed var(--line); padding-top: 10px; font-size: 13px; color: var(--ink-2); }
+.marker { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--note); color: var(--paper); font-family: var(--font-hand); font-weight: 700; font-size: 13px; flex: none; }
+.anno { position: absolute; z-index: 5; box-shadow: 0 0 0 3px var(--note-bg); }
+body.no-notes .anno { display: none; }
+
+/* ---------- desktop frame ---------- */
+.desk { min-width: 980px; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.desk-bar { height: 28px; background: var(--fill-2); display: flex; align-items: center; gap: 6px; padding: 0 12px; }
+.desk-bar i { width: 10px; height: 10px; border-radius: 50%; background: var(--line); display: block; }
+.desk-bar .url { margin-left: 12px; font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); }
+.app { display: grid; grid-template-columns: 200px 1fr; min-height: 640px; }
+.side { border-right: 1px solid var(--line); padding: 16px 12px; display: grid; align-content: start; gap: 4px; background: var(--fill); }
+.side .brand { font-weight: 600; padding: 4px 8px 12px; display: flex; gap: 8px; align-items: center; }
+.side .brand .box { width: 20px; height: 20px; border: 2px solid var(--ink-2); border-radius: 4px; }
+.side a { text-decoration: none; color: var(--ink-2); padding: 7px 8px; border-radius: 6px; font-size: 13px; display: flex; justify-content: space-between; }
+.side a.on { background: var(--paper); color: var(--ink); font-weight: 500; border: 1px solid var(--line); }
+.side .who { margin-top: 24px; padding: 8px; font-size: 12px; color: var(--ink-3); border-top: 1px solid var(--line); }
+.main { padding: 20px 24px 32px; display: grid; gap: 18px; align-content: start; position: relative; min-width: 0; }
+.head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.head h2 { margin: 0; font-size: 20px; font-weight: 600; }
+.crumb { font-size: 12px; color: var(--ink-3); }
+.crumb a { color: var(--hot); text-decoration: none; }
+
+/* wire primitives */
+.box { border: 1px solid var(--line); border-radius: 8px; background: var(--paper); }
+.pad { padding: 14px 16px; }
+.btn { border: 1px solid var(--line); background: var(--paper); border-radius: 6px; padding: 7px 12px; font-size: 13px; }
+.btn.primary { background: var(--hot); border-color: var(--hot); color: var(--paper); font-weight: 500; }
+.btn.ghost { border-style: dashed; color: var(--ink-2); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.select { border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; background: var(--paper); font-size: 13px; }
+.pill { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 11px; padding: 2px 8px; border-radius: 999px; white-space: nowrap; border: 1px solid transparent; }
+.pill::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.s-PENDING_DATA { background: var(--warn-bg); color: var(--warn); }
+.s-IN_REVIEW { background: var(--crit-bg); color: var(--crit); }
+.s-READY { background: var(--hot-bg); color: var(--hot); }
+.s-APPROVED, .s-NOTIFIED { background: var(--ok-bg); color: var(--ok); }
+.chip { display: inline-block; font-size: 11px; padding: 1px 7px; border-radius: 4px; margin: 1px 2px 1px 0; white-space: nowrap; }
+.chip.b { background: var(--crit-bg); color: var(--crit); }
+.chip.i { background: var(--fill-2); color: var(--ink-2); }
+.chip.w { background: var(--warn-bg); color: var(--warn); }
+.bar { height: 8px; border-radius: 4px; background: var(--fill-2); overflow: hidden; display: flex; }
+.bar > span { display: block; height: 100%; }
+
+/* inbox */
+.stats { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+.stat { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; text-align: left; background: var(--paper); display: grid; gap: 2px; }
+.stat b { font-size: 22px; font-weight: 600; }
+.stat[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.progress { display: grid; gap: 6px; }
+.progress .row { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-2); }
+.toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.search { flex: 1; min-width: 180px; border: 1px solid var(--line); border-radius: 6px; padding: 7px 10px; color: var(--ink-3); background: var(--fill); }
+table.t { width: 100%; border-collapse: collapse; font-size: 13px; }
+.t th { text-align: left; font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-3); padding: 8px 10px; border-bottom: 1px solid var(--line); }
+.t td { padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.t td.r, .t th.r { text-align: right; }
+.t tr.click { cursor: pointer; }
+.t tr.click:hover td { background: var(--fill); }
+.t .name { font-weight: 500; }
+.tbl-foot { display: flex; justify-content: space-between; align-items: center; padding: 10px; font-size: 12px; color: var(--ink-3); }
+.cap { display: grid; grid-template-columns: 1fr 34px; align-items: center; gap: 6px; min-width: 90px; }
+.bulkbar { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 8px; background: var(--hot-bg); flex-wrap: wrap; }
+.bulkbar .spacer { flex: 1; }
+
+/* client detail */
+.alerts { display: grid; gap: 8px; }
+.alert { display: grid; grid-template-columns: 4px 1fr auto; gap: 12px; align-items: center; border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px 10px 0; background: var(--paper); overflow: hidden; }
+.alert .sev { align-self: stretch; }
+.alert.b .sev { background: var(--crit); }
+.alert.i .sev { background: var(--ink-3); }
+.alert.done { opacity: .55; }
+.alert.done .sev { background: var(--ok); }
+.alert .acts { display: flex; gap: 6px; }
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.kpi { border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; display: grid; gap: 4px; align-content: start; }
+.kpi .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-3); }
+.kpi .val { font-size: 20px; font-weight: 600; }
+.kpi .sub { font-size: 12px; color: var(--ink-2); }
+.split { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; align-items: start; }
+.tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--line); }
+.tabs button { background: none; border: none; padding: 8px 12px; color: var(--ink-2); border-bottom: 2px solid transparent; margin-bottom: -1px; font-size: 13px; }
+.tabs button[aria-selected="true"] { color: var(--ink); border-color: var(--ink); font-weight: 500; }
+.tabpanel { padding-top: 10px; }
+.rule-cb { font-size: 11px; color: var(--ink-2); display: flex; align-items: center; gap: 4px; margin-top: 4px; }
+.trace { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; counter-reset: s; }
+.trace li { display: grid; grid-template-columns: 22px 1fr auto; gap: 10px; font-size: 13px; align-items: baseline; padding-bottom: 8px; border-bottom: 1px dashed var(--line); }
+.trace li::before { counter-increment: s; content: counter(s); font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); }
+.log { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; font-size: 13px; }
+.log li { display: grid; grid-template-columns: 110px 130px 1fr; gap: 10px; }
+.msg { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.msg .mh { background: var(--fill); padding: 8px 12px; font-size: 12px; color: var(--ink-2); display: flex; justify-content: space-between; }
+.msg .mb { padding: 12px; font-size: 13px; display: grid; gap: 8px; }
+.msg .var { background: var(--hot-bg); color: var(--hot); border-radius: 3px; padding: 0 3px; font-family: var(--font-mono); font-size: 12px; }
+.approve-box { display: grid; gap: 8px; padding: 14px; border: 1px solid var(--line); border-radius: 8px; }
+/* by alert */
+.ba-grid { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 16px; align-items: start; }
+.ba-list { display: grid; gap: 8px; }
+.ba-item { display: grid; grid-template-columns: 4px 1fr auto; gap: 10px; align-items: center; width: 100%; text-align: left; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); padding: 10px 12px 10px 0; overflow: hidden; }
+.ba-item .sev { align-self: stretch; }
+.ba-item.b .sev { background: var(--crit); }
+.ba-item.w .sev { background: var(--warn); }
+.ba-item.i .sev { background: var(--ink-3); }
+.ba-item b.num { font-size: 18px; }
+.ba-item[aria-selected="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.t tr.done td { opacity: .45; }
+.toast { position: absolute; right: 24px; top: 16px; background: var(--ink); color: var(--paper); padding: 10px 14px; border-radius: 8px; font-size: 13px; z-index: 6; }
+
+/* batch */
+.breakdown { display: grid; gap: 0; }
+.breakdown .line { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); gap: 12px; }
+.breakdown .line.total { font-weight: 600; border-bottom: none; }
+.checkline { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; }
+.success { display: grid; gap: 14px; justify-items: start; }
+.big { font-size: 28px; font-weight: 600; }
+
+/* config */
+.cfg-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+.tpl { font-size: 13px; background: var(--fill); border-radius: 6px; padding: 12px; white-space: pre-wrap; font-family: var(--font-mono); line-height: 1.6; }
+
+/* ---------- phone frame ---------- */
+.phone-wrap { display: flex; justify-content: center; padding: 8px 0; }
+.phone { width: 360px; max-width: 100%; border: 10px solid var(--ink); border-radius: 36px; background: var(--paper); overflow: hidden; position: relative; min-height: 700px; display: flex; flex-direction: column; }
+.phone .status { height: 28px; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; font-size: 11px; font-family: var(--font-mono); color: var(--ink-2); }
+.phone .scr { padding: 8px 18px 24px; display: grid; gap: 14px; align-content: start; flex: 1; position: relative; }
+.phone .tabbar { border-top: 1px solid var(--line); display: grid; grid-template-columns: repeat(4, 1fr); padding: 8px 0 14px; font-size: 10px; color: var(--ink-3); text-align: center; }
+.phone .tabbar span::before { content: ""; display: block; width: 18px; height: 18px; border: 1.5px solid currentColor; border-radius: 5px; margin: 0 auto 3px; }
+.phone .tabbar .on { color: var(--ink); }
+.m-h { font-size: 20px; font-weight: 600; margin: 0; }
+.m-card { border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: grid; gap: 10px; }
+.m-card.hero { background: var(--fill); }
+.m-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 13px; }
+.m-btn { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--paper); font-weight: 500; }
+.m-btn.primary { background: var(--hot); border-color: var(--hot); color: var(--paper); }
+.m-list { display: grid; gap: 0; }
+.m-list .it { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+.m-input { width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; background: var(--paper); font-size: 13px; }
+.persona { display: grid; grid-template-columns: 36px 1fr auto; gap: 10px; align-items: center; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper); text-align: left; width: 100%; }
+.avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--fill-2); display: grid; place-items: center; font-weight: 600; font-size: 13px; color: var(--ink-2); }
+.demo-banner { font-size: 11px; font-family: var(--font-mono); background: var(--note-bg); color: var(--note); padding: 6px 10px; border-radius: 8px; }
+.seg { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.seg button { border: none; background: var(--paper); padding: 6px; font-size: 12px; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+.m-opt { width: 100%; text-align: left; padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--paper); font-size: 13px; display: grid; gap: 2px; }
+.m-opt[aria-pressed="true"] { border-color: var(--hot); background: var(--hot-bg); }
+.m-hint { background: var(--fill); border-radius: 10px; padding: 8px 10px; font-size: 12px; }
+.demo-clock { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 12px; background: var(--note-bg); color: var(--note); font-size: 12px; font-family: var(--font-mono); border-bottom: 1px solid var(--line); }
+.demo-clock button { border: 1px solid currentColor; background: var(--paper); color: var(--ink); border-radius: 6px; padding: 3px 10px; font-size: 12px; }
+.demo-clock button[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+section.pre-close > :not(.keep) { display: none; }
+.m-bullets { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 13px; }
+.m-field { display: grid; gap: 4px; font-size: 12px; color: var(--ink-2); }
+.m-check { display: flex; gap: 8px; align-items: flex-start; font-size: 12px; }
+.m-back { background: none; border: none; color: var(--hot); padding: 0; font-size: 13px; justify-self: start; }
+
+/* plan del día */
+.plan { display: grid; gap: 12px; }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.step { display: grid; grid-template-columns: 26px 1fr; grid-template-rows: auto auto; gap: 4px 10px; padding: 12px; border: 1px solid var(--line); border-radius: 8px; align-items: start; }
+.step .n { grid-row: 1 / 3; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-family: var(--font-mono); font-size: 12px; background: var(--fill-2); color: var(--ink-2); }
+.step > div { display: grid; gap: 2px; min-width: 0; }
+.step .btn { grid-column: 2; justify-self: start; text-decoration: none; }
+.step.now { border-color: var(--hot); box-shadow: inset 0 0 0 1px var(--hot); }
+.step.now .n { background: var(--hot); color: var(--paper); }
+.step.done { opacity: .6; }
+.step.done .n { background: var(--ok); color: var(--paper); }
+.eta { font-size: 13px; color: var(--ink-2); }
+.eta b { color: var(--ink); font-size: 16px; }
+/* revisión guiada */
+.review-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 10px 14px; border-radius: 8px; background: var(--hot-bg); }
+kbd { font-family: var(--font-mono); font-size: 11px; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; background: var(--paper); color: var(--ink); }
+.shortcuts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px 16px; font-size: 13px; }
+.changed { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: start; padding: 10px 14px; border: 1px dashed var(--hot); border-radius: 8px; font-size: 13px; }
+.changed ul { margin: 0; padding-left: 18px; grid-column: 1; }
+.sugg { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 12px; margin-top: 6px; }
+.sugg .tag { background: var(--fill-2); border-radius: 4px; padding: 1px 6px; }
+/* conversación */
+.thread { border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; display: grid; gap: 10px; margin: -2px 0 4px 16px; }
+.msgs { display: grid; gap: 8px; }
+.bubble { max-width: 80%; padding: 8px 10px; border-radius: 10px; font-size: 13px; display: grid; gap: 2px; }
+.bubble .who { font-size: 11px; color: var(--ink-3); }
+.bubble.me { justify-self: end; background: var(--hot-bg); }
+.bubble.them { justify-self: start; background: var(--fill); }
+.bubble.sys { justify-self: center; background: none; color: var(--ink-3); font-size: 12px; padding: 0; }
+.tpl-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.tpl-chip { border: 1px solid var(--line); background: var(--paper); border-radius: 999px; padding: 2px 10px; font-size: 12px; }
+.composer { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.composer textarea { border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; background: var(--paper); font-size: 13px; resize: vertical; min-height: 54px; }
+.found { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 8px 10px; border-radius: 8px; background: var(--ok-bg); font-size: 13px; }
+.toast button { margin-left: 10px; background: none; border: 1px solid currentColor; color: inherit; border-radius: 4px; padding: 1px 8px; font-size: 12px; }
+.t.hide-ok tr.ok { display: none; }
+/* perfil */
+.prof-head { display: grid; grid-template-columns: 52px 1fr auto; gap: 14px; align-items: center; }
+.prof-head .avatar { width: 52px; height: 52px; font-size: 17px; }
+.prof-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.chart svg { display: block; width: 100%; height: auto; }
+.chart text { fill: var(--ink-3); font-family: var(--font-mono); font-size: 10px; }
+.chart .lbl { fill: var(--ink-2); }
+.note-item { border-left: 2px solid var(--note); padding-left: 10px; font-size: 13px; }
+
+@media (prefers-reduced-motion: no-preference) { .bar > span { transition: width .4s ease; } }
+</style>
+
+<div class="shell">
+  <div class="topbar">
+    <h1>Servicio contable · wireframes</h1>
+    <span class="tag">baja fidelidad · navegable · datos ficticios</span>
+    <span class="spacer"></span>
+    <label class="toggle"><input type="checkbox" id="notes-toggle" checked> Mostrar anotaciones</label>
+  </div>
+
+  <nav class="screens" aria-label="Pantallas">
+    <div class="grp"><span>Consola contador</span>
+      <a href="#inbox">Bandeja del cierre</a>
+      <a href="#client">Detalle de cliente</a>
+      <a href="#profile">Perfil de cliente</a>
+      <a href="#by-alert">Resolver por alerta</a>
+      <a href="#batch">Aprobación en lote</a>
+      <a href="#rules">Reglas</a>
+      <a href="#params">Parámetros y plantillas</a>
+    </div>
+    <div class="grp"><span>App usuario</span>
+      <a href="#m-select">Simular ser…</a>
+      <a href="#m-home">Inicio</a>
+      <a href="#m-offer">Oferta</a>
+      <a href="#m-enroll">Adhesión</a>
+      <a href="#m-arca">Vincular ARCA</a>
+      <a href="#m-invoice">Facturar este cobro</a>
+      <a href="#m-counterparty">¿Quién es?</a>
+      <a href="#m-thread">Mensajes</a>
+      <a href="#m-close">Mi cierre</a>
+    </div>
+  </nav>
+
+  <div class="stage">
+    <div class="frame-scroll">
+
+      <!-- ===================== CONSOLE ===================== -->
+      <div class="desk" id="desk">
+        <div class="desk-bar"><i></i><i></i><i></i><span class="url" id="url">contador.local/cierres/2026-10</span></div>
+        <div class="demo-clock" role="group" aria-label="Reloj de demo">
+          <span>MODO DEMO · solo en el prototipo · fecha simulada <b id="demo-date">03/11</b></span>
+          <button data-day="31" aria-pressed="false">31/10 · antes del cierre</button>
+          <button data-day="1" aria-pressed="true">Simular día 1: iniciar cierre</button>
+          <button data-day="5" aria-pressed="false">Simular día 5: vence el plazo</button>
+        </div>
+        <div class="app">
+          <aside class="side">
+            <div class="brand"><span class="box"></span>Cierres</div>
+            <a href="#inbox" data-nav="inbox">Bandeja <span class="num">480</span></a>
+            <a href="#by-alert" data-nav="by-alert">Por alerta <span class="num" id="side-alerts">5</span></a>
+            <a href="#batch" data-nav="batch">Aprobar en lote <span class="num" id="side-ready">312</span></a>
+            <a href="#rules" data-nav="rules">Reglas</a>
+            <a href="#params" data-nav="params">Parámetros</a>
+            <div class="who">Contador demo · sin login</div>
+          </aside>
+
+          <!-- INBOX -->
+          <section class="main" data-screen="inbox" id="inbox-section" hidden>
+            <span class="marker anno" style="left:8px;top:64px">1</span>
+            <span class="marker anno" style="right:16px;top:20px">2</span>
+            <span class="marker anno" style="left:8px;top:478px">3</span>
+            <span class="marker anno" style="left:8px;top:176px">5</span>
+            <span class="marker anno" style="left:8px;top:262px">6</span>
+            <span class="marker anno" style="right:16px;top:262px">7</span>
+            <div class="box pad keep" id="inbox-empty" hidden style="display:grid;gap:10px;justify-items:start;padding:28px">
+              <span class="pill s-PENDING_DATA">Sin arrancar</span>
+              <b style="font-size:16px">El cierre de octubre todavía no arrancó</b>
+              <span class="muted">Arranca solo el 1/11 a las 00:05 para los <b>480</b> clientes adheridos. En la demo, disparalo a mano.</span>
+              <button class="btn primary" data-day-go="1">Simular día 1: iniciar cierre</button>
+            </div>
+            <div class="head keep">
+              <h2>Cierre de octubre 2026</h2>
+              <select class="select" id="period" aria-label="Período"><option>2026-10</option><option>2026-09</option></select>
+              <span class="spacer"></span>
+              <button class="btn" onclick="location.hash='batch'">Aprobar <span id="ready-count">312</span> listos</button>
+            </div>
+
+            <div class="stats" role="group" aria-label="Filtrar por estado">
+              <button class="stat" data-filter="IN_REVIEW"><span class="pill s-IN_REVIEW">En revisión</span><b class="num">41</b><span class="small muted">te esperan a vos</span></button>
+              <button class="stat" data-filter="PENDING_DATA"><span class="pill s-PENDING_DATA">Esperando usuario</span><b class="num">87</b><span class="small muted">vence plazo día 5</span></button>
+              <button class="stat" data-filter="READY"><span class="pill s-READY">Listos</span><b class="num">312</b><span class="small muted">aprobables en lote</span></button>
+              <button class="stat" data-filter="APPROVED"><span class="pill s-APPROVED">Aprobados</span><b class="num">0</b><span class="small muted">&nbsp;</span></button>
+              <button class="stat" data-filter="NOTIFIED"><span class="pill s-NOTIFIED">Notificados</span><b class="num">40</b><span class="small muted">&nbsp;</span></button>
+            </div>
+
+            <div class="progress">
+              <div class="row"><span>Avance del cierre · hoy 3 de noviembre</span><span>Objetivo: todos notificados el 7/11 · vence monotributo 20/11</span></div>
+              <div class="bar" aria-hidden="true">
+                <span style="width:8.3%;background:var(--ok)"></span>
+                <span style="width:65%;background:var(--hot)"></span>
+                <span style="width:8.5%;background:var(--crit)"></span>
+                <span style="width:18.2%;background:var(--warn)"></span>
+              </div>
+            </div>
+
+            <div class="box pad plan">
+              <div class="head"><b>Plan para cerrar octubre</b><span class="spacer"></span><span class="eta">Te quedan <b class="num" id="eta">~1 h 10 min</b> <span id="eta-extra">· hasta ~2 h 05 min si los 87 pendientes no responden al 5/11</span></span></div>
+              <ol class="steps">
+                <li class="step now" id="step-1"><span class="n">1</span><div><b>Resolver por alerta</b><span class="small muted" id="step-1-sub">35 casos · ~20 min</span></div><a class="btn primary" href="#by-alert">Empezar</a></li>
+                <li class="step" id="step-2"><span class="n">2</span><div><b>Revisar uno por uno</b><span class="small muted" id="step-2-sub">12 clientes · ~42 min</span></div><button class="btn" data-start-review>Revisión guiada</button></li>
+                <li class="step" id="step-3"><span class="n">3</span><div><b>Aprobar en lote</b><span class="small muted">312 listos · ~5 min</span></div><a class="btn" href="#batch">Ir al lote</a></li>
+              </ol>
+              <span class="small muted">Estimación con tus tiempos de septiembre: 35 s por caso masivo, 3,5 min por revisión individual. Se actualiza a medida que resolvés.</span>
+            </div>
+
+            <div class="box">
+              <div class="toolbar pad" style="border-bottom:1px solid var(--line)">
+                <div class="search">Buscar cliente o CUIT…</div>
+                <select class="select" id="f-alert" aria-label="Filtrar por alerta">
+                  <option value="">Todas las alertas</option>
+                  <option value="cobro">Cobro sin facturar</option>
+                  <option value="clasif">Sin clasificar</option>
+                  <option value="tope">Tope de categoría</option>
+                  <option value="preg">Preguntas sin responder</option>
+                </select>
+                <button class="btn ghost" id="clear-filter">Limpiar filtros</button>
+                <button class="btn" onclick="location.hash='by-alert'">Resolver por alerta</button>
+              </div>
+              <table class="t" id="inbox-table">
+                <thead><tr><th>Cliente</th><th>Cat.</th><th class="r">Facturado</th><th class="r">Cobrado</th><th>Tope 12m</th><th>Alertas</th><th>Estado</th></tr></thead>
+                <tbody></tbody>
+              </table>
+              <div class="tbl-foot"><span id="tbl-count">Mostrando 12 de 480 · orden: en revisión primero, por severidad</span><span>‹ 1 2 3 … 40 ›</span></div>
+            </div>
+            <span class="marker anno" style="left:640px;top:550px">4</span>
+          </section>
+
+          <!-- CLIENT -->
+          <section class="main" data-screen="client" hidden>
+            <span class="marker anno" style="left:8px;top:200px">1</span>
+            <span class="marker anno" style="left:8px;top:420px">2</span>
+            <span class="marker anno" style="left:8px;top:560px">3</span>
+            <span class="marker anno" style="right:16px;top:560px">4</span>
+            <span class="marker anno" style="right:16px;top:52px">5</span>
+            <span class="marker anno" style="left:8px;top:118px">6</span>
+            <span class="marker anno" style="right:16px;top:200px">7</span>
+            <div id="toast-client" class="toast" hidden></div>
+            <div class="review-bar" id="review-bar" hidden>
+              <span class="pill s-IN_REVIEW">Revisión guiada</span>
+              <b class="num" id="rv-pos">1 de 12</b>
+              <div class="bar" style="flex:1;max-width:220px"><span id="rv-bar" style="width:8%;background:var(--hot)"></span></div>
+              <span class="small muted"><kbd>J</kbd>/<kbd>K</kbd> siguiente/anterior · <kbd>A</kbd> aprobar · <kbd>?</kbd> atajos</span>
+              <span class="spacer"></span>
+              <button class="btn ghost" id="rv-exit">Salir de la revisión</button>
+            </div>
+            <div class="box pad" id="shortcuts" hidden>
+              <div class="head" style="margin-bottom:8px"><b>Atajos de teclado</b><span class="spacer"></span><button class="btn ghost" data-close-shortcuts>Cerrar</button></div>
+              <div class="shortcuts">
+                <span><kbd>J</kbd> siguiente cliente</span><span><kbd>K</kbd> cliente anterior</span><span><kbd>A</kbd> aprobar (si no hay bloqueantes)</span>
+                <span><kbd>1</kbd> escribirle por la 1.ª alerta</span><span><kbd>2</kbd> o <kbd>Enter</kbd> aplicar sugerencia</span><span><kbd>P</kbd> abrir el perfil</span>
+                <span><kbd>Esc</kbd> cerrar paneles</span><span><kbd>?</kbd> mostrar u ocultar atajos</span>
+              </div>
+            </div>
+            <div class="crumb"><a href="#inbox">Bandeja</a> / Octubre 2026 / <span id="c-name-crumb">Martina Ríos</span></div>
+            <div class="head">
+              <h2 id="c-name">Martina Ríos</h2>
+              <span class="muted small mono">CUIT 27-3•••••12-4 · Diseño UX · Cat. D · CABA</span>
+              <span class="pill s-IN_REVIEW" id="c-state">IN_REVIEW</span>
+              <span class="spacer"></span>
+              <a class="btn" href="#profile" style="text-decoration:none">Perfil del cliente</a>
+              <button class="btn" id="rv-prev">‹ Anterior</button><button class="btn" id="rv-next">Siguiente en revisión ›</button>
+            </div>
+
+            <div class="changed" id="changed">
+              <b>Qué cambió desde que lo viste (01/11 00:07)</b>
+              <button class="btn ghost" data-dismiss-changed>Entendido</button>
+              <ul>
+                <li>Se importaron de ARCA 2 facturas (E-41 y E-42) y matchearon sus cobros.</li>
+                <li>Recalculado: acumulado 12 meses pasó de 81% a 84% del tope de la categoría D.</li>
+                <li>No respondió “¿Quién es J. Pérez?” antes del 05/11: te pasa a vos.</li>
+              </ul>
+            </div>
+
+            <div class="alerts" id="alerts">
+              <div class="alert b" data-alert="cobro"><span class="sev"></span>
+                <div><b>Cobro sin facturar · USD 1.200</b><div class="small muted">Acme Corp (US), 12/10. No hay una Factura E en ARCA para este cobro. Le avisamos el 31/10 con “Facturar este cobro” y no la emitió. Mientras no se resuelva, el aviso al usuario no puede salir.</div></div>
+                <div class="acts"><button class="btn" data-open-thread>Escribirle a Martina</button><button class="btn" data-resolve="cobro" data-how="Marcado como resuelto">Marcar resuelto</button></div>
+              </div>
+              <div class="thread" id="thread" hidden>
+                <div class="head"><b class="small">Conversación sobre esta alerta</b><span class="chip i" id="thread-status">sin enviar</span><span class="spacer"></span><span class="small muted">Martina la ve en la app · queda en el historial</span></div>
+                <div class="msgs" id="thread-msgs"></div>
+                <div class="tpl-chips" role="group" aria-label="Plantillas de mensaje">
+                  <button class="tpl-chip" data-tpl="factura">Pedir factura</button><button class="tpl-chip" data-tpl="que">Preguntar qué es</button><button class="tpl-chip" data-tpl="plazo">Recordar plazo</button>
+                </div>
+                <div class="composer"><textarea id="thread-text" aria-label="Mensaje para Martina"></textarea><button class="btn primary" id="thread-send">Enviar</button></div>
+              </div>
+              <div class="alert b" data-alert="clasif"><span class="sev"></span>
+                <div><b>Movimiento sin clasificar · USD 300</b><div class="small muted">Transferencia entrante de “J. Pérez”, 15/10. Le preguntamos a Martina el 31/10, al vincular ARCA, y no respondió al 05/11: lo resolvés vos.</div>
+                  <div class="sugg"><span class="tag">Sugerencia</span><span>Familia o regalo: montos distintos cada vez, sin referencia de factura, cuenta personal en AR.</span></div></div>
+                <div class="acts"><button class="btn primary" data-apply-sugg>Aplicar sugerencia <kbd>Enter</kbd></button><button class="btn" data-goto-mov>Elegir otra</button></div>
+              </div>
+              <div class="alert i"><span class="sev"></span>
+                <div><b>Acumulado 12 meses al 84% del tope de la categoría D</b><div class="small muted">Informativa. Se incluye en el mensaje al usuario.</div></div>
+                <div class="acts"></div>
+              </div>
+            </div>
+
+            <div class="kpis">
+              <div class="kpi"><span class="lbl">Facturado oct.</span><span class="val num">USD 3.000</span><span class="sub num">$ 4.350.000 · 2 Facturas E</span></div>
+              <div class="kpi"><span class="lbl">Cobrado en Wallbit</span><span class="val num">USD 4.200</span><span class="sub num" style="color:var(--crit)">USD 1.200 sin facturar</span></div>
+              <div class="kpi"><span class="lbl">Acumulado 12 meses</span><span class="val num">84%</span><div class="bar"><span style="width:84%;background:var(--warn)"></span></div><span class="sub num">$ 39,8 M de $ 47,4 M (cat. D)</span></div>
+              <div class="kpi"><span class="lbl">A pagar</span><span class="val num">$ 58.300</span><span class="sub">Cuota monotributo · vence 20/11</span></div>
+            </div>
+
+            <div class="split">
+              <div class="box pad">
+                <div class="tabs" role="tablist">
+                  <button role="tab" aria-selected="true" data-tab="mov">Movimientos (8)</button>
+                  <button role="tab" aria-selected="false" data-tab="inv">Facturas (2)</button>
+                  <button role="tab" aria-selected="false" data-tab="trace">Cómo se calculó</button>
+                  <button role="tab" aria-selected="false" data-tab="log">Historial</button>
+                </div>
+                <div class="tabpanel" data-panel="mov">
+                  <div class="head small" style="margin-bottom:6px"><span><b>8 movimientos</b> · 6 OK · <span style="color:var(--crit)">2 con alerta</span></span><span class="spacer"></span><button class="btn ghost" id="toggle-ok">Mostrar los 6 OK</button></div>
+                  <table class="t hide-ok" id="mov-table">
+                    <thead><tr><th>Fecha</th><th>Movimiento</th><th class="r">USD</th><th>Clasificación</th><th>Origen</th></tr></thead>
+                    <tbody>
+                      <tr class="ok"><td class="num">02/10</td><td>Cobro · Acme Corp (US)</td><td class="r num">+1.800</td><td>Cobro por trabajo</td><td class="small muted">match factura</td></tr>
+                      <tr class="ok"><td class="num">05/10</td><td>Conversión a USDC</td><td class="r num">−500</td><td>Conversión</td><td class="small muted">regla global</td></tr>
+                      <tr class="ok"><td class="num">09/10</td><td>Tarjeta · Spotify</td><td class="r num">−12</td><td>Gasto tarjeta</td><td class="small muted">regla global</td></tr>
+                      <tr><td class="num">12/10</td><td>Cobro · Acme Corp (US) <span class="chip b">sin factura</span></td><td class="r num">+1.200</td><td>Cobro por trabajo</td><td class="small muted">historial ARCA</td></tr>
+                      <tr id="mov-unclassified" style="background:var(--crit-bg)"><td class="num">15/10</td><td>Transferencia entrante · J. Pérez</td><td class="r num">+300</td>
+                        <td><select class="select" id="mov-select" aria-label="Clasificar movimiento"><option value="">Sin clasificar</option><option>Cobro por trabajo</option><option>Transferencia propia</option><option>Familia o regalo</option></select>
+                          <span class="rule-cb small muted">Sin regla por cliente: si J. Pérez vuelve a aparecer, se le pregunta a Martina.</span></td>
+                        <td class="small muted" id="mov-origin">—</td></tr>
+                      <tr class="ok"><td class="num">21/10</td><td>Cobro · Northwind Ltd (UK)</td><td class="r num">+1.200</td><td>Cobro por trabajo</td><td class="small muted">match factura</td></tr>
+                      <tr class="ok"><td class="num">24/10</td><td>Transferencia a cuenta propia (banco AR)</td><td class="r num">−2.000</td><td>Transf. propia</td><td class="small muted">regla global</td></tr>
+                      <tr class="ok"><td class="num">30/10</td><td>Tarjeta · Supermercado</td><td class="r num">−85</td><td>Gasto tarjeta</td><td class="small muted">regla global</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="tabpanel" data-panel="inv" hidden>
+                  <table class="t">
+                    <thead><tr><th>Comprobante</th><th>Fecha</th><th>Cliente exterior</th><th class="r">USD</th><th class="r">TC</th><th>Origen</th></tr></thead>
+                    <tbody>
+                      <tr><td class="mono">E 0001-00000041</td><td class="num">02/10</td><td>Acme Corp</td><td class="r num">1.800</td><td class="r num">1.450</td><td class="small muted">importada de ARCA 31/10</td></tr>
+                      <tr><td class="mono">E 0001-00000042</td><td class="num">21/10</td><td>Northwind Ltd</td><td class="r num">1.200</td><td class="r num">1.450</td><td class="small muted">importada de ARCA 31/10</td></tr>
+                    </tbody>
+                  </table>
+                  <p class="small muted">Facturas leídas de ARCA con la vinculación del usuario (simulado en el prototipo).</p>
+                </div>
+                <div class="tabpanel" data-panel="trace" hidden>
+                  <ol class="trace">
+                    <li><span>Ingresos clasificados: 1.800 + 1.200 + 1.200</span><span class="num">USD 4.200</span></li>
+                    <li><span>Facturas E en ARCA: E-41 + E-42</span><span class="num">USD 3.000</span></li>
+                    <li><span>Conversión a pesos: 3.000 × 1.450 (TC de cada factura)</span><span class="num">$ 4.350.000</span></li>
+                    <li><span>Acumulado 12 meses: 35.450.000 + 4.350.000</span><span class="num">$ 39.800.000</span></li>
+                    <li><span>Tope categoría D (parámetros vigentes desde 08/2026)</span><span class="num">$ 47.400.000 → 84%</span></li>
+                    <li><span>Cuota categoría D, servicios</span><span class="num">$ 58.300 · vence 20/11</span></li>
+                  </ol>
+                  <p class="small muted mono">motor v0.3.0 · parámetros 2026-08 · valores ficticios</p>
+                </div>
+                <div class="tabpanel" data-panel="log" hidden>
+                  <ul class="log" id="log">
+                    <li><span class="num muted">01/11 00:07</span><span class="mono small">sistema</span><span>Calculó el cierre. Estado PENDING_DATA.</span></li>
+                    <li><span class="num muted">02/11 18:40</span><span class="mono small">system</span><span>Importó 2 facturas de ARCA.</span></li>
+                    <li><span class="num muted">02/11 18:41</span><span class="mono small">sistema</span><span>Recalculó. 2 alertas bloqueantes → IN_REVIEW.</span></li>
+                  </ul>
+                </div>
+              </div>
+
+              <div style="display:grid;gap:12px">
+                <div class="msg">
+                  <div class="mh"><span>Lo que va a ver el usuario</span><span>plantilla v3</span></div>
+                  <div class="mb">
+                    <span>Hola <span class="var">Martina</span>, tu contador revisó tu cierre de <span class="var">octubre</span>.</span>
+                    <span>Facturaste <span class="var">USD 3.000</span> (<span class="var">$ 4.350.000</span>).</span>
+                    <span>Tenés que pagar <span class="var">$ 58.300</span> de monotributo antes del <span class="var">20/11</span>.</span>
+                    <span>Llevás el <span class="var">84%</span> del tope de tu categoría. Si lo superás, te avisamos para recategorizarte.</span>
+                    <span class="small muted">Revisado por C.P. Laura Gómez (ficticia) · Mat. T° 000 F° 000</span>
+                  </div>
+                </div>
+                <div class="approve-box">
+                  <span class="small muted" id="approve-hint">Resolvé las 2 alertas bloqueantes para aprobar.</span>
+                  <button class="btn primary" id="approve-one" disabled>Aprobar y notificar</button>
+                  <button class="btn ghost">Dejar nota interna</button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- BY ALERT -->
+          <section class="main" data-screen="by-alert" hidden>
+            <span class="marker anno" style="left:8px;top:120px">1</span>
+            <span class="marker anno" style="left:290px;top:120px">2</span>
+            <span class="marker anno" style="right:16px;top:20px">3</span>
+            <div id="toast-ba" class="toast" hidden></div>
+            <div class="crumb"><a href="#inbox">Bandeja</a> / Octubre 2026 / Resolver por alerta</div>
+            <div class="head"><h2>Resolver por alerta</h2></div>
+            <p class="muted" style="margin:0">El mismo problema en muchos clientes se resuelve con una sola decisión. Primero las bloqueantes.</p>
+            <div class="ba-grid">
+              <div class="ba-list" id="ba-list" role="tablist" aria-label="Tipos de alerta"></div>
+              <div class="box" id="ba-panel"></div>
+            </div>
+          </section>
+
+          <!-- BATCH -->
+          <section class="main" data-screen="batch" hidden>
+            <span class="marker anno" style="left:8px;top:110px">1</span>
+            <span class="marker anno" style="right:16px;top:110px">2</span>
+            <span class="marker anno" style="left:8px;top:430px">3</span>
+            <div class="crumb"><a href="#inbox">Bandeja</a> / Octubre 2026 / Aprobación en lote</div>
+            <div id="batch-form" style="display:grid;gap:18px">
+              <div class="head"><h2>Aprobar <span class="num" id="b-total">312</span> cierres de octubre</h2></div>
+              <div class="split">
+                <div class="box pad" style="display:grid;gap:14px">
+                  <div class="breakdown">
+                    <div class="line"><span>Sin alertas</span><span class="num">282</span></div>
+                    <div class="line"><span>Con alertas informativas <span class="chip w">cerca del tope · 19</span><span class="chip i">facturado sin cobro · 4</span><span class="chip w">variación fuerte · 7</span></span><span class="num">30</span></div>
+                    <div class="line"><label class="checkline"><input type="checkbox" id="incl-info" checked> Incluir los 30 con alertas informativas (el mensaje lleva la advertencia)</label></div>
+                    <div class="line total"><span>Se aprueban y notifican</span><span class="num" id="b-total-2">312</span></div>
+                  </div>
+                  <table class="t">
+                    <thead><tr><th>Primero lo que conviene mirar</th><th>Cat.</th><th class="r">Facturado</th><th class="r">vs. prom. 3 meses</th><th class="r">A pagar</th><th></th></tr></thead>
+                    <tbody>
+                      <tr><td><a href="#profile" style="color:var(--hot)">Bruno Aguirre</a></td><td>C</td><td class="r num">USD 4.100</td><td class="r num" style="color:var(--warn)">+82%</td><td class="r num">$ 41.900</td><td><span class="chip w">variación fuerte</span></td></tr>
+                      <tr><td><a href="#profile" style="color:var(--hot)">Elena Quiroga</a></td><td>D</td><td class="r num">USD 900</td><td class="r num" style="color:var(--warn)">−71%</td><td class="r num">$ 58.300</td><td><span class="chip w">variación fuerte</span></td></tr>
+                      <tr><td>Camila Ferreyra</td><td>E</td><td class="r num">USD 5.200</td><td class="r num">+6%</td><td class="r num">$ 79.600</td><td><span class="chip w">81% tope</span></td></tr>
+                      <tr><td>Joaquín Medina</td><td>C</td><td class="r num">USD 2.400</td><td class="r num">−3%</td><td class="r num">$ 41.900</td><td></td></tr>
+                      <tr><td>Sofía Romero</td><td>D</td><td class="r num">USD 3.600</td><td class="r num">+2%</td><td class="r num">$ 58.300</td><td></td></tr>
+                    </tbody>
+                  </table>
+                  <div class="small muted">Total a pagar por los clientes del lote: <span class="num">$ 17,9 M</span> · Facturado: <span class="num">USD 1,04 M</span></div>
+                </div>
+                <div style="display:grid;gap:12px">
+                  <div class="msg">
+                    <div class="mh"><span>Plantilla que se envía</span><span>v3 · aprobada 01/08</span></div>
+                    <div class="mb"><span>Hola <span class="var">{nombre}</span>, tu contador revisó tu cierre de <span class="var">{mes}</span>. Facturaste <span class="var">{facturado}</span>. Tenés que pagar <span class="var">{cuota}</span> antes del <span class="var">{vencimiento}</span>.</span><span class="small muted">+ párrafo de advertencia si hay alerta informativa</span></div>
+                  </div>
+                </div>
+              </div>
+              <div class="box pad" style="display:grid;gap:12px">
+                <label class="checkline"><input type="checkbox" id="attest"> <span>Revisé los criterios de este lote y, como contador matriculado, apruebo los <b class="num" id="b-total-3">312</b> cierres y su comunicación a los clientes.</span></label>
+                <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" id="do-batch" disabled>Aprobar y notificar <span id="b-total-4">312</span></button><button class="btn" onclick="location.hash='inbox'">Cancelar</button></div>
+                <span class="small muted mono">Idempotency-Key: batch-2026-10-a91f · cada cierre guarda snapshot + registro de auditoría</span>
+              </div>
+            </div>
+            <div id="batch-done" class="success" hidden>
+              <span class="pill s-APPROVED">Lote aprobado</span>
+              <span class="big"><span class="num" id="b-done-n">312</span> cierres aprobados</span>
+              <div style="width:min(520px,100%);display:grid;gap:6px">
+                <div class="progress"><div class="row"><span>Enviando notificaciones</span><span class="num" id="b-sent">0</span></div></div>
+                <div class="bar"><span id="b-sent-bar" style="width:0%;background:var(--ok)"></span></div>
+              </div>
+              <span class="small muted">Si se corta la conexión, reintentar no duplica envíos.</span>
+              <button class="btn" onclick="location.hash='inbox'">Volver a la bandeja</button>
+            </div>
+          </section>
+
+          <!-- RULES -->
+          <section class="main" data-screen="rules" hidden>
+            <span class="marker anno" style="left:8px;top:120px">1</span>
+            <span class="marker anno" style="left:520px;top:84px">2</span>
+            <div class="head"><h2>Reglas de clasificación</h2><span class="spacer"></span><button class="btn">Nueva regla</button></div>
+            <p class="muted" style="margin:0">Solo reglas globales, pocas y mantenidas por el contador. Orden: tipo estructural → reglas globales → match con factura de ARCA → historial de facturación en ARCA → declaración del usuario. Lo que no matchea se le pregunta al usuario; si no responde al día 5, genera alerta.</p>
+            <div class="box">
+              <table class="t">
+                <thead><tr><th>Condición</th><th>Clasifica como</th><th>Alcance</th><th>Creada por</th><th class="r">Usos oct.</th><th></th></tr></thead>
+                <tbody>
+                  <tr><td>Contraparte = plataforma conocida (Deel, Toptal, Remote…)</td><td>Cobro por trabajo</td><td>Global</td><td class="small muted">sistema (inicial)</td><td class="r num">1.284</td><td><button class="btn ghost">Editar</button></td></tr>
+                  <tr><td>Tipo = conversión a stablecoin</td><td>Conversión</td><td>Global</td><td class="small muted">sistema (inicial)</td><td class="r num">612</td><td><button class="btn ghost">Editar</button></td></tr>
+                  <tr><td>Tipo = transferencia y CUIT destino = CUIT del cliente</td><td>Transf. propia</td><td>Global</td><td class="small muted">sistema (inicial)</td><td class="r num">540</td><td><button class="btn ghost">Editar</button></td></tr>
+                  <tr><td>Tipo = gasto con tarjeta</td><td>Gasto tarjeta</td><td>Global</td><td class="small muted">sistema (inicial)</td><td class="r num">3.910</td><td><button class="btn ghost">Editar</button></td></tr>
+                  <tr><td>Ordenante = titular y origen Payoneer / PayPal / Wise</td><td>Retiro de plataforma (facturable)</td><td>Global</td><td class="small muted">sistema (inicial)</td><td class="r num">203</td><td><button class="btn ghost">Editar</button></td></tr>
+                  <tr><td>Contraparte contiene “Upwork”</td><td>Cobro por trabajo</td><td>Global</td><td class="small muted">L. Gómez · 03/09</td><td class="r num">96</td><td><button class="btn ghost">Editar</button></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="box pad small muted">Declaraciones de usuarios este cierre: <b class="num">214</b> contrapartes (<span class="num">6</span> marcadas para tu revisión). Sin clasificar tras el día 5: <b class="num">57</b> movimientos (septiembre: <span class="num">143</span>). Cada respuesta y validación queda como etiqueta para un futuro modelo ML local.</div>
+          </section>
+
+          <!-- PROFILE -->
+          <section class="main" data-screen="profile" hidden>
+            <span class="marker anno" style="left:8px;top:60px">1</span>
+            <span class="marker anno" style="left:8px;top:150px">2</span>
+            <span class="marker anno" style="left:8px;top:250px">3</span>
+            <span class="marker anno" style="right:16px;top:250px">4</span>
+            <span class="marker anno" style="left:8px;top:560px">5</span>
+            <div class="crumb"><a href="#inbox">Bandeja</a> / Clientes / Martina Ríos</div>
+            <div class="prof-head">
+              <span class="avatar">MR</span>
+              <div style="display:grid;gap:2px;min-width:0">
+                <h2 style="margin:0;font-size:20px">Martina Ríos</h2>
+                <span class="small muted mono">CUIT 27-3•••••12-4 · Diseño UX · Monotributo cat. D (servicios) · CABA · cliente desde 03/2026</span>
+                <span><span class="chip i">responde rápido</span><span class="chip i">factura a mes vencido a Acme</span><span class="chip w">cerca del tope</span></span>
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn primary" href="#client" style="text-decoration:none">Abrir cierre de octubre</a><button class="btn" onclick="location.hash='client'">Escribirle</button></div>
+            </div>
+            <div class="kpis">
+              <div class="kpi"><span class="lbl">Facturado 12 meses</span><span class="val num">$ 39,8 M</span><div class="bar"><span style="width:84%;background:var(--warn)"></span></div><span class="sub num">84% del tope D ($ 47,4 M)</span></div>
+              <div class="kpi"><span class="lbl">Promedio mensual</span><span class="val num">USD 3.010</span><span class="sub">últimos 8 meses · estable (±8%)</span></div>
+              <div class="kpi"><span class="lbl">Cierres</span><span class="val num">7 de 7</span><span class="sub">aprobados y notificados a tiempo · 2 con revisión</span></div>
+              <div class="kpi"><span class="lbl">Respuesta</span><span class="val num">1,2 días</span><span class="sub">promedio · 6 de 7 meses antes del día 5</span></div>
+            </div>
+            <div class="prof-grid">
+              <div class="box pad" style="display:grid;gap:10px">
+                <div class="head"><b>Facturado por mes (USD)</b><span class="spacer"></span><span class="small muted">Facturas E de ARCA</span></div>
+                <div class="chart" id="prof-chart"></div>
+                <div class="small" style="background:var(--warn-bg);color:var(--warn);border-radius:6px;padding:8px 10px">Proyección: al ritmo actual supera el tope de la categoría D en febrero 2027. Conviene avisarle con tiempo la recategorización a E.</div>
+              </div>
+              <div class="box pad" style="display:grid;gap:10px">
+                <b>Contrapartes conocidas</b>
+                <table class="t">
+                  <thead><tr><th>Contraparte</th><th>Qué es</th><th>Origen</th></tr></thead>
+                  <tbody>
+                    <tr><td>Acme Corp (US)</td><td>Cobro por trabajo</td><td class="small muted">match factura</td></tr>
+                    <tr><td>Northwind Ltd (UK)</td><td>Cobro por trabajo</td><td class="small muted">match con factura</td></tr>
+                    <tr><td>Banco Galicia · propia</td><td>Transf. propia</td><td class="small muted">regla global</td></tr>
+                    <tr><td>J. Pérez</td><td><span class="chip b">sin aclarar</span></td><td class="small muted">preguntado 31/10</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="prof-grid">
+              <div class="box pad" style="display:grid;gap:10px">
+                <div class="head"><b>Historial de cierres</b><span class="spacer"></span><span class="small muted">snapshots inmutables</span></div>
+                <table class="t">
+                  <thead><tr><th>Período</th><th>Estado</th><th class="r">Facturado</th><th class="r">A pagar</th><th>Aprobó</th></tr></thead>
+                  <tbody>
+                    <tr><td class="num">2026-10</td><td><span class="pill s-IN_REVIEW">En revisión</span></td><td class="r num">USD 3.000</td><td class="r num">$ 58.300</td><td class="small muted">—</td></tr>
+                    <tr><td class="num">2026-09</td><td><span class="pill s-NOTIFIED">Notificado</span></td><td class="r num">USD 3.200</td><td class="r num">$ 58.300</td><td class="small muted">L. Gómez · lote 05/10</td></tr>
+                    <tr><td class="num">2026-08</td><td><span class="pill s-NOTIFIED">Notificado</span></td><td class="r num">USD 3.300</td><td class="r num">$ 52.100</td><td class="small muted">L. Gómez · individual 06/09</td></tr>
+                    <tr><td class="num">2026-07</td><td><span class="pill s-NOTIFIED">Notificado</span></td><td class="r num">USD 3.400</td><td class="r num">$ 52.100</td><td class="small muted">L. Gómez · lote 04/08</td></tr>
+                  </tbody>
+                </table>
+                <span class="small muted">Alerta recurrente: “cobro sin facturar” en 3 de los últimos 8 meses, siempre Acme Corp. Factura a mes vencido.</span>
+              </div>
+              <div class="box pad" style="display:grid;gap:10px">
+                <b>Notas internas</b>
+                <div class="note-item">Acme le paga antes de que ella facture; la factura llega a los pocos días. No es evasión. <span class="small muted">· L. Gómez 14/09</span></div>
+                <div class="note-item">Prefiere que le escriban por la app, no por mail. <span class="small muted">· L. Gómez 03/2026</span></div>
+                <textarea class="m-input" id="prof-note" rows="2" placeholder="Agregar nota interna (solo la ve el equipo contable)"></textarea>
+                <b style="margin-top:4px">Conversaciones</b>
+                <div class="small" style="display:grid;gap:6px">
+                  <div class="m-row"><span>Cobro sin facturar · Acme · oct.</span><span class="chip i">abierta</span></div>
+                  <div class="m-row"><span>Cobro sin facturar · Acme · jul.</span><span class="small muted">resuelta en 1 día</span></div>
+                  <div class="m-row"><span>¿Quién es Northwind Ltd? · sep.</span><span class="small muted">resuelta en 2 h</span></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- PARAMS -->
+          <section class="main" data-screen="params" hidden>
+            <span class="marker anno" style="left:8px;top:84px">1</span>
+            <span class="marker anno" style="left:520px;top:84px">2</span>
+            <div class="head"><h2>Parámetros fiscales y plantillas</h2></div>
+            <div class="cfg-grid">
+              <div class="box pad" style="display:grid;gap:10px">
+                <div class="head"><b>Categorías de monotributo</b><span class="spacer"></span><select class="select" aria-label="Versión de parámetros"><option>Vigente desde 08/2026</option><option>02/2026 – 07/2026</option></select></div>
+                <table class="t">
+                  <thead><tr><th>Cat.</th><th class="r">Tope anual</th><th class="r">Cuota servicios</th></tr></thead>
+                  <tbody>
+                    <tr><td>B</td><td class="r num">$ 15.100.000</td><td class="r num">$ 33.200</td></tr>
+                    <tr><td>C</td><td class="r num">$ 21.200.000</td><td class="r num">$ 41.900</td></tr>
+                    <tr><td>D</td><td class="r num">$ 47.400.000</td><td class="r num">$ 58.300</td></tr>
+                    <tr><td>E</td><td class="r num">$ 55.800.000</td><td class="r num">$ 79.600</td></tr>
+                    <tr><td colspan="3" class="small muted">… valores ficticios para el prototipo</td></tr>
+                  </tbody>
+                </table>
+                <div style="display:flex;gap:8px"><button class="btn">Nueva versión</button><button class="btn ghost">Comparar versiones</button></div>
+              </div>
+              <div class="box pad" style="display:grid;gap:10px">
+                <div class="head"><b>Plantilla: cierre aprobado</b><span class="spacer"></span><span class="pill s-APPROVED">v3 aprobada</span></div>
+                <div class="tpl">Hola {nombre}, tu contador revisó tu cierre de {mes}.
+Facturaste {facturado_usd} ({facturado_ars}).
+Tenés que pagar {cuota} de monotributo antes del {vencimiento}.
+{si alerta_tope}Llevás el {pct_tope} del tope de tu categoría.{/si}
+Revisado por {contador}, {matricula}.</div>
+                <div style="display:flex;gap:8px"><button class="btn">Editar (crea v4)</button><button class="btn ghost">Ver otras plantillas (4)</button></div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <!-- ===================== PHONE ===================== -->
+      <div class="phone-wrap" id="phone-wrap" hidden>
+        <div class="phone">
+          <div class="status"><span>9:41</span><span>Wallbit (simulador)</span></div>
+
+          <div class="scr" data-screen="m-select" hidden>
+            <span class="marker anno" style="right:10px;top:6px">1</span>
+            <span class="demo-banner">MODO DEMO · reemplaza el login</span>
+            <h3 class="m-h">¿Quién sos?</h3>
+            <p class="small muted" style="margin:0">Elegí un cliente para ver la app como lo vería él.</p>
+            <button class="persona" data-persona="pending"><span class="avatar">VS</span><span><b>Valentina Sosa</b><br><span class="small muted">Todavía no adhirió al servicio contable</span></span><span class="pill s-PENDING_DATA">nueva</span></button>
+            <button class="persona" data-persona="approved"><span class="avatar">MG</span><span><b>Mateo Giménez</b><br><span class="small muted">Cierre aprobado y notificado</span></span><span class="pill s-NOTIFIED">notificado</span></button>
+            <button class="persona" data-persona="review"><span class="avatar">MR</span><span><b>Martina Ríos</b><br><span class="small muted">En revisión: su contador le escribió</span></span><span class="pill s-IN_REVIEW">revisión</span></button>
+          </div>
+
+          <div class="scr" data-screen="m-home" hidden>
+            <span class="marker anno" style="right:10px;top:60px">1</span>
+            <span class="marker anno" style="right:10px;top:250px">2</span>
+            <div class="m-row"><span class="small muted">Hola, <b id="m-name">Valentina</b></span><a href="#m-select" class="small" style="color:var(--hot);text-decoration:none">Cambiar usuario</a></div>
+            <div class="m-card hero" id="m-home-card"></div>
+            <div class="m-card">
+              <div class="m-row"><b>Saldo</b><span class="num">USD 6.410</span></div>
+              <div class="m-row small muted"><span>Últimos movimientos</span><span>Ver todo ›</span></div>
+            </div>
+            <div class="m-card">
+              <div class="m-row"><b>Impuestos</b><span class="small muted">Servicio contable</span></div>
+              <div class="m-row small"><span>Categoría</span><span id="m-cat">D</span></div>
+              <div class="m-row small"><span>Próximo vencimiento</span><span>20/11</span></div>
+            </div>
+          </div>
+
+          <div class="scr" data-screen="m-offer" hidden>
+            <span class="marker anno" style="right:10px;top:46px">1</span>
+            <span class="marker anno" style="right:10px;top:330px">2</span>
+            <button class="m-back" onclick="location.hash='m-home'">‹ Volver</button>
+            <span class="pill s-READY" style="justify-self:start">Nuevo en Wallbit</span>
+            <h3 class="m-h">Tu contador, dentro de Wallbit</h3>
+            <p class="small muted" style="margin:0">Olvidate de tu facturación y de tus impuestos: cada mes te decimos cuánto facturaste y cuánto tenés que pagar.</p>
+            <ul class="m-bullets">
+              <li>Leemos tus facturas de ARCA: no tenés que mandar resúmenes ni capturas.</li>
+              <li>Un contador matriculado revisa todo antes de avisarte.</li>
+              <li>Si te falta una factura, la emitís desde Wallbit con un toque.</li>
+              <li>Te avisamos antes de que te pases de tu categoría.</li>
+            </ul>
+            <div class="m-card"><div class="m-row small"><span>Costo</span><b>[a definir]</b></div></div>
+            <button class="m-btn primary" onclick="location.hash='m-enroll'">Quiero mi contador</button>
+          </div>
+
+          <div class="scr" data-screen="m-enroll" hidden>
+            <span class="marker anno" style="right:10px;top:46px">1</span>
+            <span class="marker anno" style="right:10px;top:400px">2</span>
+            <button class="m-back" onclick="location.hash='m-offer'">‹ Volver</button>
+            <span class="small muted">Paso 1 de 2</span>
+            <h3 class="m-h">Confirmá tus datos</h3>
+            <p class="small muted" style="margin:0">Los precargamos con lo que ya sabemos de tu cuenta.</p>
+            <label class="m-field">Nombre<input class="m-input" id="en-name" value="Valentina Sosa"></label>
+            <label class="m-field">CUIT<input class="m-input" id="en-cuit" value="27-4•••••18-9"></label>
+            <label class="m-field">Actividad<input class="m-input" id="en-act" value="Desarrollo de software"></label>
+            <label class="m-field">Régimen<input class="m-input" id="en-reg" value="Monotributo · la categoría la leemos de ARCA"></label>
+            <label class="m-check"><input type="checkbox" id="en-consent"> <span>Autorizo a Wallbit y a su contador matriculado a ver mis movimientos y mis comprobantes de ARCA para calcular mis impuestos. Puedo revocarlo cuando quiera.</span></label>
+            <button class="m-btn primary" id="en-next" disabled>Continuar</button>
+          </div>
+
+          <div class="scr" data-screen="m-arca" hidden>
+            <span class="marker anno" style="right:10px;top:46px">1</span>
+            <span class="marker anno" style="right:10px;top:300px">2</span>
+            <span class="marker anno" style="right:10px;top:470px">3</span>
+            <button class="m-back" onclick="location.hash='m-enroll'">‹ Volver</button>
+            <span class="small muted">Paso 2 de 2 · obligatorio</span>
+            <h3 class="m-h">Vinculá tu cuenta de ARCA</h3>
+            <p class="small muted" style="margin:0">Así leemos las facturas que emitís y podés facturar desde Wallbit. Nunca emitimos nada sin que vos lo confirmes.</p>
+            <ol class="m-bullets">
+              <li>Ingresá a ARCA con tu clave fiscal.</li>
+              <li>Autorizá a Wallbit a consultar y emitir tus comprobantes.</li>
+            </ol>
+            <span class="demo-banner">MODO DEMO · no se conecta a ARCA</span>
+            <button class="m-btn primary" id="arca-link">Vincular con ARCA</button>
+            <div class="m-card" id="arca-done" hidden>
+              <b class="small">Listo: importamos tus facturas de los últimos 12 meses</b>
+              <div class="m-list">
+                <div class="it"><span><b class="num">E 0001-00000017</b><br><span class="small muted">03/10 · Globex Inc</span></span><span class="num">USD 2.100</span></div>
+                <div class="it"><span><b class="num">E 0001-00000018</b><br><span class="small muted">18/10 · Globex Inc</span></span><span class="num">USD 1.400</span></div>
+              </div>
+              <span class="small muted">… y 11 facturas de meses anteriores (para el acumulado de 12 meses). Ya clasificamos tus movimientos: te avisamos en el inicio si algo necesita tu ayuda.</span>
+              <button class="m-btn" onclick="location.hash='m-home'">Ir al inicio</button>
+            </div>
+          </div>
+
+          <div class="scr" data-screen="m-invoice" hidden>
+            <span class="marker anno" style="right:10px;top:46px">1</span>
+            <span class="marker anno" style="right:10px;top:250px">2</span>
+            <button class="m-back" onclick="location.hash='m-home'">‹ Volver</button>
+            <h3 class="m-h">Facturar este cobro</h3>
+            <p class="small muted" style="margin:0">Lo precargamos con los datos del cobro. Se emite en ARCA recién cuando confirmás.</p>
+            <div class="m-card" id="inv-form" style="gap:8px">
+              <div class="m-row small"><span>Cliente</span><span>Globex Inc (US)</span></div>
+              <div class="m-row small"><span>Monto</span><span class="num">USD 600</span></div>
+              <div class="m-row small"><span>Tipo de cambio</span><span class="num">1.452 (el del cobro)</span></div>
+              <div class="m-row small"><span>Comprobante</span><span>Factura E · servicios</span></div>
+              <label class="m-field">Descripción<input class="m-input" id="inv-desc" value="Servicios de desarrollo · octubre 2026"></label>
+            </div>
+            <span class="demo-banner">MODO DEMO · no se emite en ARCA real</span>
+            <button class="m-btn primary" id="inv-issue">Emitir factura</button>
+            <div class="m-card" id="inv-done" hidden>
+              <b class="small">Emitida en ARCA: <span class="num">E 0001-00000019</span></b>
+              <span class="small muted">Tu contador ya la ve en tu cierre de octubre.</span>
+              <button class="m-btn" onclick="location.hash='m-home'">Volver al inicio</button>
+            </div>
+          </div>
+
+          <div class="scr" data-screen="m-counterparty" hidden>
+            <span class="marker anno" style="right:10px;top:46px">1</span>
+            <span class="marker anno" style="right:10px;top:200px">2</span>
+            <span class="marker anno" style="right:10px;top:430px">3</span>
+            <button class="m-back" onclick="location.hash='m-home'">‹ Volver</button>
+            <h3 class="m-h">¿Quién es Roberto Gómez?</h3>
+            <p class="small muted" style="margin:0">Te transfirió <b class="num">USD 400</b> el 14/10. No sabemos si es por un trabajo, así que te lo preguntamos una sola vez.</p>
+            <div class="m-hint"><b>Nuestra sugerencia:</b> parece familia o un regalo (montos distintos, sin referencia de factura).</div>
+            <div style="display:grid;gap:8px" role="group" aria-label="¿Qué es este cobro?">
+              <button class="m-opt" data-cp="work" aria-pressed="false"><b>Un cliente, es por un trabajo</b><span class="small muted">Te vamos a pedir la factura</span></button>
+              <button class="m-opt" data-cp="own" aria-pressed="false"><b>Soy yo, desde otra cuenta</b><span class="small muted">Banco, exchange o billetera propia</span></button>
+              <button class="m-opt" data-cp="family" aria-pressed="true"><b>Familia o un regalo</b><span class="small muted">No es un ingreso por trabajo</span></button>
+              <button class="m-opt" data-cp="other" aria-pressed="false"><b>Otra cosa</b><span class="small muted">Se lo pasamos a tu contador</span></button>
+            </div>
+            <input class="m-input" id="cp-other" placeholder="Contale qué es (opcional)" hidden>
+            <button class="m-btn primary" id="m-cp-btn">Listo</button>
+            <span class="small muted">Vale para los próximos cobros de Roberto Gómez. Tu contador revisa tu respuesta antes del cierre.</span>
+          </div>
+
+          <div class="scr" data-screen="m-thread" hidden>
+            <span class="marker anno" style="right:10px;top:46px">1</span>
+            <span class="marker anno" style="right:10px;top:380px">2</span>
+            <button class="m-back" onclick="location.hash='m-home'">‹ Volver</button>
+            <h3 class="m-h">Tu contador</h3>
+            <span class="small muted">Sobre: cobro de Acme Corp · USD 1.200 · 12/10</span>
+            <div class="msgs" id="m-thread-msgs"></div>
+            <div class="m-card" style="gap:8px">
+              <div class="m-card" id="m-issue" style="gap:6px;background:var(--fill)">
+                <b class="small">Facturar este cobro</b>
+                <div class="m-row small"><span>Cliente</span><span>Acme Corp (US)</span></div>
+                <div class="m-row small"><span>Monto</span><span class="num">USD 1.200</span></div>
+                <div class="m-row small"><span>Tipo de cambio</span><span class="num">1.450 (el del cobro)</span></div>
+                <div class="m-row small"><span>Comprobante</span><span>Factura E</span></div>
+                <button class="m-btn" id="m-attach">Emitir factura</button>
+              </div>
+              <input class="m-input" id="m-thread-text" placeholder="Escribile a tu contador">
+              <button class="m-btn primary" id="m-thread-send">Enviar</button>
+            </div>
+            <span class="small muted">Tu contador ve esta conversación junto a tu cierre.</span>
+          </div>
+
+          <div class="scr" data-screen="m-close" hidden>
+            <span class="marker anno" style="right:10px;top:46px">1</span>
+            <span class="marker anno" style="right:10px;top:300px">2</span>
+            <button class="m-back" onclick="location.hash='m-home'">‹ Volver</button>
+            <h3 class="m-h">Tu cierre de octubre</h3>
+            <span class="pill s-NOTIFIED" style="justify-self:start">Revisado por tu contador · 05/11</span>
+            <div class="m-card hero">
+              <span class="small muted">Tenés que pagar</span>
+              <span style="font-size:28px;font-weight:600" class="num">$ 58.300</span>
+              <span class="small">Monotributo categoría D · antes del <b>20/11</b></span>
+              <button class="m-btn primary">Pagar desde Wallbit</button>
+              <span class="small muted">(fuera de alcance v1: abre instrucciones de pago)</span>
+            </div>
+            <div class="m-card">
+              <div class="m-row"><span>Facturaste</span><span class="num">USD 3.200</span></div>
+              <div class="m-row small muted"><span>En pesos</span><span class="num">$ 4.640.000</span></div>
+              <div class="m-row small muted"><span>Facturas</span><span>2 Facturas E ›</span></div>
+            </div>
+            <div class="m-card">
+              <div class="m-row"><b class="small">Tope de tu categoría (12 meses)</b><span class="num small">58%</span></div>
+              <div class="bar"><span style="width:58%;background:var(--ok)"></span></div>
+              <span class="small muted">Vas bien. Te avisamos si te acercás al límite.</span>
+            </div>
+          </div>
+
+          <div class="tabbar"><span class="on">Inicio</span><span>Cobrar</span><span>Tarjeta</span><span>Impuestos</span></div>
+        </div>
+      </div>
+    </div>
+
+    <aside class="notes-panel" aria-live="polite">
+      <h2 id="notes-title">Notas</h2>
+      <ol id="notes-list"></ol>
+      <div class="why" id="notes-why"></div>
+    </aside>
+  </div>
+</div>
+
+<script>
+(function () {
+  const NOTES = {
+    inbox: {
+      title: 'Bandeja del cierre',
+      why: 'La pantalla responde una pregunta: ¿cuánto me falta para cerrar el mes? La lista viene después.',
+      items: [
+        'Resumen por estado arriba. Cada tarjeta filtra la tabla. Lo primero que ve el contador es cuánto trabajo le queda.',
+        'Acción principal: aprobar en lote los listos. Ahí está la escala: 312 clientes en un paso.',
+        'Orden por defecto: en revisión primero y por severidad. El contador nunca busca qué hacer.',
+        'Las alertas se ven como chips en la fila, para decidir sin abrir el detalle.',
+        'Barra de avance contra el objetivo del día 7, con el vencimiento del 20 como referencia.',
+        'Plan del día: el orden importa. Primero lo masivo (una decisión resuelve muchos), después lo individual con revisión guiada, al final el lote.',
+        'Estimación de lo que queda, con los tiempos reales del contador del mes anterior. Baja a medida que resuelve.',
+        'Reloj de demo (solo prototipo): “31/10” muestra la bandeja antes del cierre; “Simular día 1” dispara la misma tarea que Beat; “Simular día 5” vence el plazo de las preguntas.'
+      ]
+    },
+    client: {
+      title: 'Detalle de cliente',
+      why: 'Probá: “Escribirle a Martina” → Enviar (ella responde con la factura) y “Aplicar sugerencia” en J. Pérez. Con J/K pasás de cliente, con A aprobás.',
+      items: [
+        'Alertas bloqueantes arriba con su acción. Aprobar queda deshabilitado hasta resolverlas, sin excepción ni “aprobar con motivo”: la regla regulatoria está en la UI.',
+        'Cuatro números clave. “Cómo se calculó” muestra la traza paso a paso, para que el contador confíe sin rehacer la cuenta.',
+        'La columna Origen dice qué capa clasificó cada movimiento (estructural, regla global, match con factura, historial ARCA, declaración del usuario o contador). El contador solo resuelve lo que el usuario no aclaró al día 5; no crea reglas por cliente.',
+        'Vista previa exacta del mensaje. Lo que se aprueba es lo que se envía (snapshot).',
+        'Revisión guiada desde la bandeja: “12 de 41”, al aprobar pasa sola al siguiente. Todo se maneja con teclado (?).',
+        '“Qué cambió desde que lo viste”: el contador no relee el cliente entero cuando vuelve.',
+        'Conversación dentro de la alerta, con plantillas. El usuario factura desde la app y la factura nueva vuelve acá desde ARCA: un clic vincula y resuelve. Reemplaza el WhatsApp. Las acciones muestran “Deshacer” en vez de pedir confirmación.'
+      ]
+    },
+    'by-alert': {
+      title: 'Resolver por alerta',
+      why: 'Probá: elegí “Sin clasificar”, clasificá Upwork como Cobro por trabajo con regla global y mirá cómo baja el contador.',
+      items: [
+        'Tipos de alerta ordenados por severidad, con cuántos casos quedan. Se trabaja por problema, no por cliente.',
+        '“Sin clasificar” se agrupa por contraparte: clasificar Upwork una vez resuelve 18 movimientos en 9 clientes y deja una regla global.',
+        '“No facturable con señales de riesgo”: el usuario declaró “regalo” o “transferencia mía” pero el patrón parece un cobro. Es la validación por excepción que evita el incentivo a no facturar.',
+        'Cada acción masiva queda registrada en el historial de cada cliente afectado, y esos cierres se recalculan. Sin “¿estás seguro?”: la acción se ejecuta y ofrece “Deshacer” por 10 segundos.'
+      ]
+    },
+    batch: {
+      title: 'Aprobación en lote',
+      why: 'Es la pantalla que justifica pasar de 30 a cientos de clientes por contador.',
+      items: [
+        'Desglose de qué entra en el lote. Los que tienen alertas informativas se pueden excluir con un clic. Nueva: “variación fuerte” (±50% contra el promedio de 3 meses) y la muestra arranca por esos, para aprobar 300 con confianza.',
+        'Se muestra la plantilla que va a salir, con las variables marcadas.',
+        'Declaración explícita del matriculado antes de aprobar. Queda en el registro de auditoría con cada snapshot.',
+      ]
+    },
+    rules: {
+      title: 'Reglas',
+      why: 'Clasificación determinista y auditable. Ningún dato sale a un modelo externo.',
+      items: [
+        'No hay reglas por cliente: lo que solo sabe el usuario (“es mi papá”) lo declara él en la app, una vez por contraparte. El trabajo del contador no crece con la cantidad de usuarios.',
+        '“Usos del mes” muestra qué reglas hacen el trabajo y cuáles sobran.',
+        'Cada regla dice quién la creó. El contador es dueño de la lógica, no el engineer.'
+      ]
+    },
+    params: {
+      title: 'Parámetros y plantillas',
+      why: 'Los valores cambian seguido. Actualizarlos no requiere un deploy.',
+      items: [
+        'Parámetros versionados con vigencia. Cada cierre recuerda con qué versión se calculó.',
+        'Plantillas versionadas y aprobadas. Editar crea una versión nueva, no pisa la anterior.'
+      ]
+    },
+    'm-select': {
+      title: 'Simular ser…',
+      why: 'La app mobile es un simulador. Sirve para ver y cambiar datos como el usuario.',
+      items: ['Reemplaza al login en el prototipo. Valentina todavía no adhirió (recorre oferta, adhesión y ARCA); Martina está en revisión; Mateo ya fue notificado.']
+    },
+    'm-home': {
+      title: 'Inicio del usuario',
+      why: 'El objetivo del producto: que el usuario deje de preocuparse. Una sola cosa por hacer, o ninguna.',
+      items: [
+        'Una tarjeta de estado según el momento: la oferta si todavía no adhirió; después, solo lo que necesita al usuario, en el momento en que pasa: facturar un cobro, aclarar una contraparte o responder al contador.',
+        'Ninguna cifra impositiva se muestra hasta que el contador aprueba.'
+      ]
+    },
+    'm-invoice': {
+      title: 'Facturar este cobro',
+      why: 'Probá: emití la factura. Prevenir en vez de detectar: el cobro no llega al contador como alerta.',
+      items: [
+        'El aviso llega cuando entra el cobro, no el día 1: cada movimiento se clasifica al llegar y, si es un cobro por trabajo sin factura en ARCA, se le ofrece facturarlo.',
+        'Precargado con cliente, monto y tipo de cambio del cobro. Nunca se emite sin que el usuario confirme (en el prototipo, ARCA simulado).'
+      ]
+    },
+    'm-offer': {
+      title: 'Oferta del servicio',
+      why: 'Así se entera el usuario: una tarjeta en el inicio de Wallbit, no un mail.',
+      items: [
+        'La promesa es la del producto: dejar de preocuparse. Sin jerga impositiva.',
+        'El costo queda a definir: es una decisión comercial, no del prototipo.'
+      ]
+    },
+    'm-enroll': {
+      title: 'Adhesión',
+      why: 'Probá: tildá el consentimiento y seguí. Es lo primero que pide un regulador.',
+      items: [
+        'Datos fiscales precargados con lo que Wallbit ya sabe; la categoría se lee de ARCA.',
+        'Consentimiento explícito y revocable para que el contador vea movimientos y comprobantes. Queda en la auditoría con su versión.'
+      ]
+    },
+    'm-arca': {
+      title: 'Vincular ARCA',
+      why: 'Probá: vinculá y mirá las facturas importadas. Es el único camino: sin ARCA no hay servicio.',
+      items: [
+        'Obligatorio: así se eliminan la confirmación manual de facturas y la mayoría de los “cobros sin facturar”.',
+        'En la propuesta, vía AfipSDK (ARCHITECTURE §10). En el prototipo, simulado: importa comprobantes de un ARCA ficticio.',
+        'Nunca se emite una factura sin que el usuario la confirme.'
+      ]
+    },
+    'm-counterparty': {
+      title: '¿Quién es esta contraparte?',
+      why: 'Probá: elegí una opción y tocá “Listo”. El usuario aporta lo que solo él sabe; el contador valida por excepción.',
+      items: [
+        'Una pregunta por contraparte, no por movimiento, y en lenguaje simple. Solo aparece si las reglas globales y el match con facturas no alcanzaron.',
+        'La sugerencia viene precargada (hoy heurística; a futuro, un modelo ML local entrenado con estas respuestas). El usuario confirma o corrige.',
+        'La respuesta es evidencia, no decisión: si dice “no es trabajo” pero el patrón parece un cobro, le salta una alerta al contador. Si no responde al día 5, pasa al contador.'
+      ]
+    },
+    profile: {
+      title: 'Perfil de cliente',
+      why: 'Todo lo que el contador sabe del cliente en una pantalla, para decidir rápido y sin preguntar dos veces.',
+      items: [
+        'Identidad y etiquetas que resumen el comportamiento (“responde rápido”, “factura a mes vencido”).',
+        'Métricas: acumulado contra el tope, promedio mensual y estabilidad, cierres a tiempo, tiempo de respuesta.',
+        'Facturado mes a mes con proyección del tope: anticipa la recategorización antes de que sea alerta.',
+        'Contrapartes conocidas con su origen (regla, factura o declaración del usuario).',
+        'Historial de cierres con sus snapshots, alertas recurrentes, notas internas y conversaciones.'
+      ]
+    },
+    'm-thread': {
+      title: 'Mensajes del contador',
+      why: 'Probá: “Emitir factura” y enviá. La factura nueva llega desde ARCA a la alerta del contador.',
+      items: [
+        'La conversación está atada a una alerta concreta, no es un chat suelto: el contador sabe a qué responde cada mensaje.',
+        '“Facturar este cobro” precarga cliente, monto y tipo de cambio del cobro; el usuario confirma y se emite en ARCA (simulado).'
+      ]
+    },
+    'm-close': {
+      title: 'Mi cierre',
+      why: 'Es lo que hoy el usuario le pide al contador por WhatsApp.',
+      items: [
+        'Sello “Revisado por tu contador” con fecha: es lo que da tranquilidad.',
+        'El tope de la categoría como barra anticipa la recategorización antes de que sea un problema.'
+      ]
+    }
+  };
+
+  const ROWS = [
+    ['IN_REVIEW', 'Martina Ríos', 'D', 'USD 3.000', 'USD 4.200', 84, [['b', 'Cobro sin facturar', 'cobro'], ['b', 'Sin clasificar', 'clasif']]],
+    ['IN_REVIEW', 'Facundo Ortiz', 'H', 'USD 12.400', 'USD 12.400', 101, [['b', 'Supera máximo del régimen', 'tope']]],
+    ['IN_REVIEW', 'Tomás Herrera', 'F', 'USD 7.800', 'USD 7.800', 103, [['b', 'Supera categoría', 'tope']]],
+    ['IN_REVIEW', 'Lucía Benítez', 'C', 'USD 2.100', 'USD 2.400', 52, [['b', 'Sin clasificar', 'clasif']]],
+    ['PENDING_DATA', 'Valentina Sosa', 'D', 'USD 3.500', 'USD 3.900', 61, [['w', 'Pregunta sin responder', 'preg']]],
+    ['PENDING_DATA', 'Nicolás Paz', 'B', 'USD 1.500', 'USD 3.000', 44, [['w', 'Pregunta sin responder', 'preg']]],
+    ['READY', 'Camila Ferreyra', 'E', 'USD 5.200', 'USD 5.200', 81, [['i', 'Cerca del tope', 'tope']]],
+    ['READY', 'Agustín Molina', 'F', 'USD 6.000', 'USD 5.400', 70, [['i', 'Facturado sin cobro', 'cobro']]],
+    ['READY', 'Joaquín Medina', 'C', 'USD 2.400', 'USD 2.400', 45, []],
+    ['READY', 'Sofía Romero', 'D', 'USD 3.600', 'USD 3.600', 62, []],
+    ['READY', 'Julieta Castro', 'B', 'USD 1.300', 'USD 1.300', 38, []],
+    ['NOTIFIED', 'Mateo Giménez', 'D', 'USD 3.200', 'USD 3.200', 58, []]
+  ];
+  const STATE_LABEL = { IN_REVIEW: 'En revisión', PENDING_DATA: 'Esperando usuario', READY: 'Listo', APPROVED: 'Aprobado', NOTIFIED: 'Notificado' };
+
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+
+  // ---------- inbox ----------
+  let stateFilter = '', alertFilter = '';
+  function capCell(p) {
+    if (p == null) return '<span class="muted small">—</span>';
+    const c = p >= 100 ? 'var(--crit)' : p >= 80 ? 'var(--warn)' : 'var(--ok)';
+    return `<div class="cap"><div class="bar"><span style="width:${Math.min(p, 100)}%;background:${c}"></span></div><span class="num small">${p}%</span></div>`;
+  }
+  function renderInbox() {
+    const tb = $('#inbox-table tbody');
+    const rows = ROWS.filter(r => (!stateFilter || r[0] === stateFilter) && (!alertFilter || r[6].some(a => a[2] === alertFilter)));
+    tb.innerHTML = rows.map(r => `
+      <tr class="click" tabindex="0" data-name="${r[1]}">
+        <td class="name">${r[1]}</td><td>${r[2]}</td>
+        <td class="r num">${r[3]}</td><td class="r num">${r[4]}</td>
+        <td>${capCell(r[5])}</td>
+        <td>${r[6].map(a => `<span class="chip ${a[0]}">${a[1]}</span>`).join('') || '<span class="muted small">—</span>'}</td>
+        <td><span class="pill s-${r[0]}">${STATE_LABEL[r[0]]}</span></td>
+      </tr>`).join('') || '<tr><td colspan="7" class="muted">Ningún cliente con este filtro en la muestra.</td></tr>';
+    $('#tbl-count').textContent = (stateFilter || alertFilter)
+      ? `Mostrando ${rows.length} (muestra filtrada)`
+      : 'Mostrando 12 de 480 · orden: en revisión primero, por severidad';
+    $$('.stat').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.filter === stateFilter)));
+  }
+  $$('.stat').forEach(b => b.addEventListener('click', () => { stateFilter = stateFilter === b.dataset.filter ? '' : b.dataset.filter; renderInbox(); }));
+  $('#f-alert').addEventListener('change', e => { alertFilter = e.target.value; renderInbox(); });
+  $('#clear-filter').addEventListener('click', () => { stateFilter = ''; alertFilter = ''; $('#f-alert').value = ''; renderInbox(); });
+  $('#inbox-table').addEventListener('click', e => { const tr = e.target.closest('tr[data-name]'); if (tr) openClient(tr.dataset.name); });
+  $('#inbox-table').addEventListener('keydown', e => { if (e.key === 'Enter') { const tr = e.target.closest('tr[data-name]'); if (tr) openClient(tr.dataset.name); } });
+  function openClient(name) {
+    $('#c-name').textContent = name; $('#c-name-crumb').textContent = name;
+    location.hash = 'client';
+  }
+
+  // ---------- client ----------
+  const resolved = new Set();
+  let approved = false;
+  function addLog(actor, text) {
+    const li = document.createElement('li');
+    li.innerHTML = `<span class="num muted">03/11 ${new Date().toTimeString().slice(0, 5)}</span><span class="mono small">${actor}</span><span>${text}</span>`;
+    $('#log').appendChild(li);
+  }
+  function toast(msg, undo) {
+    const t = $('#toast-client');
+    t.innerHTML = '';
+    t.append(document.createTextNode(msg));
+    if (undo) {
+      const b = document.createElement('button'); b.textContent = 'Deshacer';
+      b.addEventListener('click', () => { undo(); t.hidden = true; });
+      t.append(b);
+    }
+    t.hidden = false;
+    clearTimeout(toast._t); toast._t = setTimeout(() => { t.hidden = true; }, undo ? 10000 : 2600);
+  }
+  function updateClient() {
+    $$('#alerts .alert.b').forEach(a => a.classList.toggle('done', resolved.has(a.dataset.alert)));
+    const left = 2 - resolved.size;
+    const st = $('#c-state');
+    if (approved) { st.className = 'pill s-APPROVED'; st.textContent = 'APPROVED'; }
+    else if (left === 0) { st.className = 'pill s-READY'; st.textContent = 'READY'; }
+    else { st.className = 'pill s-IN_REVIEW'; st.textContent = 'IN_REVIEW'; }
+    $('#approve-one').disabled = left > 0 || approved;
+    $('#approve-hint').textContent = approved ? 'Aprobado. Snapshot guardado y notificación en cola.'
+      : left > 0 ? `Resolvé ${left === 1 ? 'la alerta bloqueante' : 'las 2 alertas bloqueantes'} para aprobar.` : 'Sin bloqueantes. Revisá el mensaje y aprobá.';
+  }
+  $$('[data-resolve]').forEach(b => b.addEventListener('click', () => {
+    const id = b.dataset.resolve;
+    resolved.add(id); addLog('accountant-demo', b.dataset.how + '.');
+    toast(b.dataset.how, () => { resolved.delete(id); addLog('accountant-demo', 'Deshizo: ' + b.dataset.how + '.'); updateClient(); });
+    updateClient();
+  }));
+  $('[data-goto-mov]').addEventListener('click', () => { selectTab('mov'); $('#mov-select').focus(); });
+  $('#mov-select').addEventListener('change', e => {
+    const v = e.target.value;
+    if (!v) { resolved.delete('clasif'); $('#mov-unclassified').style.background = 'var(--crit-bg)'; $('#mov-origin').textContent = '—'; updateClient(); return; }
+    resolved.add('clasif');
+    $('#mov-unclassified').style.background = '';
+    $('#mov-origin').textContent = 'contador';
+    addLog('accountant-demo', `Clasificó J. Pérez como “${v}” (el usuario no respondió). Recalculado.`);
+    toast(`J. Pérez: ${v}`, () => { e.target.value = ''; e.target.dispatchEvent(new Event('change')); });
+    updateClient();
+  });
+  function applySuggestion() {
+    if (resolved.has('clasif') || approved) return;
+    const sel = $('#mov-select'); sel.value = 'Familia o regalo'; sel.dispatchEvent(new Event('change'));
+  }
+  $('[data-apply-sugg]').addEventListener('click', applySuggestion);
+  $('#toggle-ok').addEventListener('click', () => {
+    const hidden = $('#mov-table').classList.toggle('hide-ok');
+    $('#toggle-ok').textContent = hidden ? 'Mostrar los 6 OK' : 'Ocultar los 6 OK';
+  });
+  $('[data-dismiss-changed]').addEventListener('click', () => { $('#changed').hidden = true; });
+
+  // conversación dentro de la alerta
+  const TPL = {
+    factura: 'Hola Martina, vimos un cobro de Acme Corp por USD 1.200 del 12/10 que no tiene factura en ARCA. Si te falta, podés emitirla desde la app con “Facturar este cobro”.',
+    que: 'Hola Martina, ¿nos contás qué es el cobro de Acme Corp por USD 1.200 del 12/10?',
+    plazo: 'Hola Martina, te recordamos que necesitamos la factura del cobro de Acme Corp antes del 7/11 para cerrar tu mes.'
+  };
+  let thread = [];
+  function renderThread() {
+    const html = thread.map(m => m.kind === 'found'
+      ? `<div class="found"><span>Martina emitió <b class="mono">E 0001-00000043</b> desde Wallbit · USD 1.200 · ya está en ARCA</span><span class="spacer"></span><button class="btn primary" data-link-invoice ${resolved.has('cobro') ? 'disabled' : ''}>Vincular y resolver</button></div>`
+      : `<div class="bubble ${m.kind}"><span class="who">${m.who}</span><span>${m.text}</span></div>`).join('');
+    $('#thread-msgs').innerHTML = html || '<span class="small muted">Todavía no le escribiste. Elegí una plantilla o escribí.</span>';
+    const mm = $('#m-thread-msgs');
+    if (mm) mm.innerHTML = thread.filter(m => m.kind !== 'found').map(m => `<div class="bubble ${m.kind === 'me' ? 'them' : m.kind === 'them' ? 'me' : 'sys'}"><span class="who">${m.kind === 'me' ? 'Tu contador' : m.kind === 'them' ? 'Vos' : ''}</span><span>${m.text}</span></div>`).join('') || '<span class="small muted">Sin mensajes.</span>';
+  }
+  function openThread() { $('#thread').hidden = false; if (!$('#thread-text').value && !thread.length) $('#thread-text').value = TPL.factura; renderThread(); $('#thread-text').focus(); }
+  $('[data-open-thread]').addEventListener('click', openThread);
+  $$('[data-tpl]').forEach(b => b.addEventListener('click', () => { $('#thread-text').value = TPL[b.dataset.tpl]; $('#thread-text').focus(); }));
+  function userReplies(text) {
+    thread.push({ kind: 'them', who: 'Martina · app', text });
+    thread.push({ kind: 'found' });
+    $('#thread-status').textContent = 'respondió'; $('#thread-status').className = 'chip w';
+    addLog('client:martina', 'Respondió y emitió la factura E-43 desde la app (ARCA).');
+    renderThread();
+  }
+  $('#thread-send').addEventListener('click', () => {
+    const text = $('#thread-text').value.trim(); if (!text) return;
+    thread.push({ kind: 'me', who: 'Vos · ahora', text });
+    $('#thread-text').value = '';
+    $('#thread-status').textContent = 'esperando respuesta'; $('#thread-status').className = 'chip i';
+    addLog('accountant-demo', 'Le escribió a Martina por “Cobro sin facturar”.');
+    renderThread();
+    clearTimeout(userReplies._t);
+    userReplies._t = setTimeout(() => userReplies('Me había olvidado. Ya la emití desde la app.'), 1600);
+  });
+  $('#thread-msgs').addEventListener('click', e => {
+    if (!e.target.matches('[data-link-invoice]')) return;
+    resolved.add('cobro');
+    addLog('accountant-demo', 'Vinculó la factura E-43 al cobro de Acme del 12/10. Recalculado.');
+    $('#thread-status').textContent = 'resuelta'; $('#thread-status').className = 'chip i';
+    toast('Factura vinculada', () => { resolved.delete('cobro'); $('#thread-status').textContent = 'respondió'; updateClient(); renderThread(); });
+    updateClient(); renderThread();
+  });
+
+  // revisión guiada
+  const QUEUE = ['Martina Ríos', 'Lucía Benítez', 'Facundo Ortiz', 'Tomás Herrera', 'Lucas Vega', 'Paula Díaz', 'Ramiro Sánchez', 'Lara Méndez', 'Iván Rossi', 'Carla Núñez', 'Pablo Ferro', 'Bruno Aguirre'];
+  let reviewOn = false, rvIdx = 0, reviewedCount = 0;
+  function resetClient(name) {
+    $('#c-name').textContent = name; $('#c-name-crumb').textContent = name;
+    resolved.clear(); approved = false; thread = [];
+    $('#mov-select').value = ''; $('#mov-unclassified').style.background = 'var(--crit-bg)'; $('#mov-origin').textContent = '—';
+    $('#thread').hidden = true; $('#thread-text').value = ''; $('#thread-status').textContent = 'sin enviar'; $('#thread-status').className = 'chip i';
+    $('#changed').hidden = false; $('#shortcuts').hidden = true;
+    selectTab('mov'); renderThread(); updateClient(); updateReviewBar();
+  }
+  function updateReviewBar() {
+    $('#review-bar').hidden = !reviewOn;
+    $('#rv-pos').textContent = `${rvIdx + 1} de ${QUEUE.length}`;
+    $('#rv-bar').style.width = ((rvIdx + 1) / QUEUE.length * 100) + '%';
+  }
+  function goReview(i) { rvIdx = (i + QUEUE.length) % QUEUE.length; resetClient(QUEUE[rvIdx]); }
+  $$('[data-start-review]').forEach(b => b.addEventListener('click', () => { reviewOn = true; goReview(0); location.hash = 'client'; }));
+  $('#rv-exit').addEventListener('click', () => { reviewOn = false; updateReviewBar(); location.hash = 'inbox'; });
+  $('#rv-next').addEventListener('click', () => { reviewOn = true; goReview(rvIdx + 1); });
+  $('#rv-prev').addEventListener('click', () => { reviewOn = true; goReview(rvIdx - 1); });
+  $('[data-close-shortcuts]').addEventListener('click', () => { $('#shortcuts').hidden = true; });
+  document.addEventListener('keydown', e => {
+    if (location.hash !== '#client') return;
+    const el = e.target && e.target.closest ? e.target : null;
+    if ((el && el.closest('input, textarea, select')) || e.metaKey || e.ctrlKey || e.altKey) return;
+    const k = e.key;
+    if (k === 'j' || k === 'J') { reviewOn = true; goReview(rvIdx + 1); }
+    else if (k === 'k' || k === 'K') { reviewOn = true; goReview(rvIdx - 1); }
+    else if ((k === 'a' || k === 'A') && !$('#approve-one').disabled) $('#approve-one').click();
+    else if (k === '1') openThread();
+    else if (k === '2' || (k === 'Enter' && !(el && el.closest('button, a')))) applySuggestion();
+    else if (k === 'p' || k === 'P') location.hash = 'profile';
+    else if (k === '?') $('#shortcuts').hidden = !$('#shortcuts').hidden;
+    else if (k === 'Escape') { $('#shortcuts').hidden = true; $('#thread').hidden = true; }
+    else return;
+    e.preventDefault();
+  });
+  $('#approve-one').addEventListener('click', () => {
+    approved = true; addLog('accountant-demo', 'Aprobó el cierre. Snapshot #c-2026-10-0412 congelado.');
+    reviewedCount = Math.max(reviewedCount, rvIdx + 1); updateEta();
+    if (reviewOn && rvIdx < QUEUE.length - 1) {
+      toast(`Aprobado. Sigue ${QUEUE[rvIdx + 1]}…`);
+      setTimeout(() => { if (approved && location.hash === '#client') goReview(rvIdx + 1); }, 1100);
+    } else toast('Aprobado y notificación en cola');
+    updateClient();
+  });
+  function selectTab(id) {
+    $$('.tabs [data-tab]').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === id)));
+    $$('[data-panel]').forEach(p => { p.hidden = p.dataset.panel !== id; });
+  }
+  $$('.tabs [data-tab]').forEach(b => b.addEventListener('click', () => selectTab(b.dataset.tab)));
+
+  // ---------- by alert ----------
+  const BA = [
+    { id: 'clasif', sev: 'b', label: 'Sin clasificar', unit: 'contrapartes', sub: '57 movimientos en 22 clientes, sin respuesta al 5/11',
+      hint: 'El usuario no respondió “¿Quién es?”. Agrupado por contraparte: clasificar una vez resuelve sus movimientos en todos los clientes y puede quedar como regla global.',
+      cols: ['Contraparte', 'Movimientos', 'Clientes', 'USD'],
+      rows: [{ c: ['Upwork Global Inc', '18', '9', '6.420'] }, { c: ['Binance P2P', '14', '3', '2.300'] }, { c: ['Gusto Inc', '11', '6', '3.100'] },
+        { c: ['Mercury · transferencia', '9', '4', '8.950'] }, { c: ['J. Pérez', '1', '1', '300'] }, { c: ['Otras 4 contrapartes', '4', '4', '910'], w: 4 }],
+      extra: '<select class="select" id="ba-class" aria-label="Clasificar como"><option>Cobro por trabajo</option><option>Transferencia propia</option><option>Familia o regalo</option></select><label class="rule-cb" style="margin:0"><input type="checkbox" id="ba-rule" checked> Guardar como regla global</label>',
+      action: n => `Clasificar ${n} contraparte${n === 1 ? '' : 's'}`, done: 'Clasificado. Cierres afectados recalculados.' },
+    { id: 'riesgo', sev: 'b', label: 'No facturable con señales de riesgo', unit: 'declaraciones', sub: 'el usuario dijo “no es trabajo”, pero parece cobro',
+      hint: 'Validación por excepción: el resto de las declaraciones entra en el lote. Estas tienen monto alto, recurrencia o memo de factura.',
+      cols: ['Cliente', 'Contraparte', 'Declaró', 'Señal', 'USD'],
+      rows: [{ c: ['Lucas Vega', 'K. Smith', 'Familia o regalo', 'mensual desde mayo, monto fijo', '1.500'] }, { c: ['Paula Díaz', 'Hooli GmbH', 'Transferencia propia', 'memo “Invoice 0042”', '2.300'] },
+        { c: ['Ramiro Sánchez', 'A. Novak', 'Familia o regalo', 'monto alto', '4.000'] }, { c: ['… y 3 más', '', '', '', '2.150'], w: 3 }],
+      extra: '<select class="select" id="ba-risk" aria-label="Decisión"><option>Reclasificar como cobro por trabajo</option><option>Confirmar lo que declaró</option></select>',
+      action: n => `Resolver ${n} declaraci${n === 1 ? 'ón' : 'ones'}`, done: 'Resuelto. Si se reclasificó, se le pide la factura al usuario.' },
+    { id: 'cobro', sev: 'b', label: 'Cobro sin facturar', unit: 'clientes', sub: 'USD 16.800 sin Factura E',
+      hint: 'El cobro está en Wallbit pero no tiene Factura E en ARCA. El usuario recibe un pedido en la app con “Facturar este cobro”.',
+      cols: ['Cliente', 'Pagador', 'Fecha', 'USD'],
+      rows: [{ c: ['Martina Ríos', 'Acme Corp', '12/10', '1.200'] }, { c: ['Lucas Vega', 'Toptal LLC', '08/10', '2.500'] }, { c: ['Paula Díaz', 'Globex Inc', '20/10', '900'] },
+        { c: ['Ramiro Sánchez', 'Initech', '27/10', '1.750'] }, { c: ['… y 10 clientes más', '', '', '10.450'], w: 10 }],
+      action: n => `Pedir factura a ${n} cliente${n === 1 ? '' : 's'}`, done: 'Pedido enviado. Vuelven a revisión cuando confirmen.' },
+    { id: 'supera', sev: 'b', label: 'Supera su categoría', unit: 'clientes', sub: 'acumulado 12 meses sobre el tope',
+      hint: 'Se agrega el aviso de recategorización al mensaje del cierre. Los casos de exclusión del régimen se revisan uno por uno.',
+      cols: ['Cliente', 'Cat.', 'Acumulado', 'Sugerencia'],
+      rows: [{ c: ['Tomás Herrera', 'F', '103%', 'Recategorizar a G'] }, { c: ['Lara Méndez', 'D', '104%', 'Recategorizar a E'] }, { c: ['Iván Rossi', 'B', '110%', 'Recategorizar a C'] },
+        { c: ['Carla Núñez', 'E', '101%', 'Recategorizar a F'] }, { c: ['Pablo Ferro', 'C', '107%', 'Recategorizar a D'] }, { c: ['Facundo Ortiz', 'H', '101% del máximo', 'Exclusión: revisar individual'], lock: true }],
+      action: n => `Agregar aviso de recategorización a ${n}`, done: 'Aviso agregado. Pasan a Listos.' },
+    { id: 'preg', sev: 'w', label: 'Preguntas sin responder', unit: 'clientes', sub: 'plazo 5/11, después pasan a vos',
+      hint: 'El usuario todavía no contestó “¿Quién es?”. Podés reenviar el recordatorio; el 5/11 pasan solos a tu revisión.',
+      cols: ['Cliente', 'Contraparte', 'USD', 'Último aviso'],
+      rows: [{ c: ['Valentina Sosa', 'Roberto Gómez', '400', '01/11'] }, { c: ['Nicolás Paz', 'K. Smith', '1.500', '01/11'] }, { c: ['Bruno Aguirre', 'L. Torres', '600', '02/11'] }, { c: ['… y 84 clientes más', '', '', ''], w: 84 }],
+      action: n => `Reenviar recordatorio a ${n}`, done: 'Recordatorio reenviado.', keep: true },
+    { id: 'cerca', sev: 'i', label: 'Cerca del tope (≥ 80%)', unit: 'clientes', sub: 'informativa, ya en el lote',
+      hint: 'No bloquea. Están incluidos en el lote de aprobación con la advertencia en el mensaje.',
+      cols: ['Cliente', 'Cat.', 'Acumulado'],
+      rows: [{ c: ['Diego Luna', 'C', '92%'] }, { c: ['Martina Ríos', 'D', '84%'] }, { c: ['Camila Ferreyra', 'E', '81%'] }, { c: ['… y 16 clientes más', '', ''], w: 16 }],
+      action: () => 'Ir al lote de aprobación', goto: 'batch' }
+  ];
+  const SEV_LABEL = { b: 'Bloqueante', w: 'Espera al usuario', i: 'Informativa' };
+  let baSel = 'clasif';
+  const left = t => t.rows.filter(r => !r.done).reduce((s, r) => s + (r.w || 1), 0);
+  function baToast(msg, undo) {
+    const t = $('#toast-ba');
+    t.innerHTML = ''; t.append(document.createTextNode(msg));
+    if (undo) {
+      const b = document.createElement('button'); b.textContent = 'Deshacer';
+      b.addEventListener('click', () => { undo(); t.hidden = true; });
+      t.append(b);
+    }
+    t.hidden = false;
+    clearTimeout(baToast._t); baToast._t = setTimeout(() => { t.hidden = true; }, undo ? 10000 : 2600);
+  }
+  function fmtMin(m) { m = Math.round(m / 5) * 5; return m >= 60 ? `~${Math.floor(m / 60)} h ${String(m % 60).padStart(2, '0')} min` : `~${Math.max(m, 5)} min`; }
+  function updateEta() {
+    const cases = BA.filter(t => t.sev === 'b').reduce((s, t) => s + left(t), 0);
+    const massMin = cases * 35 / 60;
+    const revLeft = QUEUE.length - reviewedCount;
+    const revMin = revLeft * 3.5;
+    const total = massMin + revMin + 5;
+    $('#eta').textContent = fmtMin(total);
+    $('#eta-extra').textContent = `· hasta ${fmtMin(total + 55)} si los 87 pendientes no responden al 5/11`;
+    $('#step-1-sub').textContent = cases ? `${cases} casos · ${fmtMin(massMin)}` : 'Listo';
+    $('#step-2-sub').textContent = revLeft ? `${revLeft} clientes · ${fmtMin(revMin)}` : 'Listo';
+    $('#step-1').className = 'step ' + (cases ? 'now' : 'done');
+    $('#step-2').className = 'step ' + (revLeft ? (cases ? '' : 'now') : 'done');
+    $('#step-3').className = 'step ' + (!cases && !revLeft ? 'now' : '');
+  }
+  function renderBA() {
+    $('#ba-list').innerHTML = BA.map(t => `
+      <button class="ba-item ${t.sev}" role="tab" aria-selected="${t.id === baSel}" data-ba="${t.id}"><span class="sev"></span>
+        <span><b>${t.label}</b><br><span class="small muted">${t.sub}</span></span><b class="num">${left(t)}</b></button>`).join('');
+    $('#side-alerts').textContent = BA.filter(t => t.sev !== 'i' && left(t) > 0).length;
+    const t = BA.find(x => x.id === baSel);
+    $('#ba-panel').innerHTML = `
+      <div class="pad" style="display:grid;gap:12px">
+        <div class="head"><b>${t.label}</b><span class="chip ${t.sev}">${SEV_LABEL[t.sev]}</span><span class="spacer"></span><span class="small muted num">${left(t)} ${t.unit} pendientes</span></div>
+        <span class="small muted">${t.hint}</span>
+        <table class="t"><thead><tr><th style="width:28px">${t.goto ? '' : '<input type="checkbox" id="ba-all" checked aria-label="Seleccionar todos">'}</th>${t.cols.map((c, i) => `<th${i === t.cols.length - 1 && /USD/.test(c) ? ' class="r"' : ''}>${c}</th>`).join('')}</tr></thead>
+        <tbody>${t.rows.map((r, i) => `<tr class="${r.done ? 'done' : ''}"><td>${t.goto ? '' : `<input type="checkbox" data-ba-row="${i}" ${r.done || r.lock ? 'disabled' : 'checked'} aria-label="Seleccionar ${r.c[0]}">`}</td>
+          ${r.c.map((v, j) => `<td class="${j === r.c.length - 1 && /USD/.test(t.cols[j]) ? 'r num' : ''}${j === 0 ? ' name' : ''}">${v}${j === 0 && r.done ? ' <span class="chip i">resuelto</span>' : ''}${j === 0 && r.lock ? ' <a href="#client" class="small" style="color:var(--hot)">abrir</a>' : ''}</td>`).join('')}</tr>`).join('')}</tbody></table>
+        <div class="bulkbar">${t.extra || ''}<span class="spacer"></span><button class="btn primary" id="ba-go"></button></div>
+        <span class="small muted">Cada cambio queda en el historial de cada cliente afectado.</span>
+      </div>`;
+    updateBAButton();
+  }
+  function selectedRows(t) { return $$('[data-ba-row]').filter(cb => cb.checked).map(cb => t.rows[+cb.dataset.baRow]); }
+  function updateBAButton() {
+    const t = BA.find(x => x.id === baSel); const btn = $('#ba-go');
+    if (t.goto) { btn.textContent = t.action(); btn.disabled = false; return; }
+    const n = selectedRows(t).reduce((s, r) => s + (r.w || 1), 0);
+    btn.textContent = n ? t.action(n) : 'Seleccioná al menos uno'; btn.disabled = n === 0;
+  }
+  $('#ba-list').addEventListener('click', e => { const b = e.target.closest('[data-ba]'); if (b) { baSel = b.dataset.ba; renderBA(); } });
+  $('#ba-panel').addEventListener('change', e => {
+    if (e.target.id === 'ba-all') $$('[data-ba-row]').forEach(cb => { if (!cb.disabled) cb.checked = e.target.checked; });
+    updateBAButton();
+  });
+  $('#ba-panel').addEventListener('click', e => {
+    if (e.target.id !== 'ba-go') return;
+    const t = BA.find(x => x.id === baSel);
+    if (t.goto) { location.hash = t.goto; return; }
+    const rows = selectedRows(t).filter(r => !r.done);
+    if (!t.keep) rows.forEach(r => { r.done = true; });
+    const extra = t.id === 'clasif' ? ` Como “${$('#ba-class').value}”${$('#ba-rule').checked ? ', con regla global' : ''}.` : t.id === 'riesgo' ? ` Decisión: ${$('#ba-risk').value.toLowerCase()}.` : '';
+    baToast(t.done + extra, t.keep ? null : () => { rows.forEach(r => { r.done = false; }); renderBA(); updateEta(); });
+    renderBA(); updateEta();
+  });
+
+  // ---------- batch ----------
+  function batchTotal() { return $('#incl-info').checked ? 312 : 282; }
+  function updateBatch() {
+    const n = batchTotal();
+    ['#b-total', '#b-total-2', '#b-total-3', '#b-total-4'].forEach(s => { $(s).textContent = n; });
+    $('#do-batch').disabled = !$('#attest').checked;
+  }
+  $('#incl-info').addEventListener('change', updateBatch);
+  $('#attest').addEventListener('change', updateBatch);
+  $('#do-batch').addEventListener('click', () => {
+    const n = batchTotal();
+    $('#batch-form').hidden = true; $('#batch-done').hidden = false; $('#b-done-n').textContent = n;
+    $('#ready-count').textContent = 312 - n; $('#side-ready').textContent = 312 - n;
+    let sent = 0;
+    const step = () => {
+      sent = Math.min(n, sent + Math.ceil(n / 12));
+      $('#b-sent').textContent = `${sent} / ${n}`; $('#b-sent-bar').style.width = (sent / n * 100) + '%';
+      if (sent < n) setTimeout(step, 180);
+    };
+    step();
+  });
+
+  // ---------- mobile ----------
+  const PERSONAS = {
+    pending: { name: 'Valentina', cat: 'D', state: 'offer', ask: true, invoice: true },
+    approved: { name: 'Mateo', cat: 'D', state: 'approved' },
+    review: { name: 'Martina', cat: 'D', state: 'review' }
+  };
+  let persona = PERSONAS.pending;
+  function renderHome() {
+    $('#m-name').textContent = persona.name; $('#m-cat').textContent = persona.cat;
+    const c = $('#m-home-card');
+    if (persona.state === 'offer') {
+      c.innerHTML = `<span class="pill s-READY" style="justify-self:start">Nuevo en Wallbit</span>
+        <b>Tu contador, dentro de Wallbit</b>
+        <span class="small muted">Olvidate de tu facturación: cada mes te decimos cuánto facturaste y cuánto pagar.</span>
+        <button class="m-btn primary" onclick="location.hash='m-offer'">Conocer más</button>`;
+    } else if (persona.state === 'pending') {
+      c.innerHTML = `<span class="pill s-PENDING_DATA" style="justify-self:start">Tu mes, al día</span>
+        <b>${persona.invoice || persona.ask ? 'Tenés cosas para resolver' : 'Todo en orden'}</b>
+        <span class="small muted">Tu contador cierra octubre el 1/11 con tus facturas de ARCA.</span>`
+        + (persona.invoice ? `<hr style="border:none;border-top:1px solid var(--line);margin:4px 0;width:100%">
+        <b>Cobraste USD 600 de Globex Inc y no tiene factura</b>
+        <span class="small muted">28/10. Facturalo ahora y te olvidás.</span>
+        <button class="m-btn primary" onclick="location.hash='m-invoice'">Facturar este cobro</button>` : '')
+        + (persona.ask ? `<hr style="border:none;border-top:1px solid var(--line);margin:4px 0;width:100%">
+        <b>¿Quién es Roberto Gómez?</b>
+        <span class="small muted">Te transfirió USD 400. Contanos qué es, una sola vez.</span>
+        <button class="m-btn" onclick="location.hash='m-counterparty'">Responder</button>` : '');
+    } else if (persona.state === 'review') {
+      const asked = thread.some(m => m.kind === 'me');
+      c.innerHTML = `<span class="pill s-IN_REVIEW" style="justify-self:start">En revisión</span>
+        <b>${asked ? 'Tu contador te escribió' : 'Tu contador está revisando octubre'}</b>
+        <span class="small muted">${asked ? 'Necesita un dato del cobro de Acme Corp para cerrar tu mes.' : 'No tenés que hacer nada. Te avisamos cuando esté listo, antes del 7/11.'}</span>`
+        + (asked ? `<button class="m-btn primary" onclick="location.hash='m-thread'">Ver mensaje</button>` : '');
+    } else {
+      c.innerHTML = `<span class="pill s-NOTIFIED" style="justify-self:start">Revisado por tu contador</span>
+        <b>Pagá $ 58.300 antes del 20/11</b>
+        <span class="small muted">Octubre: facturaste USD 3.200.</span>
+        <button class="m-btn primary" onclick="location.hash='m-close'">Ver mi cierre</button>`;
+    }
+  }
+  $$('[data-persona]').forEach(b => b.addEventListener('click', () => { persona = { ...PERSONAS[b.dataset.persona] }; location.hash = 'm-home'; }));
+  $('#en-consent').addEventListener('change', e => { $('#en-next').disabled = !e.target.checked; });
+  $('#en-next').addEventListener('click', () => { location.hash = 'm-arca'; });
+  $('#inv-issue').addEventListener('click', () => { $('#inv-issue').hidden = true; $('#inv-done').hidden = false; persona.invoice = false; });
+  $('#arca-link').addEventListener('click', () => { $('#arca-link').hidden = true; $('#arca-done').hidden = false; persona.state = 'pending'; });
+  $$('[data-cp]').forEach(b => b.addEventListener('click', () => {
+    $$('[data-cp]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    $('#cp-other').hidden = b.dataset.cp !== 'other';
+  }));
+  $('#m-cp-btn').addEventListener('click', () => { persona.ask = false; location.hash = 'm-home'; });
+  $('#m-attach').addEventListener('click', () => { $('#m-issue').innerHTML = '<b class="small">Emitida en ARCA: <span class="num">E 0001-00000043</span></b><span class="small muted">USD 1.200 · Acme Corp · ahora</span>'; $('#m-thread-text').value = 'Me había olvidado. Ya la emití desde la app.'; });
+  $('#m-thread-send').addEventListener('click', () => {
+    const text = $('#m-thread-text').value.trim(); if (!text) return;
+    if (!thread.some(m => m.kind === 'me')) thread.push({ kind: 'me', who: 'Vos · 01/11', text: TPL.factura });
+    clearTimeout(userReplies._t);
+    $('#m-thread-text').value = '';
+    $('#thread').hidden = false; $('#thread-status').textContent = 'esperando respuesta';
+    userReplies(text);
+  });
+
+  // ---------- router ----------
+  const CONSOLE = ['inbox', 'client', 'profile', 'by-alert', 'batch', 'rules', 'params'];
+  const MOBILE = ['m-select', 'm-home', 'm-offer', 'm-enroll', 'm-arca', 'm-invoice', 'm-counterparty', 'm-thread', 'm-close'];
+  const URLS = { inbox: 'cierres/2026-10', client: 'cierres/2026-10/clientes/martina-rios', profile: 'clientes/martina-rios', 'by-alert': 'cierres/2026-10/alertas', batch: 'cierres/2026-10/aprobar-lote', rules: 'reglas', params: 'parametros' };
+  function route() {
+    let h = location.hash.slice(1);
+    if (![...CONSOLE, ...MOBILE].includes(h)) h = 'inbox';
+    const isMobile = MOBILE.includes(h);
+    $('#desk').hidden = isMobile; $('#phone-wrap').hidden = !isMobile;
+    $$('[data-screen]').forEach(s => { s.hidden = s.dataset.screen !== h; });
+    $$('.screens a').forEach(a => a.toggleAttribute('aria-current', a.getAttribute('href') === '#' + h));
+    $$('.screens a').forEach(a => { if (a.hasAttribute('aria-current')) a.setAttribute('aria-current', 'page'); });
+    $$('.side a').forEach(a => a.classList.toggle('on', a.dataset.nav === h || ((h === 'client' || h === 'profile') && a.dataset.nav === 'inbox')));
+    if (!isMobile) $('#url').textContent = 'contador.local/' + URLS[h];
+    if (h === 'm-home') renderHome();
+    if (h === 'm-thread') {
+      if (!thread.length) thread.push({ kind: 'me', who: 'Vos · 01/11', text: TPL.factura });
+      renderThread();
+    }
+    const n = NOTES[h];
+    $('#notes-title').textContent = n.title;
+    $('#notes-list').innerHTML = n.items.map((t, i) => `<li><span class="marker">${i + 1}</span><span>${t}</span></li>`).join('');
+    $('#notes-why').textContent = n.why;
+  }
+  window.addEventListener('hashchange', route);
+  $('#notes-toggle').addEventListener('change', e => document.body.classList.toggle('no-notes', !e.target.checked));
+
+  function renderProfileChart() {
+    const data = [['mar', 2400], ['abr', 2800], ['may', 3100], ['jun', 2900], ['jul', 3400], ['ago', 3300], ['sep', 3200], ['oct', 3000]];
+    const W = 520, H = 190, L = 40, B = 24, T = 14, max = 4000;
+    const y = v => T + (H - T - B) * (1 - v / max);
+    const bw = (W - L - 8) / data.length;
+    let g = '';
+    [0, 1000, 2000, 3000, 4000].forEach(v => {
+      g += `<line x1="${L}" x2="${W - 4}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-width="1"/>`;
+      g += `<text x="${L - 6}" y="${y(v) + 3}" text-anchor="end">${v ? (v / 1000) + 'k' : '0'}</text>`;
+    });
+    data.forEach(([m, v], i) => {
+      const x = L + i * bw + bw * 0.2, w = bw * 0.6, last = i === data.length - 1;
+      g += `<rect x="${x}" y="${y(v)}" width="${w}" height="${y(0) - y(v)}" rx="2" fill="${last ? 'var(--hot)' : 'var(--fill-2)'}" stroke="${last ? 'var(--hot)' : 'var(--ink-3)'}" stroke-width="1"/>`;
+      g += `<text x="${x + w / 2}" y="${H - 8}" text-anchor="middle">${m}</text>`;
+      if (last) g += `<text class="lbl" x="${x + w / 2}" y="${y(v) - 5}" text-anchor="middle">${v.toLocaleString('es-AR')}</text>`;
+    });
+    $('#prof-chart').innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Facturado mensual de marzo a octubre 2026, entre 2.400 y 3.400 dólares">${g}</svg>`;
+  }
+
+  // demo clock (prototype only)
+  function setDay(day) {
+    $$('[data-day]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.day === day)));
+    $('#demo-date').textContent = day === '31' ? '31/10' : day === '1' ? '03/11' : '06/11';
+    const pre = day === '31';
+    $('#inbox-section').classList.toggle('pre-close', pre);
+    $('#inbox-empty').hidden = !pre;
+  }
+  $$('[data-day]').forEach(b => b.addEventListener('click', () => { setDay(b.dataset.day); location.hash = 'inbox'; }));
+  $$('[data-day-go]').forEach(b => b.addEventListener('click', () => setDay(b.dataset.dayGo)));
+
+  renderInbox(); updateClient(); updateBatch(); renderBA(); renderThread(); renderProfileChart(); updateEta(); route();
+})();
+</script>

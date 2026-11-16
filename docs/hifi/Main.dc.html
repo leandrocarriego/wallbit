@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Bandeja del cierre</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+.c{--bg:#F6F7F9;--surface:#FFFFFF;--surface-muted:#F0F2F5;--border:#DDE1E7;--border-input:#8A93A2;--ink:#131821;--ink-muted:#586171;--ink-subtle:#646C7B;--primary:#1F5FD6;--primary-ink:#FFFFFF;--primary-tint:#E8EFFC;--pending:#8A4B00;--pending-tint:#FDF0D5;--review:#B42318;--review-tint:#FDE7E4;--ready:#5B3CC4;--ready-tint:#EEE9FC;--done:#146C43;--done-tint:#DDF3E7;--pop:0 8px 24px rgba(15,20,30,.12);font-family:Geist,Inter,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:14px;line-height:20px;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased}
+.c.dark{--bg:#0E1117;--surface:#161A22;--surface-muted:#1C212B;--border:#2A303B;--border-input:#667186;--ink:#E7EAF0;--ink-muted:#9AA3B2;--ink-subtle:#7F8898;--primary:#6E9BF3;--primary-ink:#0E1117;--primary-tint:#1B2A47;--pending:#F2B65A;--pending-tint:#33250F;--review:#F4897A;--review-tint:#3A1A16;--ready:#B4A2F5;--ready-tint:#261F45;--done:#5FD39A;--done-tint:#12301F;--pop:0 8px 24px rgba(0,0,0,.45);color-scheme:dark}
+.c *{box-sizing:border-box}
+.c a{color:var(--primary);text-decoration:none}
+.c a:hover{text-decoration:underline}
+.c :focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.mono{font-family:"Geist Mono",ui-monospace,"SF Mono",Menlo,monospace;font-variant-numeric:tabular-nums}
+.label{font-size:11px;line-height:16px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-subtle)}
+.muted{color:var(--ink-muted)}
+.cap{font-size:12px;line-height:16px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:36px;padding:0 14px;border-radius:6px;border:1px solid var(--border-input);background:var(--surface);color:var(--ink);font-family:inherit;font-size:14px;font-weight:500;line-height:20px;cursor:pointer;white-space:nowrap}
+.c a.btn{color:var(--ink);text-decoration:none}
+.btn.primary,.c a.btn.primary{background:var(--primary);border-color:var(--primary);color:var(--primary-ink)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--ink-muted)}
+.btn.sm{min-height:30px;padding:0 10px;font-size:13px}
+.pill{display:inline-flex;align-items:center;gap:6px;height:22px;padding:0 9px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.p-pending{background:var(--pending-tint);color:var(--pending)}
+.p-review{background:var(--review-tint);color:var(--review)}
+.p-ready{background:var(--ready-tint);color:var(--ready)}
+.p-done{background:var(--done-tint);color:var(--done)}
+.chip{display:inline-flex;align-items:center;height:20px;padding:0 7px;border-radius:4px;font-size:12px;white-space:nowrap}
+.ch-review{background:var(--review-tint);color:var(--review)}
+.ch-pending{background:var(--pending-tint);color:var(--pending)}
+.ch-neutral{background:var(--surface-muted);color:var(--ink-muted)}
+.kbd{font-family:"Geist Mono",ui-monospace,monospace;font-size:11px;min-width:18px;height:18px;padding:0 4px;border:1px solid var(--border-input);border-bottom-width:2px;border-radius:4px;display:inline-grid;place-items:center;background:var(--surface);color:var(--ink)}
+.t{width:100%;border-collapse:collapse}
+.t th{text-align:left;padding:10px 12px;background:var(--surface-muted);border-bottom:1px solid var(--border);font-size:11px;line-height:16px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-subtle);white-space:nowrap}
+.t td{padding:11px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+.t tr:last-child td{border-bottom:none}
+.t .r{text-align:right}
+.bar{height:6px;border-radius:999px;background:var(--surface-muted);overflow:hidden;display:flex}
+.bar>span{display:block;height:100%}
+.nav a{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:36px;padding:0 10px;border-radius:6px;color:var(--ink-muted);font-weight:500;border:1px solid transparent}
+.c .nav a:hover{text-decoration:none;color:var(--ink)}
+.c .nav a.on{background:var(--surface);color:var(--ink);border-color:var(--border)}
+.input{min-height:36px;border:1px solid var(--border-input);border-radius:6px;background:var(--surface);color:var(--ink);padding:0 10px;font-family:inherit;font-size:14px}
+.stat{display:grid;gap:6px;text-align:left;padding:14px 16px;border-radius:10px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-family:inherit;color:var(--ink)}
+.stat[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.step{display:grid;grid-template-columns:28px minmax(0,1fr);gap:4px 12px;padding:14px;border:1px solid var(--border);border-radius:10px;background:var(--surface)}
+.step.now{border-color:var(--primary);box-shadow:inset 0 0 0 1px var(--primary)}
+.num{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-family:"Geist Mono",ui-monospace,monospace;font-size:12px;background:var(--surface-muted);color:var(--ink-muted);grid-row:span 3}
+.step.now .num{background:var(--primary);color:var(--primary-ink)}
+</style>
+</helmet>
+<div class="{{themeClass}}" style="min-height: 1180px; display: flex; flex-wrap: wrap; align-items: stretch;">
+
+  <aside style="flex: 1 1 232px; background: var(--surface-muted); border-right: 1px solid var(--border); padding: 20px 14px; display: flex; flex-direction: column; gap: 20px;">
+    <div style="display: flex; align-items: center; gap: 10px; padding: 0 6px;">
+      <span style="width: 30px; height: 30px; border-radius: 8px; background: var(--ink); display: grid; place-items: center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l4 4L19 6"></path></svg></span>
+      <div style="display: grid;"><b style="font-size: 15px; line-height: 20px;">Cierre</b><span class="cap muted">Servicio contable · Wallbit</span></div>
+    </div>
+    <div style="display: grid; gap: 6px; padding: 0 6px;">
+      <label class="label" for="period">Período</label>
+      <select class="input" id="period"><option>Octubre 2026</option><option>Septiembre 2026</option></select>
+    </div>
+    <nav class="nav" aria-label="Secciones" style="display: grid; gap: 2px;">
+      <a class="on" href="Main.dc.html" aria-current="page">Bandeja <span class="mono cap muted">480</span></a>
+      <a href="PorAlerta.dc.html">Resolver por alerta <span class="mono cap muted">5</span></a>
+      <a href="Detalle.dc.html">Revisión guiada <span class="mono cap muted">12</span></a>
+      <a href="Lote.dc.html">Aprobar en lote <span class="mono cap muted">312</span></a>
+      <a href="Perfil.dc.html">Clientes</a>
+      <a href="Main.dc.html">Reglas</a>
+      <a href="Main.dc.html">Parámetros y plantillas</a>
+    </nav>
+    <div class="card" style="padding: 14px; display: grid; gap: 8px;">
+      <span class="label">Te quedan</span>
+      <span class="mono" style="font-size: 22px; line-height: 28px; font-weight: 500;">~1 h 05 min</span>
+      <div class="bar"><span style="width: 58%; background: var(--primary);"></span></div>
+      <span class="cap muted">Hasta ~2 h 00 min si los 87 pendientes no responden al 5/11.</span>
+    </div>
+    <div style="margin-top: auto; display: flex; align-items: center; gap: 10px; padding: 12px 6px 0; border-top: 1px solid var(--border);">
+      <span style="width: 32px; height: 32px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border); display: grid; place-items: center; font-size: 12px; font-weight: 600;">LG</span>
+      <div style="display: grid;"><span style="font-weight: 500;">C.P. Laura Gómez</span><span class="cap muted">Demo sin login</span></div>
+    </div>
+  </aside>
+
+  <main style="flex: 999 1 560px; min-width: 0; padding: 28px 32px 40px; display: flex; flex-direction: column; gap: 24px;">
+    <div style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 16px;">
+      <div style="display: grid; gap: 4px; flex: 1 1 320px; min-width: 0;">
+        <h1 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600;">Cierre de octubre 2026</h1>
+        <span class="muted">Hoy 3 de noviembre · objetivo: todos notificados el 7/11 · vence el monotributo el 20/11</span>
+      </div>
+      <input class="input" type="search" aria-label="Buscar cliente, CUIT o contraparte" placeholder="Buscar cliente, CUIT o contraparte" style="flex: 0 1 320px; min-width: 0;">
+      <a class="btn" href="Lote.dc.html">Aprobar 312 listos</a>
+    </div>
+
+    <section class="card" aria-labelledby="plan-h" style="padding: 18px; display: grid; gap: 14px;">
+      <div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 16px;">
+        <h2 id="plan-h" style="margin: 0; font-size: 15px; line-height: 22px; font-weight: 600;">Plan para cerrar octubre</h2>
+        <span class="cap muted">En este orden: lo masivo primero porque una decisión resuelve muchos clientes.</span>
+        <span style="margin-left: auto;" class="muted">Te quedan <b class="mono" style="color: var(--ink); font-size: 16px;">~1 h 05 min</b></span>
+      </div>
+      <ol style="list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px;">
+        <li class="step now">
+          <span class="num">1</span>
+          <b>Resolver por alerta</b>
+          <span class="cap muted"><span class="mono">35</span> casos en 5 tipos · <span class="mono">~20 min</span></span>
+          <a class="btn primary sm" href="PorAlerta.dc.html" style="justify-self: start; margin-top: 6px;">Empezar</a>
+        </li>
+        <li class="step">
+          <span class="num">2</span>
+          <b>Revisar uno por uno</b>
+          <span class="cap muted">Lo que quede: <span class="mono">12</span> clientes · <span class="mono">~42 min</span></span>
+          <a class="btn sm" href="Detalle.dc.html" style="justify-self: start; margin-top: 6px;">Revisión guiada</a>
+        </li>
+        <li class="step">
+          <span class="num">3</span>
+          <b>Aprobar en lote</b>
+          <span class="cap muted"><span class="mono">312</span> listos · <span class="mono">~5 min</span></span>
+          <a class="btn sm" href="Lote.dc.html" style="justify-self: start; margin-top: 6px;">Ir al lote</a>
+        </li>
+      </ol>
+      <span class="cap muted">Estimado con tus tiempos de septiembre: 35 s por caso masivo y 3,5 min por revisión individual. Se actualiza a medida que resolvés.</span>
+    </section>
+
+    <section aria-label="Clientes por estado" style="display: grid; gap: 12px;">
+      <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px;">
+        <button class="stat" type="button" aria-pressed="true"><span class="pill p-review" style="justify-self: start;">En revisión</span><span class="mono" style="font-size: 22px; line-height: 28px; font-weight: 500;">41</span><span class="cap muted">te esperan a vos</span></button>
+        <button class="stat" type="button" aria-pressed="false"><span class="pill p-pending" style="justify-self: start;">Esperando usuario</span><span class="mono" style="font-size: 22px; line-height: 28px; font-weight: 500;">87</span><span class="cap muted">plazo 5/11, después pasan a vos</span></button>
+        <button class="stat" type="button" aria-pressed="false"><span class="pill p-ready" style="justify-self: start;">Listos</span><span class="mono" style="font-size: 22px; line-height: 28px; font-weight: 500;">312</span><span class="cap muted">aprobables en lote</span></button>
+        <button class="stat" type="button" aria-pressed="false"><span class="pill p-done" style="justify-self: start;">Aprobados</span><span class="mono" style="font-size: 22px; line-height: 28px; font-weight: 500;">0</span><span class="cap muted">notificación en cola</span></button>
+        <button class="stat" type="button" aria-pressed="false"><span class="pill p-done" style="justify-self: start;">Notificados</span><span class="mono" style="font-size: 22px; line-height: 28px; font-weight: 500;">40</span><span class="cap muted">ya saben cuánto pagar</span></button>
+      </div>
+      <div style="display: grid; gap: 6px;">
+        <div class="bar" style="height: 8px;" aria-hidden="true">
+          <span style="width: 8.3%; background: var(--done);"></span>
+          <span style="width: 65%; background: var(--ready);"></span>
+          <span style="width: 8.5%; background: var(--review);"></span>
+          <span style="width: 18.2%; background: var(--pending);"></span>
+        </div>
+        <span class="cap muted"><span class="mono">40</span> de <span class="mono">480</span> notificados (8%). Si aprobás el lote hoy, llegás al 73%.</span>
+      </div>
+    </section>
+
+    <section class="card" aria-label="Clientes" style="overflow: hidden;">
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid var(--border);">
+        <label class="cap muted" for="f-alert">Alerta</label>
+        <select class="input" id="f-alert" style="min-height: 32px;"><option>Todas</option><option>Cobro sin facturar</option><option>Sin clasificar</option><option>No facturable con riesgo</option><option>Supera categoría</option><option>Preguntas sin responder</option></select>
+        <span class="chip ch-neutral">Estado: En revisión <span aria-hidden="true" style="margin-left: 6px;">×</span></span>
+        <span style="margin-left: auto;" class="cap muted">Orden: severidad, después monto</span>
+      </div>
+      <div style="overflow-x: auto;">
+        <table class="t">
+          <thead><tr><th>Cliente</th><th>Cat.</th><th class="r">Facturado</th><th class="r">Cobrado</th><th style="width: 150px;">Tope 12 meses</th><th>Alertas</th><th>Estado</th><th><span style="position: absolute; left: -9999px;">Abrir</span></th></tr></thead>
+          <tbody>
+            <tr>
+              <td><a href="Detalle.dc.html" style="color: var(--ink); font-weight: 500;">Martina Ríos</a><div class="mono cap muted">27-3•••••12-4</div></td>
+              <td>D</td><td class="r mono">USD 3.000</td><td class="r mono">USD 4.200</td>
+              <td><div style="display: grid; grid-template-columns: minmax(0, 1fr) 36px; gap: 8px; align-items: center;"><div class="bar"><span style="width: 84%; background: var(--pending);"></span></div><span class="mono cap">84%</span></div></td>
+              <td><span class="chip ch-review">Cobro sin facturar</span> <span class="chip ch-review">Sin clasificar</span></td>
+              <td><span class="pill p-review">En revisión</span></td>
+              <td class="r"><a class="btn ghost sm" href="Detalle.dc.html" aria-label="Abrir Martina Ríos">Abrir</a></td>
+            </tr>
+            <tr>
+              <td><span style="font-weight: 500;">Facundo Ortiz</span><div class="mono cap muted">20-3•••••87-1</div></td>
+              <td>H</td><td class="r mono">USD 12.400</td><td class="r mono">USD 12.400</td>
+              <td><div style="display: grid; grid-template-columns: minmax(0, 1fr) 36px; gap: 8px; align-items: center;"><div class="bar"><span style="width: 100%; background: var(--review);"></span></div><span class="mono cap" style="color: var(--review);">101%</span></div></td>
+              <td><span class="chip ch-review">Supera máximo del régimen</span></td>
+              <td><span class="pill p-review">En revisión</span></td>
+              <td class="r"><a class="btn ghost sm" href="Detalle.dc.html" aria-label="Abrir Facundo Ortiz">Abrir</a></td>
+            </tr>
+            <tr>
+              <td><span style="font-weight: 500;">Paula Díaz</span><div class="mono cap muted">27-4•••••33-0</div></td>
+              <td>C</td><td class="r mono">USD 2.300</td><td class="r mono">USD 4.600</td>
+              <td><div style="display: grid; grid-template-columns: minmax(0, 1fr) 36px; gap: 8px; align-items: center;"><div class="bar"><span style="width: 61%; background: var(--done);"></span></div><span class="mono cap">61%</span></div></td>
+              <td><span class="chip ch-review">No facturable con riesgo</span></td>
+              <td><span class="pill p-review">En revisión</span></td>
+              <td class="r"><a class="btn ghost sm" href="Detalle.dc.html" aria-label="Abrir Paula Díaz">Abrir</a></td>
+            </tr>
+            <tr>
+              <td><span style="font-weight: 500;">Tomás Herrera</span><div class="mono cap muted">20-2•••••45-6</div></td>
+              <td>F</td><td class="r mono">USD 7.800</td><td class="r mono">USD 7.800</td>
+              <td><div style="display: grid; grid-template-columns: minmax(0, 1fr) 36px; gap: 8px; align-items: center;"><div class="bar"><span style="width: 100%; background: var(--review);"></span></div><span class="mono cap" style="color: var(--review);">103%</span></div></td>
+              <td><span class="chip ch-review">Supera categoría</span></td>
+              <td><span class="pill p-review">En revisión</span></td>
+              <td class="r"><a class="btn ghost sm" href="Detalle.dc.html" aria-label="Abrir Tomás Herrera">Abrir</a></td>
+            </tr>
+            <tr>
+              <td><span style="font-weight: 500;">Lucía Benítez</span><div class="mono cap muted">27-3•••••90-2</div></td>
+              <td>C</td><td class="r mono">USD 2.100</td><td class="r mono">USD 2.400</td>
+              <td><div style="display: grid; grid-template-columns: minmax(0, 1fr) 36px; gap: 8px; align-items: center;"><div class="bar"><span style="width: 52%; background: var(--done);"></span></div><span class="mono cap">52%</span></div></td>
+              <td><span class="chip ch-review">Sin clasificar</span></td>
+              <td><span class="pill p-review">En revisión</span></td>
+              <td class="r"><a class="btn ghost sm" href="Detalle.dc.html" aria-label="Abrir Lucía Benítez">Abrir</a></td>
+            </tr>
+            <tr>
+              <td><span style="font-weight: 500;">Valentina Sosa</span><div class="mono cap muted">27-4•••••18-9</div></td>
+              <td>D</td><td class="r mono">USD 3.500</td><td class="r mono">USD 3.900</td>
+              <td><div style="display: grid; grid-template-columns: minmax(0, 1fr) 36px; gap: 8px; align-items: center;"><div class="bar"><span style="width: 61%; background: var(--done);"></span></div><span class="mono cap">61%</span></div></td>
+              <td><span class="chip ch-pending">Pregunta sin responder</span></td>
+              <td><span class="pill p-pending">Esperando usuario</span></td>
+              <td class="r"><a class="btn ghost sm" href="Perfil.dc.html" aria-label="Abrir Valentina Sosa">Abrir</a></td>
+            </tr>
+            <tr>
+              <td><span style="font-weight: 500;">Camila Ferreyra</span><div class="mono cap muted">27-3•••••54-7</div></td>
+              <td>E</td><td class="r mono">USD 5.200</td><td class="r mono">USD 5.200</td>
+              <td><div style="display: grid; grid-template-columns: minmax(0, 1fr) 36px; gap: 8px; align-items: center;"><div class="bar"><span style="width: 81%; background: var(--pending);"></span></div><span class="mono cap">81%</span></div></td>
+              <td><span class="chip ch-neutral">Cerca del tope</span></td>
+              <td><span class="pill p-ready">Listo</span></td>
+              <td class="r"><a class="btn ghost sm" href="Lote.dc.html" aria-label="Abrir Camila Ferreyra">Abrir</a></td>
+            </tr>
+            <tr>
+              <td><span style="font-weight: 500;">Bruno Aguirre</span><div class="mono cap muted">20-3•••••61-4</div></td>
+              <td>C</td><td class="r mono">USD 4.100</td><td class="r mono">USD 4.100</td>
+              <td><div style="display: grid; grid-template-columns: minmax(0, 1fr) 36px; gap: 8px; align-items: center;"><div class="bar"><span style="width: 74%; background: var(--done);"></span></div><span class="mono cap">74%</span></div></td>
+              <td><span class="chip ch-neutral">Variación fuerte +82%</span></td>
+              <td><span class="pill p-ready">Listo</span></td>
+              <td class="r"><a class="btn ghost sm" href="Lote.dc.html" aria-label="Abrir Bruno Aguirre">Abrir</a></td>
+            </tr>
+            <tr>
+              <td><span style="font-weight: 500;">Mateo Giménez</span><div class="mono cap muted">20-4•••••02-3</div></td>
+              <td>D</td><td class="r mono">USD 3.200</td><td class="r mono">USD 3.200</td>
+              <td><div style="display: grid; grid-template-columns: minmax(0, 1fr) 36px; gap: 8px; align-items: center;"><div class="bar"><span style="width: 58%; background: var(--done);"></span></div><span class="mono cap">58%</span></div></td>
+              <td><span class="cap muted">—</span></td>
+              <td><span class="pill p-done">Notificado</span></td>
+              <td class="r"><a class="btn ghost sm" href="Perfil.dc.html" aria-label="Abrir Mateo Giménez">Abrir</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 10px 14px; border-top: 1px solid var(--border);" class="cap muted">
+        <span>Mostrando 9 de 480 · datos de ejemplo</span>
+        <span class="mono">1 2 3 … 54</span>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":1180}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { themeClass: this.props.dark ? 'c dark' : 'c' };
+  }
+}
+</script>
+</body>
+</html>

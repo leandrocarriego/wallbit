@@ -1,0 +1,137 @@
+{
+  "v": 3,
+  "attachments": {},
+  "createdOnFiles": {
+    "at": "2026-11-15T20:42:41.969Z",
+    "v": 1
+  },
+  "title": "Cierre · Alta fidelidad",
+  "launch": {
+    "view": "canvas"
+  },
+  "pages": [],
+  "boards": {
+    "Main.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 1180,
+      "title": "Bandeja del cierre",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Detalle.dc.html": {
+      "x": 1520,
+      "y": 0,
+      "w": 1440,
+      "h": 1560,
+      "title": "Detalle · revisión guiada",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "PorAlerta.dc.html": {
+      "x": 3040,
+      "y": 0,
+      "w": 1440,
+      "h": 1000,
+      "title": "Resolver por alerta",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Lote.dc.html": {
+      "x": 4560,
+      "y": 0,
+      "w": 1440,
+      "h": 1100,
+      "title": "Aprobación en lote",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Perfil.dc.html": {
+      "x": 6080,
+      "y": 0,
+      "w": 1440,
+      "h": 1400,
+      "title": "Perfil de cliente",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "AppQuienEs.dc.html": {
+      "x": 1880,
+      "y": 1980,
+      "w": 390,
+      "h": 844,
+      "title": "App · ¿Quién es?"
+    },
+    "AppMensajes.dc.html": {
+      "x": 2350,
+      "y": 1980,
+      "w": 390,
+      "h": 844,
+      "title": "App · Mensajes del contador",
+      "is_interactive": true
+    },
+    "AppOferta.dc.html": {
+      "x": 0,
+      "y": 1980,
+      "w": 390,
+      "h": 844,
+      "title": "App · Oferta",
+      "is_interactive": true
+    },
+    "AppAdhesion.dc.html": {
+      "x": 470,
+      "y": 1980,
+      "w": 390,
+      "h": 844,
+      "title": "App · Adhesión",
+      "is_interactive": true
+    },
+    "AppArca.dc.html": {
+      "x": 940,
+      "y": 1980,
+      "w": 390,
+      "h": 844,
+      "title": "App · Vincular ARCA",
+      "is_interactive": true
+    },
+    "AppInicio.dc.html": {
+      "x": 1410,
+      "y": 1980,
+      "w": 390,
+      "h": 844,
+      "title": "App · Inicio con avisos del mes",
+      "is_interactive": true
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "Detalle.dc.html",
+    "PorAlerta.dc.html",
+    "Lote.dc.html",
+    "Perfil.dc.html",
+    "AppOferta.dc.html",
+    "AppAdhesion.dc.html",
+    "AppArca.dc.html",
+    "AppInicio.dc.html",
+    "AppQuienEs.dc.html",
+    "AppMensajes.dc.html"
+  ],
+  "notes": {
+    "consola": {
+      "x": 0,
+      "y": -300,
+      "text": "Consola del contador",
+      "kind": "title1",
+      "maxW": 7520
+    },
+    "app": {
+      "x": 0,
+      "y": 1680,
+      "text": "App del usuario",
+      "kind": "title1",
+      "maxW": 2740
+    }
+  },
+  "designSystems": []
+}

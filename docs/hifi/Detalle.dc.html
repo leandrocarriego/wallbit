@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Detalle de cliente en revisión guiada</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+.c{--bg:#F6F7F9;--surface:#FFFFFF;--surface-muted:#F0F2F5;--border:#DDE1E7;--border-input:#8A93A2;--ink:#131821;--ink-muted:#586171;--ink-subtle:#646C7B;--primary:#1F5FD6;--primary-ink:#FFFFFF;--primary-tint:#E8EFFC;--pending:#8A4B00;--pending-tint:#FDF0D5;--review:#B42318;--review-tint:#FDE7E4;--ready:#5B3CC4;--ready-tint:#EEE9FC;--done:#146C43;--done-tint:#DDF3E7;--pop:0 8px 24px rgba(15,20,30,.12);font-family:Geist,Inter,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:14px;line-height:20px;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased}
+.c.dark{--bg:#0E1117;--surface:#161A22;--surface-muted:#1C212B;--border:#2A303B;--border-input:#667186;--ink:#E7EAF0;--ink-muted:#9AA3B2;--ink-subtle:#7F8898;--primary:#6E9BF3;--primary-ink:#0E1117;--primary-tint:#1B2A47;--pending:#F2B65A;--pending-tint:#33250F;--review:#F4897A;--review-tint:#3A1A16;--ready:#B4A2F5;--ready-tint:#261F45;--done:#5FD39A;--done-tint:#12301F;--pop:0 8px 24px rgba(0,0,0,.45);color-scheme:dark}
+.c *{box-sizing:border-box}
+.c a{color:var(--primary);text-decoration:none}
+.c a:hover{text-decoration:underline}
+.c :focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.mono{font-family:"Geist Mono",ui-monospace,"SF Mono",Menlo,monospace;font-variant-numeric:tabular-nums}
+.label{font-size:11px;line-height:16px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-subtle)}
+.muted{color:var(--ink-muted)}
+.cap{font-size:12px;line-height:16px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:36px;padding:0 14px;border-radius:6px;border:1px solid var(--border-input);background:var(--surface);color:var(--ink);font-family:inherit;font-size:14px;font-weight:500;line-height:20px;cursor:pointer;white-space:nowrap}
+.c a.btn{color:var(--ink);text-decoration:none}
+.btn.primary,.c a.btn.primary{background:var(--primary);border-color:var(--primary);color:var(--primary-ink)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--ink-muted)}
+.btn.sm{min-height:30px;padding:0 10px;font-size:13px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.pill{display:inline-flex;align-items:center;gap:6px;height:22px;padding:0 9px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.p-pending{background:var(--pending-tint);color:var(--pending)}
+.p-review{background:var(--review-tint);color:var(--review)}
+.p-ready{background:var(--ready-tint);color:var(--ready)}
+.p-done{background:var(--done-tint);color:var(--done)}
+.chip{display:inline-flex;align-items:center;height:20px;padding:0 7px;border-radius:4px;font-size:12px;white-space:nowrap}
+.ch-review{background:var(--review-tint);color:var(--review)}
+.ch-pending{background:var(--pending-tint);color:var(--pending)}
+.ch-neutral{background:var(--surface-muted);color:var(--ink-muted)}
+.ch-done{background:var(--done-tint);color:var(--done)}
+.kbd{font-family:"Geist Mono",ui-monospace,monospace;font-size:11px;line-height:14px;min-width:18px;height:18px;padding:0 4px;border:1px solid var(--border-input);border-bottom-width:2px;border-radius:4px;display:inline-grid;place-items:center;background:var(--surface);color:var(--ink)}
+.t{width:100%;border-collapse:collapse}
+.t th{text-align:left;padding:10px 12px;background:var(--surface-muted);border-bottom:1px solid var(--border);font-size:11px;line-height:16px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-subtle);white-space:nowrap}
+.t td{padding:11px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+.t tr:last-child td{border-bottom:none}
+.t .r{text-align:right}
+.bar{height:6px;border-radius:999px;background:var(--surface-muted);overflow:hidden;display:flex}
+.bar>span{display:block;height:100%}
+.nav a{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:36px;padding:0 10px;border-radius:6px;color:var(--ink-muted);font-weight:500;border:1px solid transparent}
+.c .nav a:hover{text-decoration:none;color:var(--ink)}
+.c .nav a.on{background:var(--surface);color:var(--ink);border-color:var(--border)}
+.input{min-height:36px;border:1px solid var(--border-input);border-radius:6px;background:var(--surface);color:var(--ink);padding:0 10px;font-family:inherit;font-size:14px}
+.alert{display:grid;grid-template-columns:4px minmax(0,1fr) auto;gap:14px;align-items:start;padding:14px 16px 14px 0;background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.sev{align-self:stretch;margin:-14px 0}
+.bubble{max-width:78%;padding:10px 12px;border-radius:10px;display:grid;gap:4px}
+.bubble.me{justify-self:end;background:var(--primary-tint)}
+.bubble.them{justify-self:start;background:var(--surface-muted)}
+.tpl{display:inline-flex;align-items:center;min-height:28px;padding:0 10px;border-radius:999px;border:1px solid var(--border-input);background:var(--surface);color:var(--ink);font-family:inherit;font-size:12px;cursor:pointer}
+.kpi{display:grid;gap:6px;align-content:start;padding:14px 16px}
+.tab{background:none;border:none;border-bottom:2px solid transparent;padding:10px 2px;margin-bottom:-1px;font-family:inherit;font-size:14px;font-weight:500;color:var(--ink-muted);cursor:pointer}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
+</style>
+</helmet>
+<div class="{{themeClass}}" style="min-height: 1560px; display: flex; flex-wrap: wrap; align-items: stretch;">
+
+  <aside style="flex: 1 1 232px; background: var(--surface-muted); border-right: 1px solid var(--border); padding: 20px 14px; display: flex; flex-direction: column; gap: 20px;">
+    <div style="display: flex; align-items: center; gap: 10px; padding: 0 6px;">
+      <span style="width: 30px; height: 30px; border-radius: 8px; background: var(--ink); display: grid; place-items: center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l4 4L19 6"></path></svg></span>
+      <div style="display: grid;"><b style="font-size: 15px; line-height: 20px;">Cierre</b><span class="cap muted">Servicio contable · Wallbit</span></div>
+    </div>
+    <nav class="nav" aria-label="Secciones" style="display: grid; gap: 2px;">
+      <a href="Main.dc.html">Bandeja <span class="mono cap muted">480</span></a>
+      <a href="PorAlerta.dc.html">Resolver por alerta <span class="mono cap muted">5</span></a>
+      <a class="on" href="Detalle.dc.html" aria-current="page">Revisión guiada <span class="mono cap muted">12</span></a>
+      <a href="Lote.dc.html">Aprobar en lote <span class="mono cap muted">312</span></a>
+      <a href="Perfil.dc.html">Clientes</a>
+      <a href="Main.dc.html">Reglas</a>
+      <a href="Main.dc.html">Parámetros y plantillas</a>
+    </nav>
+    <div class="card" style="padding: 14px; display: grid; gap: 8px;">
+      <span class="label">Te quedan</span>
+      <span class="mono" style="font-size: 22px; line-height: 28px; font-weight: 500;">~42 min</span>
+      <div class="bar"><span style="width: 72%; background: var(--primary);"></span></div>
+      <span class="cap muted">El paso 1 ya está hecho. Quedan 12 revisiones.</span>
+    </div>
+    <div class="card" style="padding: 14px; display: grid; gap: 8px;">
+      <span class="label">Atajos</span>
+      <div class="cap" style="display: grid; grid-template-columns: auto 1fr; gap: 6px 10px; align-items: center;">
+        <span><span class="kbd">J</span> <span class="kbd">K</span></span><span class="muted">siguiente / anterior</span>
+        <span class="kbd">A</span><span class="muted">aprobar</span>
+        <span class="kbd">1</span><span class="muted">escribir por la 1.ª alerta</span>
+        <span><span class="kbd">2</span> <span class="kbd">⏎</span></span><span class="muted">aplicar sugerencia</span>
+        <span class="kbd">P</span><span class="muted">perfil del cliente</span>
+        <span class="kbd">?</span><span class="muted">todos los atajos</span>
+      </div>
+    </div>
+  </aside>
+
+  <main style="flex: 999 1 560px; min-width: 0; padding: 20px 32px 40px; display: flex; flex-direction: column; gap: 18px;">
+    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; padding: 10px 14px; border-radius: 10px; background: var(--primary-tint);">
+      <span class="pill p-review">Revisión guiada</span>
+      <b class="mono">1 de 12</b>
+      <div class="bar" style="flex: 1 1 160px; max-width: 260px; background: var(--surface);"><span style="width: 8%; background: var(--primary);"></span></div>
+      <span class="cap muted">Al aprobar pasa sola al siguiente: <b style="color: var(--ink);">Lucía Benítez</b></span>
+      <a class="btn ghost sm" href="Main.dc.html" style="margin-left: auto;">Salir de la revisión</a>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px;">
+      <span style="width: 44px; height: 44px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border); display: grid; place-items: center; font-weight: 600;">MR</span>
+      <div style="display: grid; gap: 2px; flex: 1 1 280px; min-width: 0;">
+        <div class="cap muted"><a href="Main.dc.html">Bandeja</a> / Octubre 2026</div>
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px;">
+          <h1 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600;">Martina Ríos</h1>
+          <span class="pill p-review">En revisión</span>
+        </div>
+        <span class="mono cap muted">CUIT 27-3•••••12-4 · Diseño UX · Monotributo D · CABA</span>
+      </div>
+      <a class="btn" href="Perfil.dc.html">Perfil <span class="kbd">P</span></a>
+      <a class="btn" href="Detalle.dc.html" aria-label="Cliente anterior">‹ <span class="kbd">K</span></a>
+      <a class="btn" href="Detalle.dc.html" aria-label="Cliente siguiente"><span class="kbd">J</span> ›</a>
+    </div>
+
+    <section class="card" aria-labelledby="chg-h" style="padding: 14px 16px; border-style: dashed; border-color: var(--primary); display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 16px;">
+      <h2 id="chg-h" style="margin: 0; font-size: 15px; line-height: 22px; font-weight: 600;">Qué cambió desde que lo viste <span class="cap muted" style="font-weight: 400;">· 01/11 00:07</span></h2>
+      <button class="btn ghost sm" type="button">Entendido</button>
+      <ul style="margin: 0; padding-left: 18px; display: grid; gap: 2px; grid-column: 1 / -1;" class="muted">
+        <li>Se importaron de ARCA 2 facturas (E-41 y E-42) y matchearon sus cobros.</li>
+        <li>Recalculado: el acumulado de 12 meses pasó de <span class="mono">81%</span> a <span class="mono">84%</span> del tope de la categoría D.</li>
+        <li>No respondió “¿Quién es J. Pérez?” antes del 05/11, así que te pasa a vos.</li>
+      </ul>
+    </section>
+
+    <section aria-label="Alertas" style="display: grid; gap: 10px;">
+      <div class="alert" style="grid-template-columns: 4px minmax(0, 1fr);">
+        <span class="sev" style="background: var(--review);"></span>
+        <div style="display: grid; gap: 14px;">
+          <div style="display: flex; flex-wrap: wrap; align-items: flex-start; gap: 10px 16px;">
+            <div style="display: grid; gap: 2px; flex: 1 1 320px; min-width: 0;">
+              <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;"><b style="font-size: 15px; line-height: 22px;">Cobro sin facturar · <span class="mono">USD 1.200</span></b><span class="chip ch-review">Bloqueante</span><span class="chip ch-pending">Martina respondió</span></div>
+              <span class="muted">Acme Corp (US), 12/10. No hay una Factura E en ARCA para este cobro. Le avisamos el 31/10 con “Facturar este cobro” y no la emitió. Mientras no se resuelva, el aviso a Martina no puede salir.</span>
+            </div>
+            <button class="btn ghost sm" type="button">Marcar resuelto</button>
+          </div>
+          <div style="display: grid; gap: 10px; padding: 14px; border: 1px solid var(--border); border-radius: 10px;">
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;"><span class="label">Conversación sobre esta alerta</span><span class="cap muted" style="margin-left: auto;">Martina la ve en la app · cada mensaje queda en el historial</span></div>
+            <div class="bubble me"><span class="cap muted">Vos · 01/11 10:20</span><span>Hola Martina, vimos un cobro de Acme Corp por USD 1.200 del 12/10 que no tiene factura en ARCA. Si te falta, podés emitirla desde la app con “Facturar este cobro”.</span></div>
+            <div class="bubble them"><span class="cap muted">Martina · 01/11 18:02 · app</span><span>Me había olvidado. Ya la emití desde la app.</span></div>
+            <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; padding: 10px 12px; border-radius: 8px; background: var(--done-tint);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--done)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path><path d="M14 3v5h5"></path><path d="M9 14l2 2 4-4"></path></svg>
+              <span style="flex: 1 1 260px; min-width: 0;">Martina emitió <b class="mono">E 0001-00000043</b> desde Wallbit · <span class="mono">USD 1.200</span> · llegó de ARCA y coincide con el cobro</span>
+              <button class="btn primary sm" type="button">Vincular y resolver</button>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 6px;" role="group" aria-label="Plantillas de mensaje">
+              <button class="tpl" type="button">Pedir factura</button><button class="tpl" type="button">Preguntar qué es</button><button class="tpl" type="button">Recordar plazo</button>
+            </div>
+            <div style="display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: end;">
+              <label style="display: grid; gap: 4px;"><span class="cap muted">Responder a Martina</span><textarea class="input" rows="2" style="padding: 8px 10px; resize: vertical;" placeholder="Escribí un mensaje o elegí una plantilla"></textarea></label>
+              <button class="btn" type="button">Enviar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert">
+        <span class="sev" style="background: var(--review);"></span>
+        <div style="display: grid; gap: 8px; min-width: 0;">
+          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;"><b style="font-size: 15px; line-height: 22px;">Movimiento sin clasificar · <span class="mono">USD 300</span></b><span class="chip ch-review">Bloqueante</span><span class="chip ch-neutral">sin respuesta al 05/11</span></div>
+          <span class="muted">Transferencia entrante de “J. Pérez”, 15/10. Le preguntamos a Martina el 31/10, al vincular ARCA, y no respondió.</span>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;" class="cap">
+            <span class="chip ch-neutral" style="font-weight: 500; color: var(--ink);">Sugerencia: Familia o regalo</span>
+            <span class="muted">montos distintos cada vez · sin referencia de factura · cuenta personal en AR · 3 transferencias desde junio</span>
+          </div>
+        </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">
+          <button class="btn" type="button">Elegir otra</button>
+          <button class="btn primary" type="button">Aplicar sugerencia <span class="kbd" style="border-color: var(--primary-ink); background: transparent; color: var(--primary-ink);">⏎</span></button>
+        </div>
+      </div>
+
+      <div class="alert">
+        <span class="sev" style="background: var(--border-input);"></span>
+        <div style="display: grid; gap: 2px; min-width: 0;">
+          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;"><b>Acumulado de 12 meses al <span class="mono">84%</span> del tope de la categoría D</b><span class="chip ch-neutral">Informativa</span></div>
+          <span class="muted">Se incluye en el mensaje. Al ritmo actual lo supera en febrero 2027.</span>
+        </div>
+        <span></span>
+      </div>
+    </section>
+
+    <section aria-label="Números del cierre" class="card" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));">
+      <div class="kpi"><span class="label">Facturado oct.</span><span class="mono" style="font-size: 22px; line-height: 28px; font-weight: 500;">USD 3.000</span><span class="cap muted"><span class="mono">$ 4.350.000</span> · 2 Facturas E</span></div>
+      <div class="kpi" style="border-left: 1px solid var(--border);"><span class="label">Cobrado en Wallbit</span><span class="mono" style="font-size: 22px; line-height: 28px; font-weight: 500;">USD 4.200</span><span class="cap" style="color: var(--review);"><span class="mono">USD 1.200</span> sin facturar</span></div>
+      <div class="kpi" style="border-left: 1px solid var(--border);"><span class="label">Acumulado 12 meses</span><span class="mono" style="font-size: 22px; line-height: 28px; font-weight: 500;">84%</span><div class="bar"><span style="width: 84%; background: var(--pending);"></span></div><span class="cap muted mono">$ 39,8 M de $ 47,4 M</span></div>
+      <div class="kpi" style="border-left: 1px solid var(--border);"><span class="label">A pagar</span><span class="mono" style="font-size: 22px; line-height: 28px; font-weight: 500;">$ 58.300</span><span class="cap muted">Cuota D servicios · vence 20/11</span></div>
+    </section>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start;">
+      <section class="card" aria-label="Detalle del cálculo" style="flex: 999 1 520px; min-width: 0; overflow: hidden;">
+        <div role="tablist" aria-label="Detalle" style="display: flex; gap: 20px; padding: 0 16px; border-bottom: 1px solid var(--border);">
+          <button class="tab" role="tab" type="button" aria-selected="true">Movimientos <span class="mono cap muted">8</span></button>
+          <button class="tab" role="tab" type="button" aria-selected="false">Facturas <span class="mono cap muted">2</span></button>
+          <button class="tab" role="tab" type="button" aria-selected="false">Cómo se calculó</button>
+          <button class="tab" role="tab" type="button" aria-selected="false">Historial</button>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 12px 16px;">
+          <span><b>8 movimientos</b> <span class="muted">· 6 OK ·</span> <span style="color: var(--review); font-weight: 500;">2 con alerta</span></span>
+          <button class="btn ghost sm" type="button" style="margin-left: auto;">Mostrar los 6 OK</button>
+        </div>
+        <div style="overflow-x: auto;">
+          <table class="t">
+            <thead><tr><th>Fecha</th><th>Movimiento</th><th class="r">USD</th><th>Clasificación</th><th>Origen</th></tr></thead>
+            <tbody>
+              <tr>
+                <td class="mono">12/10</td>
+                <td>Cobro · Acme Corp (US) <span class="chip ch-review">sin factura</span></td>
+                <td class="r mono">+1.200</td>
+                <td>Cobro por trabajo</td>
+                <td class="cap muted">historial de facturación en ARCA</td>
+              </tr>
+              <tr style="background: var(--review-tint);">
+                <td class="mono">15/10</td>
+                <td>Transferencia entrante · J. Pérez</td>
+                <td class="r mono">+300</td>
+                <td><label style="display: grid; gap: 2px;"><span style="position: absolute; left: -9999px;">Clasificar J. Pérez</span><select class="input" style="min-height: 32px;"><option>Sin clasificar</option><option>Cobro por trabajo</option><option>Transferencia propia</option><option>Familia o regalo</option></select></label></td>
+                <td class="cap muted">—</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <aside style="flex: 1 1 300px; min-width: 0; display: grid; gap: 14px;">
+        <section class="card" aria-labelledby="msg-h" style="overflow: hidden;">
+          <div style="display: flex; justify-content: space-between; gap: 8px; padding: 10px 14px; background: var(--surface-muted); border-bottom: 1px solid var(--border);"><span id="msg-h" class="label">Lo que va a ver Martina</span><span class="cap muted">plantilla v3</span></div>
+          <div style="padding: 14px; display: grid; gap: 8px;">
+            <span>Hola <b>Martina</b>, tu contador revisó tu cierre de <b>octubre</b>.</span>
+            <span>Facturaste <b class="mono">USD 3.000</b> (<span class="mono">$ 4.350.000</span>).</span>
+            <span>Tenés que pagar <b class="mono">$ 58.300</b> de monotributo antes del <b>20/11</b>.</span>
+            <span>Llevás el <b class="mono">84%</b> del tope de tu categoría. Si lo superás, te avisamos para recategorizarte.</span>
+            <span class="cap muted">Revisado por C.P. Laura Gómez (ficticia) · Mat. T° 000 F° 000</span>
+          </div>
+        </section>
+        <section class="card" style="padding: 14px; display: grid; gap: 10px;">
+          <span class="cap" style="color: var(--review);">Resolvé las 2 alertas bloqueantes para aprobar.</span>
+          <button class="btn primary" type="button" disabled>Aprobar y notificar <span class="kbd" style="border-color: var(--primary-ink); background: transparent; color: var(--primary-ink);">A</span></button>
+          <button class="btn ghost sm" type="button">Dejar nota interna</button>
+        </section>
+      </aside>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":1560}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { themeClass: this.props.dark ? 'c dark' : 'c' };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Perfil de cliente</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+.c{--bg:#F6F7F9;--surface:#FFFFFF;--surface-muted:#F0F2F5;--border:#DDE1E7;--border-input:#8A93A2;--ink:#131821;--ink-muted:#586171;--ink-subtle:#646C7B;--primary:#1F5FD6;--primary-ink:#FFFFFF;--primary-tint:#E8EFFC;--pending:#8A4B00;--pending-tint:#FDF0D5;--review:#B42318;--review-tint:#FDE7E4;--ready:#5B3CC4;--ready-tint:#EEE9FC;--done:#146C43;--done-tint:#DDF3E7;--pop:0 8px 24px rgba(15,20,30,.12);font-family:Geist,Inter,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:14px;line-height:20px;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased}
+.c.dark{--bg:#0E1117;--surface:#161A22;--surface-muted:#1C212B;--border:#2A303B;--border-input:#667186;--ink:#E7EAF0;--ink-muted:#9AA3B2;--ink-subtle:#7F8898;--primary:#6E9BF3;--primary-ink:#0E1117;--primary-tint:#1B2A47;--pending:#F2B65A;--pending-tint:#33250F;--review:#F4897A;--review-tint:#3A1A16;--ready:#B4A2F5;--ready-tint:#261F45;--done:#5FD39A;--done-tint:#12301F;--pop:0 8px 24px rgba(0,0,0,.45);color-scheme:dark}
+.c *{box-sizing:border-box}
+.c a{color:var(--primary);text-decoration:none}
+.c a:hover{text-decoration:underline}
+.c :focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.mono{font-family:"Geist Mono",ui-monospace,"SF Mono",Menlo,monospace;font-variant-numeric:tabular-nums}
+.label{font-size:11px;line-height:16px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-subtle)}
+.muted{color:var(--ink-muted)}
+.cap{font-size:12px;line-height:16px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:36px;padding:0 14px;border-radius:6px;border:1px solid var(--border-input);background:var(--surface);color:var(--ink);font-family:inherit;font-size:14px;font-weight:500;line-height:20px;cursor:pointer;white-space:nowrap}
+.c a.btn{color:var(--ink);text-decoration:none}
+.btn.primary,.c a.btn.primary{background:var(--primary);border-color:var(--primary);color:var(--primary-ink)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--ink-muted)}
+.btn.sm{min-height:30px;padding:0 10px;font-size:13px}
+.pill{display:inline-flex;align-items:center;gap:6px;height:22px;padding:0 9px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.p-review{background:var(--review-tint);color:var(--review)}
+.p-done{background:var(--done-tint);color:var(--done)}
+.chip{display:inline-flex;align-items:center;height:20px;padding:0 7px;border-radius:4px;font-size:12px;white-space:nowrap}
+.ch-review{background:var(--review-tint);color:var(--review)}
+.ch-pending{background:var(--pending-tint);color:var(--pending)}
+.ch-neutral{background:var(--surface-muted);color:var(--ink-muted)}
+.t{width:100%;border-collapse:collapse}
+.t th{text-align:left;padding:10px 12px;background:var(--surface-muted);border-bottom:1px solid var(--border);font-size:11px;line-height:16px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-subtle);white-space:nowrap}
+.t td{padding:11px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+.t tr:last-child td{border-bottom:none}
+.t .r{text-align:right}
+.bar{height:6px;border-radius:999px;background:var(--surface-muted);overflow:hidden;display:flex}
+.bar>span{display:block;height:100%}
+.nav a{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:36px;padding:0 10px;border-radius:6px;color:var(--ink-muted);font-weight:500;border:1px solid transparent}
+.c .nav a:hover{text-decoration:none;color:var(--ink)}
+.c .nav a.on{background:var(--surface);color:var(--ink);border-color:var(--border)}
+.input{min-height:36px;border:1px solid var(--border-input);border-radius:6px;background:var(--surface);color:var(--ink);padding:8px 10px;font-family:inherit;font-size:14px}
+.kpi{display:grid;gap:6px;align-content:start;padding:14px 16px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.note{border-left:2px solid var(--border-input);padding-left:12px;display:grid;gap:2px}
+</style>
+</helmet>
+<div class="{{themeClass}}" style="min-height: 1400px; display: flex; flex-wrap: wrap; align-items: stretch;">
+
+  <aside style="flex: 1 1 232px; background: var(--surface-muted); border-right: 1px solid var(--border); padding: 20px 14px; display: flex; flex-direction: column; gap: 20px;">
+    <div style="display: flex; align-items: center; gap: 10px; padding: 0 6px;">
+      <span style="width: 30px; height: 30px; border-radius: 8px; background: var(--ink); display: grid; place-items: center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l4 4L19 6"></path></svg></span>
+      <div style="display: grid;"><b style="font-size: 15px; line-height: 20px;">Cierre</b><span class="cap muted">Servicio contable · Wallbit</span></div>
+    </div>
+    <nav class="nav" aria-label="Secciones" style="display: grid; gap: 2px;">
+      <a href="Main.dc.html">Bandeja <span class="mono cap muted">480</span></a>
+      <a href="PorAlerta.dc.html">Resolver por alerta <span class="mono cap muted">5</span></a>
+      <a href="Detalle.dc.html">Revisión guiada <span class="mono cap muted">12</span></a>
+      <a href="Lote.dc.html">Aprobar en lote <span class="mono cap muted">312</span></a>
+      <a class="on" href="Perfil.dc.html" aria-current="page">Clientes</a>
+      <a href="Main.dc.html">Reglas</a>
+      <a href="Main.dc.html">Parámetros y plantillas</a>
+    </nav>
+  </aside>
+
+  <main style="flex: 999 1 560px; min-width: 0; padding: 28px 32px 40px; display: flex; flex-direction: column; gap: 20px;">
+    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px;">
+      <span style="width: 56px; height: 56px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border); display: grid; place-items: center; font-size: 18px; font-weight: 600;">MR</span>
+      <div style="display: grid; gap: 4px; flex: 1 1 360px; min-width: 0;">
+        <div class="cap muted"><a href="Main.dc.html">Clientes</a> / Martina Ríos</div>
+        <h1 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600;">Martina Ríos</h1>
+        <span class="mono cap muted">CUIT 27-3•••••12-4 · Diseño UX · Monotributo D (servicios) · CABA · cliente desde 03/2026</span>
+        <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px;">
+          <span class="chip ch-neutral">Responde rápido</span>
+          <span class="chip ch-neutral">Factura a mes vencido a Acme</span>
+          <span class="chip ch-pending">Cerca del tope</span>
+          <span class="chip ch-neutral">Prefiere la app</span>
+        </div>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+        <a class="btn" href="Detalle.dc.html">Escribirle</a>
+        <a class="btn primary" href="Detalle.dc.html">Abrir cierre de octubre</a>
+      </div>
+    </div>
+
+    <section class="card" aria-label="Métricas" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));">
+      <div class="kpi"><span class="label">Facturado 12 meses</span><span class="mono" style="font-size: 22px; line-height: 28px; font-weight: 500;">$ 39,8 M</span><div class="bar"><span style="width: 84%; background: var(--pending);"></span></div><span class="cap muted"><span class="mono">84%</span> del tope D (<span class="mono">$ 47,4 M</span>)</span></div>
+      <div class="kpi" style="border-left: 1px solid var(--border);"><span class="label">Promedio mensual</span><span class="mono" style="font-size: 22px; line-height: 28px; font-weight: 500;">USD 3.010</span><span class="cap muted">últimos 8 meses · estable (±8%)</span></div>
+      <div class="kpi" style="border-left: 1px solid var(--border);"><span class="label">Cierres</span><span class="mono" style="font-size: 22px; line-height: 28px; font-weight: 500;">7 de 7</span><span class="cap muted">notificados a tiempo · 2 pasaron por revisión</span></div>
+      <div class="kpi" style="border-left: 1px solid var(--border);"><span class="label">Tiempo de respuesta</span><span class="mono" style="font-size: 22px; line-height: 28px; font-weight: 500;">1,2 días</span><span class="cap muted">6 de 7 meses antes del día 5</span></div>
+    </section>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start;">
+      <section class="card" aria-labelledby="chart-h" style="flex: 3 1 520px; min-width: 0; padding: 16px; display: grid; gap: 12px;">
+        <div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 12px;">
+          <h2 id="chart-h" style="margin: 0; font-size: 15px; line-height: 22px; font-weight: 600;">Facturado por mes</h2>
+          <span class="cap muted">USD · Facturas E confirmadas · 2026</span>
+        </div>
+        <svg viewBox="0 0 560 200" role="img" aria-label="Facturado mensual de marzo a octubre de 2026: 2.400, 2.800, 3.100, 2.900, 3.400, 3.300, 3.200 y 3.000 dólares" style="display: block; width: 100%; height: auto;">
+          <line x1="40" x2="556" y1="176" y2="176" style="stroke: var(--border-input);" stroke-width="1"></line>
+          <line x1="40" x2="556" y1="136" y2="136" style="stroke: var(--border);" stroke-width="1"></line>
+          <line x1="40" x2="556" y1="96" y2="96" style="stroke: var(--border);" stroke-width="1"></line>
+          <line x1="40" x2="556" y1="56" y2="56" style="stroke: var(--border);" stroke-width="1"></line>
+          <line x1="40" x2="556" y1="16" y2="16" style="stroke: var(--border);" stroke-width="1"></line>
+          <text x="32" y="180" text-anchor="end" style="fill: var(--ink-subtle); font-family: 'Geist Mono', monospace; font-size: 10px;">0</text>
+          <text x="32" y="140" text-anchor="end" style="fill: var(--ink-subtle); font-family: 'Geist Mono', monospace; font-size: 10px;">1k</text>
+          <text x="32" y="100" text-anchor="end" style="fill: var(--ink-subtle); font-family: 'Geist Mono', monospace; font-size: 10px;">2k</text>
+          <text x="32" y="60" text-anchor="end" style="fill: var(--ink-subtle); font-family: 'Geist Mono', monospace; font-size: 10px;">3k</text>
+          <text x="32" y="20" text-anchor="end" style="fill: var(--ink-subtle); font-family: 'Geist Mono', monospace; font-size: 10px;">4k</text>
+          <rect x="52.8" y="80" width="38.4" height="96" rx="3" style="fill: var(--border-input);"></rect>
+          <rect x="116.8" y="64" width="38.4" height="112" rx="3" style="fill: var(--border-input);"></rect>
+          <rect x="180.8" y="52" width="38.4" height="124" rx="3" style="fill: var(--border-input);"></rect>
+          <rect x="244.8" y="60" width="38.4" height="116" rx="3" style="fill: var(--border-input);"></rect>
+          <rect x="308.8" y="40" width="38.4" height="136" rx="3" style="fill: var(--border-input);"></rect>
+          <rect x="372.8" y="44" width="38.4" height="132" rx="3" style="fill: var(--border-input);"></rect>
+          <rect x="436.8" y="48" width="38.4" height="128" rx="3" style="fill: var(--border-input);"></rect>
+          <rect x="500.8" y="56" width="38.4" height="120" rx="3" style="fill: var(--ink);"></rect>
+          <text x="520" y="48" text-anchor="middle" style="fill: var(--ink); font-family: 'Geist Mono', monospace; font-size: 11px;">3.000</text>
+          <text x="72" y="194" text-anchor="middle" style="fill: var(--ink-subtle); font-family: 'Geist Mono', monospace; font-size: 10px;">mar</text>
+          <text x="136" y="194" text-anchor="middle" style="fill: var(--ink-subtle); font-family: 'Geist Mono', monospace; font-size: 10px;">abr</text>
+          <text x="200" y="194" text-anchor="middle" style="fill: var(--ink-subtle); font-family: 'Geist Mono', monospace; font-size: 10px;">may</text>
+          <text x="264" y="194" text-anchor="middle" style="fill: var(--ink-subtle); font-family: 'Geist Mono', monospace; font-size: 10px;">jun</text>
+          <text x="328" y="194" text-anchor="middle" style="fill: var(--ink-subtle); font-family: 'Geist Mono', monospace; font-size: 10px;">jul</text>
+          <text x="392" y="194" text-anchor="middle" style="fill: var(--ink-subtle); font-family: 'Geist Mono', monospace; font-size: 10px;">ago</text>
+          <text x="456" y="194" text-anchor="middle" style="fill: var(--ink-subtle); font-family: 'Geist Mono', monospace; font-size: 10px;">sep</text>
+          <text x="520" y="194" text-anchor="middle" style="fill: var(--ink); font-family: 'Geist Mono', monospace; font-size: 10px;">oct</text>
+        </svg>
+        <div style="display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; background: var(--pending-tint); color: var(--pending);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; margin-top: 2px;"><path d="M3 17l6-6 4 4 8-8"></path><path d="M15 7h6v6"></path></svg>
+          <span>Al ritmo actual supera el tope de la categoría D en <b>febrero 2027</b>. Conviene avisarle con tiempo la recategorización a E.</span>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="cp-h" style="flex: 2 1 360px; min-width: 0; overflow: hidden;">
+        <div style="padding: 14px 16px; display: flex; align-items: baseline; gap: 8px;"><h2 id="cp-h" style="margin: 0; font-size: 15px; line-height: 22px; font-weight: 600;">Contrapartes conocidas</h2><span class="cap muted">qué es cada una y de dónde lo sabemos</span></div>
+        <div style="overflow-x: auto;">
+          <table class="t">
+            <thead><tr><th>Contraparte</th><th>Qué es</th><th>Origen</th></tr></thead>
+            <tbody>
+              <tr><td style="font-weight: 500;">Acme Corp (US)</td><td>Cobro por trabajo</td><td class="cap muted">match con factura</td></tr>
+              <tr><td style="font-weight: 500;">Northwind Ltd (UK)</td><td>Cobro por trabajo</td><td class="cap muted">match con factura</td></tr>
+              <tr><td style="font-weight: 500;">Banco Galicia · propia</td><td>Transferencia propia</td><td class="cap muted">regla global</td></tr>
+              <tr><td style="font-weight: 500;">Binance</td><td>Conversión</td><td class="cap muted">estructural</td></tr>
+              <tr><td style="font-weight: 500;">J. Pérez</td><td><span class="chip ch-review">sin aclarar</span></td><td class="cap muted">preguntado 31/10</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start;">
+      <section class="card" aria-labelledby="hist-h" style="flex: 3 1 520px; min-width: 0; overflow: hidden;">
+        <div style="padding: 14px 16px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px;"><h2 id="hist-h" style="margin: 0; font-size: 15px; line-height: 22px; font-weight: 600;">Historial de cierres</h2><span class="cap muted">cada fila es un snapshot inmutable</span></div>
+        <div style="overflow-x: auto;">
+          <table class="t">
+            <thead><tr><th>Período</th><th>Estado</th><th class="r">Facturado</th><th class="r">A pagar</th><th>Aprobó</th><th>Snapshot</th></tr></thead>
+            <tbody>
+              <tr><td class="mono">2026-10</td><td><span class="pill p-review">En revisión</span></td><td class="r mono">USD 3.000</td><td class="r mono">$ 58.300</td><td class="cap muted">—</td><td class="cap muted">—</td></tr>
+              <tr><td class="mono">2026-09</td><td><span class="pill p-done">Notificado</span></td><td class="r mono">USD 3.200</td><td class="r mono">$ 58.300</td><td class="cap muted">L. Gómez · lote 05/10</td><td class="mono cap"><a href="Perfil.dc.html">c-2026-09-0412</a></td></tr>
+              <tr><td class="mono">2026-08</td><td><span class="pill p-done">Notificado</span></td><td class="r mono">USD 3.300</td><td class="r mono">$ 52.100</td><td class="cap muted">L. Gómez · individual 06/09</td><td class="mono cap"><a href="Perfil.dc.html">c-2026-08-0412</a></td></tr>
+              <tr><td class="mono">2026-07</td><td><span class="pill p-done">Notificado</span></td><td class="r mono">USD 3.400</td><td class="r mono">$ 52.100</td><td class="cap muted">L. Gómez · lote 04/08</td><td class="mono cap"><a href="Perfil.dc.html">c-2026-07-0412</a></td></tr>
+              <tr><td class="mono">2026-06</td><td><span class="pill p-done">Notificado</span></td><td class="r mono">USD 2.900</td><td class="r mono">$ 52.100</td><td class="cap muted">L. Gómez · lote 05/07</td><td class="mono cap"><a href="Perfil.dc.html">c-2026-06-0412</a></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: flex-start; padding: 12px 16px; border-top: 1px solid var(--border);">
+          <span class="chip ch-neutral" style="flex: none;">Patrón</span>
+          <span class="muted">“Cobro sin facturar” en 3 de los últimos 8 meses, siempre con Acme Corp, y siempre resuelto en 1 o 2 días. Factura a mes vencido; no es un riesgo.</span>
+        </div>
+      </section>
+
+      <div style="flex: 2 1 360px; min-width: 0; display: grid; gap: 18px;">
+        <section class="card" aria-labelledby="notes-h" style="padding: 16px; display: grid; gap: 12px;">
+          <h2 id="notes-h" style="margin: 0; font-size: 15px; line-height: 22px; font-weight: 600;">Notas internas</h2>
+          <div class="note"><span>Acme le paga antes de que ella facture; la factura llega a los pocos días. No es evasión.</span><span class="cap muted">L. Gómez · 14/09</span></div>
+          <div class="note"><span>Prefiere que le escriban por la app, no por mail.</span><span class="cap muted">L. Gómez · 03/2026</span></div>
+          <label style="display: grid; gap: 4px;"><span class="cap muted">Nueva nota (solo la ve el equipo contable)</span><textarea class="input" rows="2" style="resize: vertical;"></textarea></label>
+        </section>
+        <section class="card" aria-labelledby="conv-h" style="padding: 4px 16px 6px;">
+          <h2 id="conv-h" style="margin: 12px 0 2px; font-size: 15px; line-height: 22px; font-weight: 600;">Conversaciones</h2>
+          <div class="row"><a href="Detalle.dc.html">Cobro sin facturar · Acme · oct.</a><span class="chip ch-pending">respondió, falta vincular</span></div>
+          <div class="row"><span>¿Quién es J. Pérez? · oct.</span><span class="chip ch-neutral">sin respuesta</span></div>
+          <div class="row"><span>Cobro sin facturar · Acme · jul.</span><span class="cap muted">resuelta en 1 día</span></div>
+          <div class="row" style="border-bottom: none;"><span>¿Quién es Northwind Ltd? · sep.</span><span class="cap muted">resuelta en 2 h</span></div>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":1400}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { themeClass: this.props.dark ? 'c dark' : 'c' };
+  }
+}
+</script>
+</body>
+</html>

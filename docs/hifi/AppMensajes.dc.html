@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Mensajes del contador</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+.c{--bg:#F6F7F9;--surface:#FFFFFF;--surface-muted:#F0F2F5;--border:#DDE1E7;--border-input:#8A93A2;--ink:#131821;--ink-muted:#586171;--ink-subtle:#646C7B;--primary:#1F5FD6;--primary-ink:#FFFFFF;--primary-tint:#E8EFFC;--done:#146C43;--done-tint:#DDF3E7;font-family:Geist,Inter,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:15px;line-height:22px;color:var(--ink);background:var(--surface);-webkit-font-smoothing:antialiased}
+.c.dark{--bg:#0E1117;--surface:#161A22;--surface-muted:#1C212B;--border:#2A303B;--border-input:#667186;--ink:#E7EAF0;--ink-muted:#9AA3B2;--ink-subtle:#7F8898;--primary:#6E9BF3;--primary-ink:#0E1117;--primary-tint:#1B2A47;--done:#5FD39A;--done-tint:#12301F;color-scheme:dark}
+.c *{box-sizing:border-box}
+.c :focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.mono{font-family:"Geist Mono",ui-monospace,"SF Mono",Menlo,monospace;font-variant-numeric:tabular-nums}
+.muted{color:var(--ink-muted)}
+.cap{font-size:13px;line-height:18px}
+.bubble{max-width:84%;padding:10px 14px;border-radius:16px;display:grid;gap:4px}
+.inv{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:2px 12px;align-items:center;width:100%;text-align:left;min-height:56px;padding:10px 14px;border-radius:12px;border:1px solid var(--border-input);background:var(--surface);color:var(--ink);font-family:inherit;font-size:14px;line-height:20px;cursor:pointer}
+.inv[aria-pressed="true"]{border-color:var(--primary);box-shadow:inset 0 0 0 1px var(--primary);background:var(--primary-tint)}
+.dot{width:20px;height:20px;border-radius:50%;border:2px solid var(--border-input)}
+.inv[aria-pressed="true"] .dot{border:6px solid var(--primary)}
+</style>
+</helmet>
+<div class="{{themeClass}}" style="width: 390px; height: 844px; display: flex; flex-direction: column; overflow: hidden;">
+  <div style="display: flex; align-items: center; gap: 10px; padding: 16px 16px 12px; border-bottom: 1px solid var(--border);">
+    <a href="AppInicio.dc.html" aria-label="Volver" style="display: inline-grid; place-items: center; width: 44px; height: 44px; margin-left: -10px; color: var(--primary);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg></a>
+    <span style="width: 36px; height: 36px; border-radius: 50%; background: var(--surface-muted); display: grid; place-items: center; font-size: 13px; font-weight: 600;">LG</span>
+    <div style="display: grid; min-width: 0;">
+      <b style="font-weight: 600;">Tu contador</b>
+      <span class="cap muted">Sobre: cobro de Acme Corp · <span class="mono">USD 1.200</span> · 12/10</span>
+    </div>
+  </div>
+
+  <div style="flex: 1; display: flex; flex-direction: column; gap: 12px; padding: 16px; background: var(--bg);">
+    <span class="cap muted" style="align-self: center;">1 de noviembre</span>
+    <div class="bubble" style="align-self: flex-start; background: var(--surface); border: 1px solid var(--border);">
+      <span class="cap muted">C.P. Laura Gómez · 10:20</span>
+      <span>Hola Martina, vimos un cobro de Acme Corp por USD 1.200 del 12/10 que no tiene factura en ARCA. Si te falta, podés emitirla desde acá con un toque.</span>
+    </div>
+
+    <div style="display: grid; gap: 10px; margin-top: 4px; padding: 14px; border-radius: 14px; background: var(--surface); border: 1px solid var(--border);">
+      <b style="font-weight: 600;">Facturar este cobro</b>
+      <div style="display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; font-size: 14px; line-height: 20px;">
+        <span class="muted">Cliente</span><span style="text-align: right;">Acme Corp (US)</span>
+        <span class="muted">Monto</span><span class="mono" style="text-align: right;">USD 1.200</span>
+        <span class="muted">Tipo de cambio</span><span class="mono" style="text-align: right;">1.450 · el del cobro</span>
+        <span class="muted">Comprobante</span><span style="text-align: right;">Factura E · exportación de servicios</span>
+      </div>
+      <span class="cap muted">Lo precargamos con los datos del cobro. Se emite en ARCA recién cuando confirmás.</span>
+    </div>
+
+    <div style="margin-top: auto; display: grid; gap: 10px;">
+      <label style="display: grid; gap: 6px;">
+        <span class="cap muted">Agregar un comentario (opcional)</span>
+        <input type="text" value="Me había olvidado, gracias." style="min-height: 48px; border-radius: 12px; border: 1px solid var(--border-input); background: var(--surface); color: var(--ink); padding: 0 14px; font-family: inherit; font-size: 15px;">
+      </label>
+      <button type="button" style="min-height: 52px; border-radius: 14px; border: none; background: var(--primary); color: var(--primary-ink); font-family: inherit; font-size: 16px; font-weight: 600; cursor: pointer;">Emitir factura y avisar a mi contador</button>
+      <span class="cap muted" style="text-align: center;">Tu contador recibe la factura desde ARCA junto con tu mensaje.</span>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { themeClass: this.props.dark ? 'c dark' : 'c' };
+  }
+}
+</script>
+</body>
+</html>

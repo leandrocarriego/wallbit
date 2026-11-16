@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Aprobación en lote</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+.c{--bg:#F6F7F9;--surface:#FFFFFF;--surface-muted:#F0F2F5;--border:#DDE1E7;--border-input:#8A93A2;--ink:#131821;--ink-muted:#586171;--ink-subtle:#646C7B;--primary:#1F5FD6;--primary-ink:#FFFFFF;--primary-tint:#E8EFFC;--pending:#8A4B00;--pending-tint:#FDF0D5;--review:#B42318;--review-tint:#FDE7E4;--ready:#5B3CC4;--ready-tint:#EEE9FC;--done:#146C43;--done-tint:#DDF3E7;--pop:0 8px 24px rgba(15,20,30,.12);font-family:Geist,Inter,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:14px;line-height:20px;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased}
+.c.dark{--bg:#0E1117;--surface:#161A22;--surface-muted:#1C212B;--border:#2A303B;--border-input:#667186;--ink:#E7EAF0;--ink-muted:#9AA3B2;--ink-subtle:#7F8898;--primary:#6E9BF3;--primary-ink:#0E1117;--primary-tint:#1B2A47;--pending:#F2B65A;--pending-tint:#33250F;--review:#F4897A;--review-tint:#3A1A16;--ready:#B4A2F5;--ready-tint:#261F45;--done:#5FD39A;--done-tint:#12301F;--pop:0 8px 24px rgba(0,0,0,.45);color-scheme:dark}
+.c *{box-sizing:border-box}
+.c a{color:var(--primary);text-decoration:none}
+.c a:hover{text-decoration:underline}
+.c :focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.mono{font-family:"Geist Mono",ui-monospace,"SF Mono",Menlo,monospace;font-variant-numeric:tabular-nums}
+.label{font-size:11px;line-height:16px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-subtle)}
+.muted{color:var(--ink-muted)}
+.cap{font-size:12px;line-height:16px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:36px;padding:0 14px;border-radius:6px;border:1px solid var(--border-input);background:var(--surface);color:var(--ink);font-family:inherit;font-size:14px;font-weight:500;line-height:20px;cursor:pointer;white-space:nowrap}
+.c a.btn{color:var(--ink);text-decoration:none}
+.btn.primary,.c a.btn.primary{background:var(--primary);border-color:var(--primary);color:var(--primary-ink)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--ink-muted)}
+.btn.sm{min-height:30px;padding:0 10px;font-size:13px}
+.pill{display:inline-flex;align-items:center;gap:6px;height:22px;padding:0 9px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.p-ready{background:var(--ready-tint);color:var(--ready)}
+.chip{display:inline-flex;align-items:center;height:20px;padding:0 7px;border-radius:4px;font-size:12px;white-space:nowrap}
+.ch-pending{background:var(--pending-tint);color:var(--pending)}
+.ch-neutral{background:var(--surface-muted);color:var(--ink-muted)}
+.t{width:100%;border-collapse:collapse}
+.t th{text-align:left;padding:10px 12px;background:var(--surface-muted);border-bottom:1px solid var(--border);font-size:11px;line-height:16px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-subtle);white-space:nowrap}
+.t td{padding:11px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+.t tr:last-child td{border-bottom:none}
+.t .r{text-align:right}
+.bar{height:6px;border-radius:999px;background:var(--surface-muted);overflow:hidden;display:flex}
+.bar>span{display:block;height:100%}
+.nav a{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:36px;padding:0 10px;border-radius:6px;color:var(--ink-muted);font-weight:500;border:1px solid transparent}
+.c .nav a:hover{text-decoration:none;color:var(--ink)}
+.c .nav a.on{background:var(--surface);color:var(--ink);border-color:var(--border)}
+.cb{width:16px;height:16px;accent-color:var(--primary);flex:none;margin-top:2px}
+.line{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.var{background:var(--primary-tint);color:var(--primary);border-radius:4px;padding:0 4px;font-family:"Geist Mono",ui-monospace,monospace;font-size:12px}
+</style>
+</helmet>
+<div class="{{themeClass}}" style="min-height: 1100px; display: flex; flex-wrap: wrap; align-items: stretch;">
+
+  <aside style="flex: 1 1 232px; background: var(--surface-muted); border-right: 1px solid var(--border); padding: 20px 14px; display: flex; flex-direction: column; gap: 20px;">
+    <div style="display: flex; align-items: center; gap: 10px; padding: 0 6px;">
+      <span style="width: 30px; height: 30px; border-radius: 8px; background: var(--ink); display: grid; place-items: center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l4 4L19 6"></path></svg></span>
+      <div style="display: grid;"><b style="font-size: 15px; line-height: 20px;">Cierre</b><span class="cap muted">Servicio contable · Wallbit</span></div>
+    </div>
+    <nav class="nav" aria-label="Secciones" style="display: grid; gap: 2px;">
+      <a href="Main.dc.html">Bandeja <span class="mono cap muted">480</span></a>
+      <a href="PorAlerta.dc.html">Resolver por alerta <span class="mono cap muted">0</span></a>
+      <a href="Detalle.dc.html">Revisión guiada <span class="mono cap muted">0</span></a>
+      <a class="on" href="Lote.dc.html" aria-current="page">Aprobar en lote <span class="mono cap muted">312</span></a>
+      <a href="Perfil.dc.html">Clientes</a>
+      <a href="Main.dc.html">Reglas</a>
+      <a href="Main.dc.html">Parámetros y plantillas</a>
+    </nav>
+    <div class="card" style="padding: 14px; display: grid; gap: 8px;">
+      <span class="label">Te quedan</span>
+      <span class="mono" style="font-size: 22px; line-height: 28px; font-weight: 500;">~5 min</span>
+      <div class="bar"><span style="width: 96%; background: var(--primary);"></span></div>
+      <span class="cap muted">Último paso del cierre de octubre.</span>
+    </div>
+  </aside>
+
+  <main style="flex: 999 1 560px; min-width: 0; padding: 28px 32px 40px; display: flex; flex-direction: column; gap: 20px;">
+    <div style="display: grid; gap: 4px;">
+      <div class="cap muted"><a href="Main.dc.html">Bandeja</a> / Octubre 2026 · paso 3 de 3</div>
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px;">
+        <h1 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600;">Aprobar <span class="mono">312</span> cierres de octubre</h1>
+        <span class="pill p-ready">Listos</span>
+      </div>
+      <span class="muted">Ninguno tiene alertas bloqueantes. Mirá primero los que cambiaron mucho y aprobá el resto con confianza.</span>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start;">
+      <div style="flex: 999 1 560px; min-width: 0; display: grid; gap: 18px;">
+        <section class="card" aria-labelledby="mix-h" style="padding: 4px 16px 8px;">
+          <h2 id="mix-h" style="position: absolute; left: -9999px;">Qué entra en el lote</h2>
+          <div class="line"><span>Sin alertas</span><span class="mono">282</span></div>
+          <div class="line" style="flex-wrap: wrap;">
+            <span style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px;">Con alertas informativas <span class="chip ch-pending">variación fuerte · 7</span><span class="chip ch-neutral">cerca del tope · 19</span><span class="chip ch-neutral">facturado sin cobro · 4</span></span>
+            <span class="mono">30</span>
+          </div>
+          <label class="line" style="justify-content: flex-start; align-items: flex-start; gap: 10px;"><input class="cb" type="checkbox" checked> <span>Incluir los 30 con alertas informativas. El mensaje de cada uno lleva su advertencia.</span></label>
+          <div class="line" style="border-bottom: none; font-weight: 600;"><span>Se aprueban y notifican</span><span class="mono">312</span></div>
+        </section>
+
+        <section class="card" aria-labelledby="look-h" style="overflow: hidden;">
+          <div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 12px; padding: 14px 16px;">
+            <h2 id="look-h" style="margin: 0; font-size: 15px; line-height: 22px; font-weight: 600;">Primero lo que conviene mirar</h2>
+            <span class="cap muted">Variación del facturado contra el promedio de sus últimos 3 meses</span>
+            <a class="cap" href="Main.dc.html" style="margin-left: auto;">Ver los 312</a>
+          </div>
+          <div style="overflow-x: auto;">
+            <table class="t">
+              <thead><tr><th>Cliente</th><th>Cat.</th><th class="r">Facturado</th><th class="r">Prom. 3 meses</th><th class="r">Variación</th><th class="r">A pagar</th><th></th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><a href="Perfil.dc.html" style="font-weight: 500;">Bruno Aguirre</a></td><td>C</td>
+                  <td class="r mono">USD 4.100</td><td class="r mono muted">USD 2.250</td><td class="r mono" style="color: var(--pending); font-weight: 500;">+82%</td><td class="r mono">$ 41.900</td>
+                  <td><span class="chip ch-pending">variación fuerte</span></td>
+                </tr>
+                <tr>
+                  <td><a href="Perfil.dc.html" style="font-weight: 500;">Elena Quiroga</a></td><td>D</td>
+                  <td class="r mono">USD 900</td><td class="r mono muted">USD 3.100</td><td class="r mono" style="color: var(--pending); font-weight: 500;">−71%</td><td class="r mono">$ 58.300</td>
+                  <td><span class="chip ch-pending">variación fuerte</span></td>
+                </tr>
+                <tr>
+                  <td><a href="Perfil.dc.html" style="font-weight: 500;">Gonzalo Ibarra</a></td><td>E</td>
+                  <td class="r mono">USD 8.300</td><td class="r mono muted">USD 5.200</td><td class="r mono" style="color: var(--pending); font-weight: 500;">+60%</td><td class="r mono">$ 79.600</td>
+                  <td><span class="chip ch-pending">variación fuerte</span></td>
+                </tr>
+                <tr>
+                  <td><span style="font-weight: 500;">Camila Ferreyra</span></td><td>E</td>
+                  <td class="r mono">USD 5.200</td><td class="r mono muted">USD 4.900</td><td class="r mono">+6%</td><td class="r mono">$ 79.600</td>
+                  <td><span class="chip ch-neutral">81% del tope</span></td>
+                </tr>
+                <tr>
+                  <td><span style="font-weight: 500;">Joaquín Medina</span></td><td>C</td>
+                  <td class="r mono">USD 2.400</td><td class="r mono muted">USD 2.470</td><td class="r mono">−3%</td><td class="r mono">$ 41.900</td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td><span style="font-weight: 500;">Sofía Romero</span></td><td>D</td>
+                  <td class="r mono">USD 3.600</td><td class="r mono muted">USD 3.530</td><td class="r mono">+2%</td><td class="r mono">$ 58.300</td>
+                  <td></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="cap muted" style="padding: 10px 16px; border-top: 1px solid var(--border);">3 de los 7 con variación fuerte se muestran arriba · <a href="Main.dc.html">ver los 7</a></div>
+        </section>
+      </div>
+
+      <aside style="flex: 1 1 320px; min-width: 0; display: grid; gap: 14px;">
+        <section class="card" style="padding: 16px; display: grid; gap: 12px;">
+          <span class="label">Totales del lote</span>
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;">
+            <div style="display: grid; gap: 2px;"><span class="cap muted">Facturado</span><span class="mono" style="font-size: 18px; line-height: 24px; font-weight: 500;">USD 1,04 M</span></div>
+            <div style="display: grid; gap: 2px;"><span class="cap muted">A pagar por los clientes</span><span class="mono" style="font-size: 18px; line-height: 24px; font-weight: 500;">$ 17,9 M</span></div>
+          </div>
+          <span class="cap muted">Parámetros vigentes desde 08/2026 · motor v0.3.0 · valores ficticios</span>
+        </section>
+        <section class="card" aria-labelledby="tpl-h" style="overflow: hidden;">
+          <div style="display: flex; justify-content: space-between; gap: 8px; padding: 10px 14px; background: var(--surface-muted); border-bottom: 1px solid var(--border);"><span id="tpl-h" class="label">Mensaje que se envía</span><span class="cap muted">plantilla v3 · aprobada 01/08</span></div>
+          <div style="padding: 14px; display: grid; gap: 8px; line-height: 22px;">
+            <span>Hola <span class="var">{nombre}</span>, tu contador revisó tu cierre de <span class="var">{mes}</span>.</span>
+            <span>Facturaste <span class="var">{facturado}</span>. Tenés que pagar <span class="var">{cuota}</span> antes del <span class="var">{vencimiento}</span>.</span>
+            <span class="cap muted">+ párrafo de advertencia si el cierre tiene una alerta informativa</span>
+          </div>
+        </section>
+      </aside>
+    </div>
+
+    <section class="card" style="padding: 16px; display: grid; gap: 14px;">
+      <label style="display: flex; gap: 10px; align-items: flex-start;"><input class="cb" type="checkbox" checked> <span>Revisé los criterios de este lote y, como contador matriculado, apruebo los <b class="mono">312</b> cierres y su comunicación a los clientes.</span></label>
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px;">
+        <button class="btn primary" type="button">Aprobar y notificar 312</button>
+        <a class="btn" href="Main.dc.html">Cancelar</a>
+        <span class="mono cap muted" style="margin-left: auto;">Idempotency-Key batch-2026-10-a91f · se aprueba en tandas de 100 · cada cierre guarda snapshot y auditoría</span>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { themeClass: this.props.dark ? 'c dark' : 'c' };
+  }
+}
+</script>
+</body>
+</html>

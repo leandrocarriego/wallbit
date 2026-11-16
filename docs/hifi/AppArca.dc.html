@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Vincular ARCA</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+.c{--bg:#F6F7F9;--surface:#FFFFFF;--surface-muted:#F0F2F5;--border:#DDE1E7;--border-input:#8A93A2;--ink:#131821;--ink-muted:#586171;--ink-subtle:#646C7B;--primary:#1F5FD6;--primary-ink:#FFFFFF;--primary-tint:#E8EFFC;--done:#146C43;--done-tint:#DDF3E7;font-family:Geist,Inter,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:15px;line-height:22px;color:var(--ink);background:var(--surface);-webkit-font-smoothing:antialiased}
+.c.dark{--bg:#0E1117;--surface:#161A22;--surface-muted:#1C212B;--border:#2A303B;--border-input:#667186;--ink:#E7EAF0;--ink-muted:#9AA3B2;--ink-subtle:#7F8898;--primary:#6E9BF3;--primary-ink:#0E1117;--primary-tint:#1B2A47;--done:#5FD39A;--done-tint:#12301F;color-scheme:dark}
+.c *{box-sizing:border-box}
+.c :focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.mono{font-family:"Geist Mono",ui-monospace,"SF Mono",Menlo,monospace;font-variant-numeric:tabular-nums}
+.muted{color:var(--ink-muted)}
+.cap{font-size:13px;line-height:18px}
+.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.step{display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;align-items:start}
+.n{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--done-tint);color:var(--done);font-size:13px;font-weight:600}
+</style>
+</helmet>
+<div class="{{themeClass}}" style="width: 390px; height: 844px; display: flex; flex-direction: column; overflow: hidden;">
+  <div style="display: flex; align-items: center; padding: 16px 12px 8px;">
+    <a href="AppAdhesion.dc.html" style="display: inline-flex; align-items: center; gap: 4px; min-height: 44px; padding: 0 8px; color: var(--primary); text-decoration: none; font-weight: 500;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg>Volver</a>
+    <span class="cap muted" style="margin-left: auto; padding-right: 8px;">Paso 2 de 2</span>
+  </div>
+
+  <div style="flex: 1; display: flex; flex-direction: column; gap: 18px; padding: 8px 20px 20px;">
+    <div style="display: grid; gap: 6px;">
+      <h1 style="margin: 0; font-size: 26px; line-height: 32px; font-weight: 600; letter-spacing: -0.01em;">Vinculá tu cuenta de ARCA</h1>
+      <p style="margin: 0;" class="muted">Así leemos las facturas que emitís y podés facturar desde Wallbit. Nunca emitimos nada sin que lo confirmes.</p>
+    </div>
+
+    <div style="display: grid; gap: 12px;">
+      <div class="step"><span class="n">✓</span><div><b style="font-weight: 500;">Ingresaste con tu clave fiscal</b><div class="cap muted">Martina Ríos · CUIT 27-3•••••12-4</div></div></div>
+      <div class="step"><span class="n">✓</span><div><b style="font-weight: 500;">Autorizaste a Wallbit</b><div class="cap muted">Consultar y emitir comprobantes. Lo revocás cuando quieras.</div></div></div>
+    </div>
+
+    <div style="display: grid; gap: 2px; padding: 14px 16px; border-radius: 14px; background: var(--done-tint);">
+      <b style="color: var(--done); font-weight: 600;">Listo: tu cuenta está vinculada</b>
+      <span class="cap" style="color: var(--done);">Monotributo categoría D · servicios. Importamos 13 facturas de los últimos 12 meses. Las de octubre:</span>
+    </div>
+
+    <div>
+      <div class="row"><span class="mono">E 0001-00000041</span><span class="mono">USD 1.800</span><span class="cap muted">02/10 · Acme Corp</span><span></span></div>
+      <div class="row"><span class="mono">E 0001-00000042</span><span class="mono">USD 1.200</span><span class="cap muted">21/10 · Northwind Ltd</span><span></span></div>
+    </div>
+
+    <div style="margin-top: auto; display: grid; gap: 10px;">
+      <a href="AppInicio.dc.html" style="display: grid; place-items: center; min-height: 52px; border-radius: 14px; background: var(--primary); color: var(--primary-ink); font-size: 16px; font-weight: 600; text-decoration: none;">Ir al inicio</a>
+      <span class="cap muted" style="text-align: center;">Ya clasificamos tus movimientos de octubre. Te avisamos en el inicio si algo necesita tu ayuda.</span>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { themeClass: this.props.dark ? 'c dark' : 'c' };
+  }
+}
+</script>
+</body>
+</html>

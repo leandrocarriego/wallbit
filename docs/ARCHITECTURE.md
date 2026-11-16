@@ -13,8 +13,8 @@
 | Monitor de colas | **Flower** | Estado de tasks/workers |
 | Base de datos | **PostgreSQL 16** | Fuente de verdad (Celery sin result backend: el avance se lee de la DB) |
 | Consola del contador | **Next.js** (App Router, TS strict, Tailwind + shadcn/ui, TanStack Query) | Bandeja de cierre, revisión, aprobación en lote |
-| App del usuario (secundaria) | **Expo / React Native** (Expo Router) | Solo un simulador de la app de Wallbit: elegir qué cliente "soy", ver mi cierre y avisos, confirmar/editar facturas, declarar cobros externos, **responder qué es cada contraparte sin clasificar** (pantalla central del flujo). Mínimo esfuerzo de UI. Corre en web (`expo start --web`) |
-| Cliente API | `openapi-typescript` generado desde el OpenAPI de FastAPI | Tipos compartidos web + mobile, sin drift |
+| App del usuario (secundaria) | Páginas dentro de la web (prototipo); Expo a futuro | Simulador de la app de Wallbit: elegir qué cliente "soy", adherir (consentimiento + **vincular ARCA**), responder qué es cada contraparte, responder al contador con "Facturar este cobro" y ver mi cierre |
+| Cliente API | `openapi-typescript` generado desde el OpenAPI de FastAPI | Tipos de la web generados desde la API, sin drift |
 | Observabilidad | **Prometheus** + **Grafana** (+ exporters de Postgres, RabbitMQ, Celery) | Métricas técnicas y de negocio |
 | Orquestación local | **Docker Compose** + **Makefile** | `make up` levanta todo |
 | Calidad | pre-commit, pytest, Vitest, Playwright, Jest, k6, GitHub Actions | Ver [TESTING.md](TESTING.md) |
@@ -32,8 +32,12 @@
 │   │   ├── core/             # config, db, auth, logging, metrics
 │   │   └── modules/
 │   │       ├── clients/          # perfil fiscal del cliente
+│   │       ├── enrollment/       # adhesión, vincular ARCA, respuestas del usuario
+│   │       ├── arca/             # puertos a ARCA (mock en el prototipo, AfipSDK a futuro)
+│   │       ├── prompts/          # avisos y preguntas al usuario durante el mes
+│   │       ├── demo/             # reloj de demo (solo prototipo)
 │   │       ├── ingestion/        # movimientos Wallbit (read-only)
-│   │       ├── invoices/         # facturas declaradas/subidas
+│   │       ├── invoices/         # facturas importadas de ARCA
 │   │       ├── classification/   # reglas + correcciones del contador
 │   │       ├── tax_engine/       # motor fiscal PURO y versionado
 │   │       ├── alerts/           # reglas de riesgo
@@ -45,7 +49,6 @@
 │   ├── seeds/                # generador de datos ficticios
 │   └── tests/{unit,integration,contract}
 ├── web/                      # Next.js — consola del contador
-├── mobile/                   # Expo — app del usuario
 ├── packages/api-client/      # tipos TS generados desde OpenAPI
 ├── infra/
 │   ├── prometheus/prometheus.yml
@@ -73,7 +76,6 @@ Cada módulo de backend sigue: `router.py` → `service.py` → `repository.py`,
 | `beat` | — | dispara el cierre el día 1 de cada mes |
 | `flower` | 5555 | |
 | `web` | 3000 | consola del contador |
-| `mobile` | 8081 | Expo web · solo con `make up-mobile` (profile `mobile`) |
 | `prometheus` | 9090 | |
 | `grafana` | 3001 | dashboards provisionados |
 | `postgres-exporter`, `celery-exporter` | — | |
@@ -81,16 +83,22 @@ Cada módulo de backend sigue: `router.py` → `service.py` → `repository.py`,
 ## 4. Componentes de dominio
 
 ```
-Movimientos ─▶ Ingesta ─▶ Clasificación ─▶ Motor fiscal ─▶ Alertas ─▶ Cierre (estado) ─▶ Revisión ─▶ Notificación
-Facturas (usuario) ──────────────────────────┘                                            │
-                                                                       Audit log ◀────────┘ (todo evento)
+Durante el mes (continuo):
+Movimiento nuevo ─▶ Clasificación ─▶ ¿cobro sin factura? ─▶ aviso al usuario "Facturar este cobro"
+Factura de ARCA ──┘                └▶ ¿desconocido?       ─▶ pregunta "¿Quién es…?"
+
+Día 1 (consolidación):
+Clasificaciones del mes ─▶ Motor fiscal ─▶ Alertas ─▶ Cierre (estado) ─▶ Revisión ─▶ Notificación
+                                                                  Audit log ◀───────┘ (todo evento)
 ```
+
+**Clasificación continua, cierre mensual** (decisión 20): cada movimiento se clasifica cuando llega (y al vincular ARCA, los del mes en curso). Así el usuario factura o aclara en el momento, y lo que el día 1 le llega al contador es solo lo que quedó sin resolver. Una clasificación se recalcula si llega una factura, una respuesta del usuario o una regla global nueva; el cierre del día 1 toma el estado final.
 
 1. **Ingesta**: adaptador read-only sobre movimientos de Wallbit (en el prototipo, el seed). Cobros, transferencias, conversiones a stablecoin, gastos con tarjeta, con tipo de cambio de cada operación.
 2. **Clasificación**: función pura `classify(movement, ctx) -> Classification + Trace`, capas en orden (gana el primer match). **No hay reglas por cliente**: lo que solo sabe el usuario lo declara el usuario; el contador valida por excepción.
    1. **Estructural** (tipo de movimiento de Wallbit: conversión, tarjeta, interés, transferencia interna).
    2. **Reglas globales** (pocas, las mantiene el contador): plataformas conocidas (Deel, Upwork…), nombre del ordenante = titular (Payoneer/PayPal/Wise → `platform_withdrawal`; otro banco → `own_transfer`).
-   3. **Match con factura confirmada** (contraparte, monto con tolerancia por comisiones, ventana de fechas). Vincula cobro ↔ factura.
+   3. **Match con factura de ARCA** (contraparte, monto con tolerancia por comisiones, ventana de fechas; o vínculo explícito si se emitió con "Facturar este cobro"). Vincula cobro ↔ factura. Si no hay factura pero el usuario **ya le facturó antes a esa contraparte en ARCA**, es cobro por trabajo sin factura (historial ARCA) → aviso "Facturar este cobro".
    4. **Declaración del usuario por contraparte** (`counterparty_declarations`: `client_id` + contraparte normalizada → categoría). Se responde una vez y aplica a los movimientos futuros de esa contraparte.
    5. **`Suggester`** → solo *sugiere*, nunca clasifica: `Suggester.suggest(movement, ctx) -> Suggestion | None` (categoría, score, motivo). v1 = heurística determinista (recurrencia, memo, monto estable). Futuro: modelo ML local (scikit-learn/LightGBM) entrenado con declaraciones del usuario + validaciones del contador, versionado, con umbral mínimo y versión en la traza/snapshot. Pre-completa la pregunta al usuario y la sugerencia al contador. Clasificación automática solo en alta confianza y con precisión ya medida.
    6. **Pregunta al usuario** (`unclassified`, una por contraparte, en lenguaje simple: *Trabajo · Transferencia mía · Familia o regalo · Otro*). Si no responde al día 5, o responde "Otro" → pasa al contador (alerta bloqueante "sin clasificar"). El contador resuelve en "Resolver por alerta"; puede crear regla global.
@@ -99,7 +107,7 @@ Facturas (usuario) ────────────────────�
 
    Categorías: `service_income` (facturable) · `platform_withdrawal` (retiro de Payoneer/PayPal/Wise propio: facturable, el origen real son clientes) · `own_transfer` · `conversion` · `refund_reversal` · `investment_income` · `personal_transfer` · `card_expense` · `unclassified`. Cada clasificación guarda `source` (`structural | global_rule | invoice_match | user_declared | accountant | model`), `rule_id`/`declaration_id` y traza. Contrapartes normalizadas ("ACME CORP" = "Acme Corp."). Cada respuesta del usuario y cada validación del contador queda como etiqueta para el modelo futuro.
 3. **Motor fiscal** (v1: monotributo): `compute_close(profile, movements, invoices, params) -> CloseResult + Trace`. Parámetros (categorías, topes, cuotas, vencimientos) versionados con vigencia, cargados por el contador.
-4. **Alertas**: declaración "no facturable" con señales de riesgo, cobrado sin facturar, facturado sin cobro, movimientos sin clasificar, >80% del tope, supera categoría, supera máximo del régimen, facturas sin confirmar. Severidad `blocking | info`.
+4. **Alertas**: declaración "no facturable" con señales de riesgo, cobrado sin facturar, facturado sin cobro, movimientos sin clasificar, >80% del tope, supera categoría, supera máximo del régimen, preguntas sin responder. Severidad `blocking | waiting | info`.
 5. **Cierre**: máquina de estados por cliente y período (ver abajo).
 6. **Revisión**: aprobación individual o en lote; al aprobar se congela un **snapshot inmutable** (inputs, resultado, versión de motor y parámetros, aprobador, timestamp).
 7. **Notificaciones**: solo desde snapshot aprobado, con plantillas validadas por el contador.
@@ -108,7 +116,7 @@ Facturas (usuario) ────────────────────�
 ### Máquina de estados del cierre
 
 ```
-PENDING_DATA ──(usuario confirma facturas)──▶ COMPUTED
+PENDING_DATA ──(usuario responde)──▶ COMPUTED
 COMPUTED ──(sin bloqueantes)──▶ READY
 COMPUTED ──(con bloqueantes)──▶ IN_REVIEW ──(contador resuelve)──▶ READY
 READY ──(aprobación individual/lote)──▶ APPROVED ──▶ NOTIFIED
@@ -121,8 +129,8 @@ APPROVED/NOTIFIED ──(reabrir, con motivo)──▶ IN_REVIEW
 | Cola | Tasks | Por qué separada |
 |---|---|---|
 | `closing` | `start_period_close(period)` → fan-out `compute_client_close(client_id, period)` | Ráfaga del día 1; se escala horizontalmente |
-| `recompute` | `recompute_client_close` (factura nueva, corrección) | Interactivo: no debe esperar detrás de la ráfaga |
-| `notifications` | `send_close_notification`, `send_due_reminder` | Aislar fallos de envío |
+| `recompute` | `classify_movement` (movimiento nuevo), `reclassify_client_period` (factura de ARCA, respuesta, regla nueva), `recompute_client_close` (corrección del contador) | Interactivo: no debe esperar detrás de la ráfaga |
+| `notifications` | `send_close_notification`, `send_due_reminder`, `send_user_prompt` ("Facturar este cobro", "¿Quién es?") | Aislar fallos de envío |
 
 **Principio: Postgres es la fuente de verdad; RabbitMQ solo transporta disparadores.** Los mensajes llevan ids (`client_id`, `period`, `notification_id`), nunca datos. El worker siempre lee el estado actual de la DB. Si un mensaje se pierde o se duplica, no se pierde ni se corrompe nada.
 
@@ -133,7 +141,7 @@ APPROVED/NOTIFIED ──(reabrir, con motivo)──▶ IN_REVIEW
 - **Auditoría en la misma transacción que el cambio**, nunca vía cola. Correlación: el `request_id` de la API viaja en los headers del mensaje; los eventos de workers guardan actor `system`, `task_id` y `request_id`. Opcional: cadena de hashes (`prev_hash`) en `audit_events` para detectar alteraciones.
 - **Snapshot reproducible**: `inputs_hash` + versión del motor + versión de parámetros → se puede recalcular y verificar que da lo mismo.
 - **Escala**: más workers en `closing`; el primer cuello es Postgres → pool de conexiones por proceso (SQLAlchemy) en el prototipo, PgBouncer en producción; índices por `(client_id, period)`. Aprobación en lote en transacciones de ~100 cierres. Sin result backend de Celery: el avance se lee de la DB.
-- **Beat**: día 1 00:05 → `start_period_close`; día 6 00:00 (hora AR, vencido el día 5) → `expire_pending_confirmations` (`PENDING_DATA` → `IN_REVIEW`; preguntas de contraparte sin respuesta → contador); cada 5 min → `sweep_dirty_closes` y `sweep_pending_notifications`; día 17 → recordatorios de vencimiento.
+- **Beat**: día 1 00:05 → `start_period_close`; día 6 00:00 (hora AR, vencido el día 5) → `expire_pending_questions` (`PENDING_DATA` → `IN_REVIEW`; preguntas de contraparte sin respuesta → contador); cada 5 min → `sweep_dirty_closes` y `sweep_pending_notifications`; día 17 → recordatorios de vencimiento.
 
 ## 5.1 Cuellos de botella (y cómo se mitigan)
 
@@ -158,20 +166,20 @@ RabbitMQ no es cuello a esta escala.
 
 - No hay login ni roles: simplifica el desarrollo y la demo.
 - La consola web asume **un único contador** (`accountant-demo`).
-- La app mobile tiene un **selector de cliente** ("simular ser…") y opera sobre endpoints del cliente: `/api/v1/clients/{client_id}/...`.
-- El audit log igual registra al actor: header opcional `X-Actor` (default `accountant-demo` en web, `client:<id>` en mobile). Así la trazabilidad regulatoria se ve en la demo aunque no haya auth.
+- El simulador del usuario (dentro de la web) tiene un **selector de cliente** ("simular ser…") y opera sobre endpoints del cliente: `/api/v1/clients/{client_id}/...`.
+- El audit log igual registra al actor: header opcional `X-Actor` (default `accountant-demo` en la consola, `client:<id>` en el simulador del usuario). Así la trazabilidad regulatoria se ve en la demo aunque no haya auth.
 - En producción se usaría el SSO/identidad existente de Wallbit; queda fuera de alcance.
 
 ## 7.1 Prioridades de construcción
 
 1. **Backend** (motor fiscal, clasificación, alertas, cierre, aprobación en lote, workers) — foco principal.
 2. **Consola web del contador** — foco principal.
-3. **App mobile** — solo lo necesario para simular al usuario y disparar recálculos, salvo la pantalla "¿Quién es esta contraparte?", que es parte central de la clasificación y se hace bien.
+3. **Simulador del usuario (en la web)** — adhesión + ARCA, inicio con avisos, "¿Quién es?", "Facturar este cobro", mensajes y mi cierre. Expo queda para después del prototipo.
 
 ## 8. Supuestos
 
 - v1 solo **monotributistas** que facturan servicios al exterior (Factura E).
-- Las facturas las **confirma/declara el usuario**; Wallbit no se integra con ARCA en la v1.
+- Las facturas se leen de **ARCA**, que el usuario vincula al adherir (obligatorio). En el prototipo, ARCA está simulado; en la propuesta, AfipSDK (§10).
 - Lo cobrado fuera de Wallbit solo existe si el usuario lo declara.
 - Tipo de cambio para facturas: el que declara el usuario al facturar (validado contra el de la operación en Wallbit).
 - Montos en `Decimal` / `NUMERIC`; nunca `float`.
@@ -194,14 +202,14 @@ RabbitMQ no es cuello a esta escala.
 
 ## 10. Evolución: integración con ARCA vía AfipSDK (propuesta, fuera del prototipo)
 
-En la v1 Wallbit no ve ARCA: el usuario confirma o declara sus facturas (decisión 3). La propuesta es integrar ARCA con **AfipSDK** para dos cosas:
+Vincular ARCA es obligatorio para adherir (decisión 3). En el prototipo está simulado; la propuesta es integrarlo con **AfipSDK** para dos cosas:
 
-1. **Leer los comprobantes emitidos** por el usuario y hacer el match cobro ↔ factura automáticamente. La alerta "cobro sin facturar" pasa a basarse en datos de ARCA y el paso "confirmá tus facturas" desaparece para la mayoría.
+1. **Leer los comprobantes emitidos** por el usuario y hacer el match cobro ↔ factura automáticamente. La alerta "cobro sin facturar" se basa en datos de ARCA y no hay paso manual de confirmar facturas.
 2. **Emitir la Factura E desde la app**: un botón en el cobro detectado ("Facturar este cobro") que precarga cliente del exterior, monto y tipo de cambio. Cierra el ciclo en el mismo lugar donde el usuario ve el cobro.
 
-**Diseño para que entre sin reescribir**: las facturas llegan por un puerto `InvoiceSource` con dos implementaciones, `UserConfirmedSource` (v1) y `ArcaSource` (AfipSDK). La clasificación, el motor fiscal y las alertas no cambian: solo cambia de dónde salen las facturas y su `source` (`arca_issued` en vez de `confirmed_from_suggestion`). La emisión va por un puerto `InvoiceIssuer`.
+**Diseño para que entre sin reescribir**: las facturas llegan por un puerto `InvoiceSource` con dos implementaciones, `MockArcaSource` (prototipo: comprobantes de un ARCA ficticio en la DB) y `AfipSdkSource` (propuesta). La emisión va por un puerto `InvoiceIssuer` (`MockArcaIssuer` / `AfipSdkIssuer`). La clasificación, el motor fiscal y las alertas no cambian. Orígenes de factura: `arca_imported` y `arca_issued`.
 
-**En el prototipo**: mockeado. El botón "Facturar este cobro" existe en el usuario simulado y crea la factura con `source = arca_issued` sin llamar a ningún servicio.
+**En el prototipo**: simulado. Vincular ARCA importa los comprobantes del ARCA ficticio; "Facturar este cobro" crea el comprobante en ese ARCA y la factura con `source = arca_issued`, sin llamar a ningún servicio externo.
 
 **A resolver antes de implementarlo**:
 - **Datos fuera del sistema**: si AfipSDK opera como servicio en la nube, el CUIT y los comprobantes del usuario pasan por un tercero, en tensión con "los datos no salen de nuestros sistemas". Opciones: usar la librería en infraestructura propia, o acuerdo de procesamiento de datos con el proveedor. Decisión del área legal/regulatoria.

@@ -22,12 +22,12 @@ La herramienta calcula todo, el contador aprueba excepciones. Nada impositivo ll
 
 ## Stack
 
-FastAPI + Celery/RabbitMQ (+ Flower) + PostgreSQL · Next.js + shadcn/ui (consola del contador) · Expo (simulador de la app del usuario, prioridad baja) · Prometheus + Grafana · Docker Compose + Makefile · pytest, Vitest, Playwright, k6, pre-commit, GitHub Actions. **Sin autenticación** (decisión del prototipo).
+FastAPI + Celery/RabbitMQ (+ Flower) + PostgreSQL · Next.js + shadcn/ui (consola del contador y simulador de la app del usuario) · Prometheus + Grafana · Docker Compose + Makefile · pytest, Vitest, Playwright, k6, pre-commit, GitHub Actions. **Sin autenticación** (decisión del prototipo).
 
 ## Reglas de trabajo
 
 - Idioma: docs y UI en español rioplatense (voseo); código, commits y ramas en inglés.
-- Prioridad: backend y consola web > app mobile.
+- Prioridad: backend y consola web > simulador del usuario.
 - Dinero en `Decimal`/`NUMERIC`, nunca `float`. Fechas UTC, períodos `YYYY-MM`.
 - Motor fiscal, reglas de clasificación y alertas = funciones puras con traza.
 - Alertas bloqueantes bloquean la aprobación sin excepción.
