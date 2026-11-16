@@ -13,7 +13,8 @@ type BatchResult = { approved: number; skipped: number; replayed: boolean };
 
 export default function BatchPage() {
   const period = useWorkingPeriod();
-  const inbox = useInbox(period);
+  // Every ready close (up to 500 per page in the prototype).
+  const inbox = useInbox(period, { status: "READY", limit: 500 });
   const qc = useQueryClient();
   const [includeInfo, setIncludeInfo] = useState(true);
   const [attested, setAttested] = useState(false);
@@ -31,7 +32,7 @@ export default function BatchPage() {
   });
 
   if (!period || !inbox.data) return <p className="text-ink-muted">Cargando…</p>;
-  const ready = inbox.data.rows.filter((r) => r.status === "READY");
+  const ready = inbox.data.rows;
   const withInfo = ready.filter((r) => r.alerts.some((a) => a.severity === "info"));
   const total = includeInfo ? ready.length : ready.length - withInfo.length;
   const sorted = [...ready].sort((a, b) => b.alerts.length - a.alerts.length);

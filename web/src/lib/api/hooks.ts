@@ -13,10 +13,14 @@ export function useWorkingPeriod(): string | undefined {
   return clock.data ? workingPeriod(clock.data.today) : undefined;
 }
 
-export function useInbox(period: string | undefined) {
+export type InboxQuery = { status?: string | null; offset?: number; limit?: number };
+
+export function useInbox(period: string | undefined, { status, offset = 0, limit = 50 }: InboxQuery = {}) {
+  const params = new URLSearchParams({ period: period ?? "", offset: String(offset), limit: String(limit) });
+  if (status) params.set("status", status);
   return useQuery({
-    queryKey: ["inbox", period],
-    queryFn: () => api<S<"Inbox">>(`/period-closes?period=${period}`),
+    queryKey: ["inbox", period, status ?? null, offset, limit],
+    queryFn: () => api<S<"Inbox">>(`/period-closes?${params.toString()}`),
     enabled: !!period,
     // Closes are computed by Celery: poll a bit while anything may be recomputing.
     refetchInterval: 3_000,

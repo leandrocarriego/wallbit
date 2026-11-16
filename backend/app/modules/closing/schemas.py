@@ -41,6 +41,11 @@ class Inbox(BaseModel):
     started: bool
     today: date
     counts: dict[CloseStatus, int]
+    total: int
+    filtered_total: int
+    blocking_alerts: int
+    limit: int
+    offset: int
     rows: list[InboxRow]
 
 

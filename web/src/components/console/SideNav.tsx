@@ -11,7 +11,7 @@ export function SideNav() {
   const inbox = useInbox(period);
   const counts = inbox.data?.counts ?? {};
   const items = [
-    { href: "/consola", label: "Bandeja", n: inbox.data?.rows.length },
+    { href: "/consola", label: "Bandeja", n: inbox.data?.total },
     { href: "/consola/alertas", label: "Resolver por alerta" },
     { href: "/consola/lote", label: "Aprobar en lote", n: counts.READY },
   ];

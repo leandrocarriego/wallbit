@@ -113,3 +113,21 @@ def test_inbox_and_detail_endpoints(seeded: Session, api: TestClient) -> None:
 def test_inbox_is_empty_before_day_1(seeded: Session, api: TestClient) -> None:
     inbox = api.get("/api/v1/period-closes", params={"period": PERIOD}).json()
     assert inbox["started"] is False and inbox["rows"] == []
+
+
+def test_inbox_paginates_and_filters_with_totals(seeded: Session, api: TestClient) -> None:
+    onboarded(api)
+    start(seeded)
+    page = api.get("/api/v1/period-closes", params={"period": PERIOD, "limit": 1}).json()
+    assert (page["total"], page["filtered_total"], len(page["rows"])) == (2, 2, 1)
+    assert page["rows"][0]["status"] == "IN_REVIEW"  # priority order in SQL
+    assert page["blocking_alerts"] == 1
+    ready = api.get("/api/v1/period-closes", params={"period": PERIOD, "status": "READY"}).json()
+    assert [r["status"] for r in ready["rows"]] == ["READY"] and ready["filtered_total"] == 1
+
+
+def test_progress_counts_computed_closes(seeded: Session, api: TestClient) -> None:
+    onboarded(api)
+    start(seeded)
+    progress = api.get("/api/v1/period-closes/progress", params={"period": PERIOD}).json()
+    assert (progress["total"], progress["computed"], progress["dirty"]) == (2, 2, 0)

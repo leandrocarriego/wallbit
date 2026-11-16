@@ -5,17 +5,18 @@ from collections import Counter
 from decimal import Decimal
 
 from fastapi import APIRouter, Query
-from sqlalchemy import select
+from pydantic import BaseModel
+from sqlalchemy import case, func, select
 
 from app.core.errors import NotFoundError
 from app.core.http import DbSession
 from app.core.periods import local_date
-from app.modules.alerts.engine import CloseStatus
+from app.modules.alerts.engine import CloseStatus, Severity
 from app.modules.audit.models import AuditEvent
 from app.modules.classification.models import MovementClassification
 from app.modules.classification.service import counterparty_keys
 from app.modules.clients.models import Client
-from app.modules.closing.models import CloseAlert, PeriodClose
+from app.modules.closing.models import AlertStatus, CloseAlert, PeriodClose
 from app.modules.closing.schemas import (
     AlertOut,
     AuditRow,
@@ -62,13 +63,96 @@ def _alerts(session: DbSession, close_id: uuid.UUID) -> list[AlertOut]:
     return sorted((_alert_out(a) for a in rows), key=lambda a: SEVERITY_ORDER[a.severity])
 
 
+class Progress(BaseModel):
+    period: str
+    total: int
+    computed: int
+    dirty: int
+    by_status: dict[CloseStatus, int]
+
+
+PERIOD_PATTERN = r"^\d{4}-(0[1-9]|1[0-2])$"
+
+
+@router.get("/progress")
+def progress(session: DbSession, period: str = Query(pattern=PERIOD_PATTERN)) -> Progress:
+    """Cheap counts for monitoring the day-1 burst (used by the k6 scenario)."""
+    rows = session.execute(
+        select(
+            PeriodClose.status,
+            PeriodClose.computed_at.is_not(None),
+            PeriodClose.dirty,
+            func.count(),
+        )
+        .where(PeriodClose.period == period)
+        .group_by(PeriodClose.status, PeriodClose.computed_at.is_not(None), PeriodClose.dirty)
+    ).all()
+    by_status: Counter[CloseStatus] = Counter()
+    computed = dirty = 0
+    for status, was_computed, is_dirty, n in rows:
+        by_status[status] += n
+        computed += n if was_computed and not is_dirty else 0
+        dirty += n if is_dirty else 0
+    return Progress(
+        period=period,
+        total=sum(by_status.values()),
+        computed=computed,
+        dirty=dirty,
+        by_status={s: by_status.get(s, 0) for s in CloseStatus},
+    )
+
+
 @router.get("")
-def inbox(session: DbSession, period: str = Query(pattern=r"^\d{4}-(0[1-9]|1[0-2])$")) -> Inbox:
-    closes = list(session.scalars(select(PeriodClose).where(PeriodClose.period == period)))
-    clients = {c.id: c for c in session.scalars(select(Client))}
+def inbox(
+    session: DbSession,
+    period: str = Query(pattern=PERIOD_PATTERN),
+    status: CloseStatus | None = None,
+    limit: int = Query(default=50, ge=1, le=500),
+    offset: int = Query(default=0, ge=0),
+) -> Inbox:
+    """One page of the inbox, ordered by priority in SQL; totals come from aggregate queries."""
+    counts: dict[CloseStatus, int] = {
+        row_status: n
+        for row_status, n in session.execute(
+            select(PeriodClose.status, func.count())
+            .where(PeriodClose.period == period)
+            .group_by(PeriodClose.status)
+        )
+    }
+    blocking = session.scalar(
+        select(func.count())
+        .select_from(CloseAlert)
+        .join(PeriodClose, PeriodClose.id == CloseAlert.close_id)
+        .where(
+            PeriodClose.period == period,
+            CloseAlert.present.is_(True),
+            CloseAlert.status == AlertStatus.OPEN,
+            CloseAlert.severity == Severity.BLOCKING,
+        )
+    )
+    priority = case({s: i for s, i in STATUS_ORDER.items()}, value=PeriodClose.status)
+    query = (
+        select(PeriodClose, Client)
+        .join(Client, Client.id == PeriodClose.client_id)
+        .where(PeriodClose.period == period)
+        .order_by(priority, Client.full_name)
+        .limit(limit)
+        .offset(offset)
+    )
+    if status is not None:
+        query = query.where(PeriodClose.status == status)
+    page = session.execute(query).all()
+
+    alerts_by_close: dict[uuid.UUID, list[AlertOut]] = {}
+    if page:
+        for a in session.scalars(
+            select(CloseAlert).where(
+                CloseAlert.close_id.in_([pc.id for pc, _ in page]), CloseAlert.present.is_(True)
+            )
+        ):
+            alerts_by_close.setdefault(a.close_id, []).append(_alert_out(a))
     rows = []
-    for pc in closes:
-        c = clients[pc.client_id]
+    for pc, c in page:
         r = pc.result or {}
         rows.append(
             InboxRow(
@@ -81,16 +165,22 @@ def inbox(session: DbSession, period: str = Query(pattern=r"^\d{4}-(0[1-9]|1[0-2
                 invoiced_usd=Decimal(r["invoiced_by_currency"].get("USD", "0")) if r else None,
                 collected_usd=Decimal(r["collected_usd"]) if r else None,
                 cap_usage_pct=Decimal(r["cap_usage_pct"]) if r else None,
-                alerts=_alerts(session, pc.id),
+                alerts=sorted(
+                    alerts_by_close.get(pc.id, []), key=lambda a: SEVERITY_ORDER[a.severity]
+                ),
             )
         )
-    rows.sort(key=lambda row: (STATUS_ORDER[row.status], -len(row.alerts), row.full_name))
-    counts = Counter(row.status for row in rows)
+    total = sum(counts.values())
     return Inbox(
         period=period,
-        started=bool(closes),
+        started=total > 0,
         today=today(session),
         counts={s: counts.get(s, 0) for s in CloseStatus},
+        total=total,
+        filtered_total=counts.get(status, 0) if status else total,
+        blocking_alerts=blocking or 0,
+        limit=limit,
+        offset=offset,
         rows=rows,
     )
 

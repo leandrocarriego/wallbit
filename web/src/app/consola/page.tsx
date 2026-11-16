@@ -21,8 +21,9 @@ const HINT: Record<string, string> = {
 
 export default function InboxPage() {
   const period = useWorkingPeriod();
-  const inbox = useInbox(period);
   const [filter, setFilter] = useState<string | null>(null);
+  const [offset, setOffset] = useState(0);
+  const inbox = useInbox(period, { status: filter, offset });
   const qc = useQueryClient();
   const start = useMutation({
     mutationFn: () => api("/demo/day-1", { method: "POST", actor: ACCOUNTANT }),
@@ -52,9 +53,9 @@ export default function InboxPage() {
   }
 
   const plan = estimate(data);
-  const total = data.rows.length || 1;
+  const total = data.total || 1;
   const notified = data.counts.NOTIFIED ?? 0;
-  const rows = filter ? data.rows.filter((r) => r.status === filter) : data.rows;
+  const rows = data.rows;
   const firstReview = data.rows.find((r) => r.status === "IN_REVIEW");
 
   return (
@@ -71,7 +72,7 @@ export default function InboxPage() {
         )}
       </div>
 
-      {notified === data.rows.length ? (
+      {notified === data.total ? (
         <Card className="grid gap-1 border-status-done bg-status-done-tint p-4 text-status-done">
           <b className="text-[15px]">Cierre de {monthName(period)} completo</b>
           <span className="text-sm">Todos los clientes fueron aprobados y notificados. Cada aviso salió de un snapshot inmutable.</span>
@@ -106,7 +107,10 @@ export default function InboxPage() {
             <button
               key={s}
               aria-pressed={filter === s}
-              onClick={() => setFilter(filter === s ? null : s)}
+              onClick={() => {
+                setFilter(filter === s ? null : s);
+                setOffset(0);
+              }}
               className="grid gap-1.5 rounded-[10px] border border-border bg-surface p-3.5 text-left aria-pressed:border-ink aria-pressed:shadow-[inset_0_0_0_1px_var(--ink)]"
             >
               <StatusPill status={s} />
@@ -126,7 +130,7 @@ export default function InboxPage() {
             ))}
           </div>
           <span className="text-xs text-ink-muted">
-            {notified} de {data.rows.length} notificados.
+            {notified} de {data.total} notificados.
           </span>
         </div>
       </section>
@@ -185,6 +189,19 @@ export default function InboxPage() {
               )}
             </tbody>
           </table>
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-3.5 py-2.5 text-xs text-ink-muted">
+          <span>
+            Mostrando {data.filtered_total === 0 ? 0 : data.offset + 1}–{data.offset + rows.length} de {data.filtered_total} · orden: en revisión primero
+          </span>
+          <span className="flex gap-2">
+            <Button size="sm" disabled={data.offset === 0} onClick={() => setOffset(Math.max(0, data.offset - data.limit))}>
+              ‹ Anterior
+            </Button>
+            <Button size="sm" disabled={data.offset + data.limit >= data.filtered_total} onClick={() => setOffset(data.offset + data.limit)}>
+              Siguiente ›
+            </Button>
+          </span>
         </div>
       </Card>
     </>

@@ -358,6 +358,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/period-closes/progress": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Progress
+         * @description Cheap counts for monitoring the day-1 burst (used by the k6 scenario).
+         */
+        get: operations["progress_api_v1_period_closes_progress_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/period-closes": {
         parameters: {
             query?: never;
@@ -365,7 +385,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Inbox */
+        /**
+         * Inbox
+         * @description One page of the inbox, ordered by priority in SQL; totals come from aggregate queries.
+         */
         get: operations["inbox_api_v1_period_closes_get"];
         put?: never;
         post?: never;
@@ -648,6 +671,16 @@ export interface components {
             counts: {
                 [key: string]: number;
             };
+            /** Total */
+            total: number;
+            /** Filtered Total */
+            filtered_total: number;
+            /** Blocking Alerts */
+            blocking_alerts: number;
+            /** Limit */
+            limit: number;
+            /** Offset */
+            offset: number;
             /** Rows */
             rows: components["schemas"]["InboxRow"][];
         };
@@ -837,6 +870,21 @@ export interface components {
             message: string;
             /** Template Version */
             template_version: number;
+        };
+        /** Progress */
+        Progress: {
+            /** Period */
+            period: string;
+            /** Total */
+            total: number;
+            /** Computed */
+            computed: number;
+            /** Dirty */
+            dirty: number;
+            /** By Status */
+            by_status: {
+                [key: string]: number;
+            };
         };
         /**
          * PromptKind
@@ -1662,10 +1710,44 @@ export interface operations {
             };
         };
     };
+    progress_api_v1_period_closes_progress_get: {
+        parameters: {
+            query: {
+                period: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Progress"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     inbox_api_v1_period_closes_get: {
         parameters: {
             query: {
                 period: string;
+                status?: components["schemas"]["CloseStatus"] | null;
+                limit?: number;
+                offset?: number;
             };
             header?: never;
             path?: never;
