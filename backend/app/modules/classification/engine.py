@@ -3,7 +3,8 @@
 Layers, the first one that decides wins:
   1. structural (movement type)          4. user declaration per counterparty
   2. global rules (by priority)          5. suggestion (suggests only, never classifies)
-  3. ARCA invoice match                  6. unclassified → question to the user
+  3. ARCA invoice match (or invoice        6. unclassified → question to the user
+     history with that counterparty)
 """
 
 from collections.abc import Iterable, Sequence
@@ -36,6 +37,7 @@ class Source(StrEnum):
     STRUCTURAL = "structural"
     GLOBAL_RULE = "global_rule"
     INVOICE_MATCH = "invoice_match"
+    INVOICE_HISTORY = "invoice_history"
     USER_DECLARED = "user_declared"
     ACCOUNTANT = "accountant"
     NONE = "none"
@@ -84,6 +86,8 @@ class InvoiceIn:
     amount: Decimal
     currency: Currency
     issued_on: date
+    # Set when the invoice was issued from Wallbit for a specific payment ("Facturar este cobro").
+    for_movement_id: str | None = None
 
 
 @dataclass(frozen=True)
@@ -142,10 +146,12 @@ class ClassificationContext:
     invoices: Sequence[InvoiceIn] = ()
     declarations: Sequence[Declaration] = ()
     history: Sequence[PriorPayment] = ()
+    # Counterparties this client has invoiced before in ARCA: evidence of a work relationship.
+    invoiced_counterparties: frozenset[str] = frozenset()
     # Invoice match tolerances: platforms deduct fees.
     match_tolerance: Decimal = Decimal("0.05")
     match_days_before: int = 45
-    match_days_after: int = 15
+    match_days_after: int = 30
 
 
 STRUCTURAL: dict[MovementType, Category] = {
@@ -219,6 +225,11 @@ def _classify(m: MovementIn, ctx: ClassificationContext, used: set[str]) -> Clas
             trace=tuple(trace),
         )
     trace.append(TraceStep("factura", "sin factura que coincida"))
+    if m.counterparty_key and m.counterparty_key in ctx.invoiced_counterparties:
+        trace.append(TraceStep("historial ARCA", "ya le facturó antes a esta contraparte"))
+        return Classification(
+            m.id, Category.SERVICE_INCOME, Source.INVOICE_HISTORY, trace=tuple(trace)
+        )
 
     # 4. User declaration
     declaration = next(
@@ -266,9 +277,14 @@ def _rule_matches(c: RuleCondition, m: MovementIn, ctx: ClassificationContext) -
 
 
 def _match_invoice(m: MovementIn, ctx: ClassificationContext, used: set[str]) -> InvoiceIn | None:
+    explicit = next(
+        (i for i in ctx.invoices if i.for_movement_id == m.id and i.id not in used), None
+    )
+    if explicit is not None:
+        return explicit
     candidates = []
     for inv in ctx.invoices:
-        if inv.id in used or inv.currency != m.currency:
+        if inv.id in used or inv.currency != m.currency or inv.for_movement_id:
             continue
         if not m.counterparty_key or inv.counterparty_key != m.counterparty_key:
             continue

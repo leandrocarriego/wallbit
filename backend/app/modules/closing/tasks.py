@@ -11,9 +11,9 @@ def start_period_close(period: str | None = None) -> None:
     log.info("closing.start_period_close", period=period, status="not_implemented")
 
 
-@shared_task(name="closing.expire_pending_confirmations")
-def expire_pending_confirmations() -> None:
-    log.info("closing.expire_pending_confirmations", status="not_implemented")
+@shared_task(name="closing.expire_pending_questions")
+def expire_pending_questions() -> None:
+    log.info("closing.expire_pending_questions", status="not_implemented")
 
 
 @shared_task(name="recompute.sweep_dirty_closes")

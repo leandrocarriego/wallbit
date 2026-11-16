@@ -1,4 +1,4 @@
-"""Type E invoices (export of services) for each client."""
+"""Type E invoices (export of services) for each client, always sourced from ARCA."""
 
 import uuid
 from datetime import date, datetime
@@ -21,8 +21,8 @@ from app.core.enums import Currency
 
 
 class InvoiceSource(StrEnum):
-    CONFIRMED_FROM_SUGGESTION = "confirmed_from_suggestion"  # Wallbit suggested the payment
-    DECLARED_BY_USER = "declared_by_user"  # entered manually by the user
+    ARCA_IMPORTED = "arca_imported"  # read from ARCA (issued elsewhere)
+    ARCA_ISSUED = "arca_issued"  # issued from Wallbit ("Facturar este cobro")
 
 
 class Invoice(UUIDPrimaryKey, Timestamps, Base):
@@ -34,6 +34,9 @@ class Invoice(UUIDPrimaryKey, Timestamps, Base):
     )
 
     client_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("clients.id"), index=True)
+    arca_document_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("arca_documents.id"), unique=True
+    )
     number: Mapped[str] = mapped_column(String(20))  # "E 0001-00000043"
     issued_on: Mapped[date]
     period: Mapped[str] = period_column()
@@ -41,7 +44,8 @@ class Invoice(UUIDPrimaryKey, Timestamps, Base):
     customer_name: Mapped[str] = mapped_column(String(200))
     amount: Mapped[Decimal]
     currency: Mapped[Currency] = mapped_column(str_enum(Currency, 4))
-    fx_rate_ars: Mapped[Decimal] = mapped_column(FxRate)  # rate declared by the user when invoicing
+    fx_rate_ars: Mapped[Decimal] = mapped_column(FxRate)  # rate stated on the invoice
     source: Mapped[InvoiceSource] = mapped_column(str_enum(InvoiceSource, 30))
-    collected_outside_wallbit: Mapped[bool] = mapped_column(default=False)
-    confirmed_at: Mapped[datetime]
+    received_at: Mapped[datetime]
+    # Payment this invoice was issued for from Wallbit, if any (explicit match).
+    issued_for_movement_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("movements.id"))

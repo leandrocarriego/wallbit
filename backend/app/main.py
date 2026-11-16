@@ -5,6 +5,9 @@ from fastapi import FastAPI, Request, Response
 from prometheus_client import CONTENT_TYPE_LATEST, Counter, Histogram, generate_latest
 
 from app.core.db import ping_db
+from app.core.errors import DomainError, domain_error_handler
+from app.modules.demo.router import router as demo_router
+from app.modules.enrollment.router import router as user_router
 from app.worker import celery_app  # noqa: F401  (the API enqueues tasks with this config)
 
 app = FastAPI(
@@ -13,6 +16,10 @@ app = FastAPI(
     openapi_url="/api/v1/openapi.json",
     docs_url="/docs",
 )
+
+app.add_exception_handler(DomainError, domain_error_handler)
+app.include_router(user_router)
+app.include_router(demo_router)
 
 REQUESTS = Counter("http_requests_total", "Requests HTTP", ["method", "route", "status"])
 LATENCY = Histogram(

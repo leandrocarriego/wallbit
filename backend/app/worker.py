@@ -60,7 +60,7 @@ celery_app.conf.update(
             "schedule": crontab(minute=5, hour=0, day_of_month=1),
         },
         "expire-pending-confirmations": {
-            "task": "closing.expire_pending_confirmations",
+            "task": "closing.expire_pending_questions",
             "schedule": crontab(minute=0, hour=0, day_of_month=6),
         },
         "sweep-dirty-closes": {

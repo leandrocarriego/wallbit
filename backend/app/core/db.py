@@ -41,6 +41,7 @@ class Base(DeclarativeBase):
         Decimal: Money,
         datetime: DateTime(timezone=True),
         dict[str, Any]: JSONB,
+        list[dict[str, str]]: JSONB,
     }
 
 

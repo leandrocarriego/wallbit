@@ -5,6 +5,7 @@ If Postgres is not available, integration tests are skipped (e.g. pre-push witho
 
 import os
 from collections.abc import Iterator
+from typing import TYPE_CHECKING
 
 import pytest
 from alembic import command
@@ -13,6 +14,9 @@ from sqlalchemy import Engine, create_engine, text
 from sqlalchemy.engine import make_url
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
+
+if TYPE_CHECKING:
+    from fastapi.testclient import TestClient
 
 from app.core.config import get_settings
 
@@ -68,3 +72,35 @@ def session(engine: Engine) -> Iterator[Session]:
         with Session(bind=conn, join_transaction_mode="create_savepoint") as s:
             yield s
         trans.rollback()
+
+
+@pytest.fixture
+def api(session: Session) -> Iterator["TestClient"]:
+    """API client whose requests share the test's rolled-back transaction."""
+    from fastapi.testclient import TestClient
+
+    from app.core.http import db_session
+    from app.main import app
+
+    def override() -> Iterator[Session]:
+        yield session
+
+    app.dependency_overrides[db_session] = override
+    with TestClient(app) as client:
+        yield client
+    app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def seeded(session: Session) -> Session:
+    from seeds import run
+
+    run.seed_parameters(session)
+    run.seed_rules(session)
+    run.seed_martina(session)
+    run.seed_mateo(session)
+    from app.modules.demo.models import DemoClock
+
+    session.add(DemoClock(id=1, today=run.DEMO_TODAY))
+    session.flush()
+    return session

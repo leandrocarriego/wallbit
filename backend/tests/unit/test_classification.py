@@ -174,3 +174,45 @@ def test_every_classification_carries_a_trace() -> None:
         "declaración",
         "sugerencia",
     ]
+
+
+def test_unbilled_payment_is_billable_when_client_invoiced_that_counterparty_before() -> None:
+    ctx = ClassificationContext(CLIENT, invoiced_counterparties=frozenset({"acme corp"}))
+    c = classify_period([incoming("m1", "1200", "Acme Corp")], ctx)[0]
+    assert (c.category, c.source, c.invoice_id) == (
+        Category.SERVICE_INCOME,
+        Source.INVOICE_HISTORY,
+        None,
+    )
+
+
+def test_invoice_issued_for_a_payment_matches_it_even_weeks_later() -> None:
+    late = InvoiceIn(
+        "43",
+        "E-43",
+        "acme corp",
+        Decimal("1200"),
+        Currency.USD,
+        date(2026, 11, 20),
+        for_movement_id="m1",
+    )
+    c = classify_period(
+        [incoming("m1", "1200", "Acme Corp")], ClassificationContext(CLIENT, invoices=[late])
+    )[0]
+    assert c.invoice_id == "43"
+
+
+def test_invoice_issued_for_another_payment_is_not_reused() -> None:
+    other = InvoiceIn(
+        "43",
+        "E-43",
+        "acme corp",
+        Decimal("1200"),
+        Currency.USD,
+        date(2026, 10, 12),
+        for_movement_id="m9",
+    )
+    c = classify_period(
+        [incoming("m1", "1200", "Acme Corp")], ClassificationContext(CLIENT, invoices=[other])
+    )[0]
+    assert c.invoice_id is None
