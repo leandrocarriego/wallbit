@@ -16,7 +16,7 @@
 
 | Escenario | Simula | Umbrales (thresholds) |
 |---|---|---|
-| `month_close_burst` | Día 1: dispara cierre de 2.000 clientes y mide hasta que todos salen de `PENDING/COMPUTED` | 100% procesado < 10 min con 2 workers; 0 tasks en DLQ |
+| `month_close_burst` | Día 1: genera 2.000 clientes con la factory de volumen (no el seed de demo), dispara el cierre y mide hasta que todos salen de `PENDING/COMPUTED` | 100% procesado < 10 min con 2 workers; 0 tasks en DLQ |
 | `accountant_inbox` | 5 contadores navegando bandeja y detalle | p95 < 300 ms, errores < 1% |
 | `batch_approve` | Aprobar 500 cierres READY en una operación | < 5 s, idempotente ante reintento |
 | `users_confirm_invoices` | 2.000 usuarios confirmando facturas en 1 h (ráfaga de recálculos) | p95 API < 500 ms, cola `recompute` drenada < 1 min |
