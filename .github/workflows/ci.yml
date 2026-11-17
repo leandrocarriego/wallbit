@@ -66,10 +66,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - run: make up
-      - run: make seed
+      # Install before `make up`: the web container mounts an anonymous volume on
+      # web/node_modules, and if the folder does not exist yet Docker creates it as root,
+      # so a later `npm ci` on the runner fails with EACCES.
       - run: npm ci && npx playwright install --with-deps chromium
         working-directory: web
+      - run: make up
+      - run: make seed
       - run: npm run e2e
         working-directory: web
       - if: failure()
