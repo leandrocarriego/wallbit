@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.core.after_commit import enqueue_after_commit
 from app.core.errors import DomainError, NotFoundError
+from app.core.locks import lock_client
 from app.modules.alerts.engine import CloseStatus, Severity
 from app.modules.audit.service import record
 from app.modules.classification.engine import Category
@@ -60,6 +61,7 @@ def set_alert_status(
     today: date,
 ) -> PeriodClose:
     """Resolve an alert (or undo it). Resolutions are kept across recomputes by alert key."""
+    lock_client(session, close.client_id)
     _editable(close)
     alert = get_alert(session, close, alert_id)
     alert.status = AlertStatus.RESOLVED if resolved else AlertStatus.OPEN
@@ -91,6 +93,7 @@ def classify_movement(
     today: date,
 ) -> PeriodClose:
     """The accountant decides what a movement is. `category=None` undoes the decision."""
+    lock_client(session, close.client_id)
     _editable(close)
     movement = session.get(Movement, movement_id)
     if movement is None or movement.client_id != close.client_id or movement.period != close.period:
@@ -153,6 +156,20 @@ def messages(session: Session, alert_id: uuid.UUID) -> list[AlertMessage]:
             .where(AlertMessage.alert_id == alert_id)
             .order_by(AlertMessage.created_at)
         )
+    )
+
+
+def record_view(session: Session, close: PeriodClose, *, actor: str) -> None:
+    """Opening a close is the start of a review: approval minus the last view is review time."""
+    record(
+        session,
+        actor=actor,
+        action="close.viewed",
+        entity_type="period_close",
+        entity_id=close.id,
+        client_id=close.client_id,
+        period=close.period,
+        after={"status": close.status.value, "version": close.version},
     )
 
 

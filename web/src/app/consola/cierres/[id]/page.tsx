@@ -82,6 +82,11 @@ export default function CloseDetailPage() {
       },
     });
 
+  // Each opening is audited as close.viewed: it is the start of the review time metric.
+  useEffect(() => {
+    api(`/period-closes/${id}/views`, { method: "POST", actor: ACCOUNTANT }).catch(() => undefined);
+  }, [id]);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const el = e.target as HTMLElement | null;

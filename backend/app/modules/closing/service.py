@@ -13,10 +13,11 @@ from datetime import UTC, date, datetime
 from decimal import Decimal
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.core.after_commit import enqueue_after_commit
+from app.core.locks import lock_client
 from app.core.periods import first_day, period_of, shift
 from app.modules.alerts import engine as alerts_engine
 from app.modules.alerts.engine import CloseStatus
@@ -96,6 +97,7 @@ def mark_dirty(session: Session, client_id: uuid.UUID, period: str) -> PeriodClo
 def compute_client_close(
     session: Session, client_id: uuid.UUID, period: str, *, today: date, actor: str
 ) -> PeriodClose:
+    lock_client(session, client_id)
     close = session.scalars(
         select(PeriodClose)
         .where(PeriodClose.client_id == client_id, PeriodClose.period == period)
@@ -107,6 +109,8 @@ def compute_client_close(
     assert client is not None and client.category is not None
 
     now = datetime.now(UTC)
+    if deadline_passed(period, today):
+        _expire_questions(session, client.id, period, now)
     reclassify(session, client, period, actor=actor, now=now)
     keys = counterparty_keys(session)
     movements = list(
@@ -208,32 +212,46 @@ def compute_client_close(
 
 
 def expire_pending_questions(session: Session, period: str, *, actor: str) -> int:
-    """Day 5: unanswered "¿Quién es?" questions go to the accountant."""
-    now = datetime.now(UTC)
-    prompts = list(
-        session.scalars(
-            select(UserPrompt).where(
-                UserPrompt.period == period,
-                UserPrompt.kind == PromptKind.WHO_IS,
-                UserPrompt.status == PromptStatus.OPEN,
-            )
+    """Day 5: unanswered "¿Quién es?" questions go to the accountant.
+
+    Only marks the open closes dirty: each recompute expires its client's questions under the
+    client lock. Expiring them all here, in one transaction, deadlocked with a user answering
+    at the same time (prompt row → close row here, close row → prompt row there).
+    """
+    pending = session.scalar(
+        select(func.count())
+        .select_from(UserPrompt)
+        .where(
+            UserPrompt.period == period,
+            UserPrompt.kind == PromptKind.WHO_IS,
+            UserPrompt.status == PromptStatus.OPEN,
         )
     )
-    for p in prompts:
-        p.status = PromptStatus.EXPIRED
-        p.closed_at = now
     record(
         session,
         actor=actor,
         action="prompts.expired",
         entity_type="period",
         period=period,
-        after={"expired": len(prompts)},
+        after={"expired": pending or 0},
     )
     # The deadline changes every open close (unclassified becomes blocking).
-    for client_id in _open_closes(session, period):
+    for client_id in sorted(_open_closes(session, period)):
         mark_dirty(session, client_id, period)
-    return len(prompts)
+    return pending or 0
+
+
+def _expire_questions(session: Session, client_id: uuid.UUID, period: str, now: datetime) -> None:
+    for p in session.scalars(
+        select(UserPrompt).where(
+            UserPrompt.client_id == client_id,
+            UserPrompt.period == period,
+            UserPrompt.kind == PromptKind.WHO_IS,
+            UserPrompt.status == PromptStatus.OPEN,
+        )
+    ):
+        p.status = PromptStatus.EXPIRED
+        p.closed_at = now
 
 
 def previous_period(today: date) -> str:

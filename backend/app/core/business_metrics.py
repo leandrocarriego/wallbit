@@ -9,8 +9,9 @@ from collections.abc import Iterator
 import structlog
 from prometheus_client.core import GaugeMetricFamily
 from prometheus_client.registry import Collector
-from sqlalchemy import func, select
+from sqlalchemy import bindparam, case, func, select, text
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
 
 from app.core.db import SessionLocal
 from app.modules.clients.models import Client
@@ -97,10 +98,15 @@ class BusinessMetricsCollector(Collector):
             stage = GaugeMetricFamily(
                 "cierre_clients", "Usuarios por etapa de adhesión", labels=["stage"]
             )
+            # Counted in SQL: loading every client into memory grows with the user base.
+            stage_expr = case(
+                (Client.enrolled_at.is_(None), "offer"),
+                (Client.arca_linked_at.is_(None), "link_arca"),
+                else_="active",
+            )
             counts = {"offer": 0, "link_arca": 0, "active": 0}
-            for c in s.scalars(select(Client)):
-                key = "offer" if c.enrolled_at is None else "active" if c.is_active else "link_arca"
-                counts[key] += 1
+            for key, n in s.execute(select(stage_expr, func.count()).group_by(stage_expr)):
+                counts[key] = n
             for key, n in counts.items():
                 stage.add_metric([key], n)
             yield stage
@@ -140,3 +146,99 @@ class BusinessMetricsCollector(Collector):
                 or 0,
             )
             yield pending
+
+            yield from _productivity(s)
+
+
+# What counts as accountant work. Users act as `client:<id>` and never appear here.
+ACCOUNTANT_ACTIONS = (
+    "close.viewed",
+    "alert.resolved",
+    "alert.reopened",
+    "movement.classified_by_accountant",
+    "movement.override_removed",
+    "alert.message_posted",
+    "close.approved",
+    "close.batch_approved",
+)
+# A view older than this before the approval is an abandoned tab, not a review.
+MAX_REVIEW_SECONDS = 2 * 3600
+
+# Review time of an individually approved close: from the accountant's last view of it to the
+# approval. Batch approvals are excluded (they take no per-close time).
+REVIEW_SECONDS = text(
+    """
+    WITH sessions AS (
+      SELECT s.period,
+             EXTRACT(EPOCH FROM s.approved_at - (
+               SELECT max(e.created_at) FROM audit_events e
+               WHERE e.action = 'close.viewed' AND e.period = s.period
+                 AND e.entity_id = s.close_id AND e.actor = s.approved_by
+                 AND e.created_at <= s.approved_at)) AS seconds
+      FROM close_snapshots s
+      WHERE s.batch_key IS NULL
+    )
+    SELECT period, count(*), avg(seconds),
+           percentile_cont(0.5) WITHIN GROUP (ORDER BY seconds),
+           percentile_cont(0.9) WITHIN GROUP (ORDER BY seconds)
+    FROM sessions
+    WHERE seconds IS NOT NULL AND seconds <= :max_seconds
+    GROUP BY period
+    """
+)
+
+ACTIONS_BY_ACTOR = text(
+    """
+    SELECT period, actor, action, count(*) FROM audit_events
+    WHERE action IN :actions AND period IS NOT NULL AND actor NOT LIKE 'client:%'
+    GROUP BY period, actor, action
+    """
+).bindparams(bindparam("actions", expanding=True))
+
+# Hours from the start of the close (day 1) to the last approval and the last notification.
+MILESTONES = text(
+    """
+    SELECT pc.period,
+           EXTRACT(EPOCH FROM max(s.approved_at) - min(pc.created_at)) / 3600,
+           EXTRACT(EPOCH FROM max(n.sent_at) - min(pc.created_at)) / 3600
+    FROM period_closes pc
+    LEFT JOIN close_snapshots s ON s.close_id = pc.id
+    LEFT JOIN notifications n ON n.snapshot_id = s.id
+    GROUP BY pc.period
+    """
+)
+
+
+def _productivity(s: Session) -> Iterator[GaugeMetricFamily]:
+    review = GaugeMetricFamily(
+        "cierre_review_seconds",
+        "Tiempo de revisión por cierre aprobado uno por uno (última apertura → aprobación)",
+        labels=["period", "stat"],
+    )
+    for period, n, avg, p50, p90 in s.execute(REVIEW_SECONDS, {"max_seconds": MAX_REVIEW_SECONDS}):
+        review.add_metric([period, "count"], n)
+        review.add_metric([period, "avg"], float(avg))
+        review.add_metric([period, "p50"], float(p50))
+        review.add_metric([period, "p90"], float(p90))
+    yield review
+
+    actions = GaugeMetricFamily(
+        "cierre_accountant_actions",
+        "Acciones del contador por período, persona y tipo",
+        labels=["period", "actor", "action"],
+    )
+    for period, actor, action, n in s.execute(ACTIONS_BY_ACTOR, {"actions": ACCOUNTANT_ACTIONS}):
+        actions.add_metric([period, actor, action], n)
+    yield actions
+
+    milestones = GaugeMetricFamily(
+        "cierre_period_hours",
+        "Horas desde el inicio del cierre (día 1) hasta cada hito",
+        labels=["period", "milestone"],
+    )
+    for period, last_approval, last_notification in s.execute(MILESTONES):
+        if last_approval is not None:
+            milestones.add_metric([period, "last_approval"], float(last_approval))
+        if last_notification is not None:
+            milestones.add_metric([period, "last_notification"], float(last_notification))
+    yield milestones

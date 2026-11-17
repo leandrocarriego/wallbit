@@ -35,6 +35,7 @@ export async function api<T>(path: string, { method = "GET", body, actor, header
     const problem = (await response.json().catch(() => ({}))) as { code?: string; detail?: string };
     throw new ApiError(response.status, problem.code ?? "error", problem.detail ?? "Algo salió mal. Probá de nuevo.");
   }
+  if (response.status === 204) return undefined as T;
   return (await response.json()) as T;
 }
 

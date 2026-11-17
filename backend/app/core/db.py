@@ -12,10 +12,12 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sess
 from app.core.config import get_settings
 
 # Per-process pool (see ARCHITECTURE §5): bounded and predictable. PgBouncer is for production.
+POOL_SIZE, POOL_OVERFLOW = 5, 5
+POOL_CAPACITY = POOL_SIZE + POOL_OVERFLOW
 engine = create_engine(
     get_settings().database_url,
-    pool_size=5,
-    max_overflow=5,
+    pool_size=POOL_SIZE,
+    max_overflow=POOL_OVERFLOW,
     pool_pre_ping=True,
 )
 SessionLocal = sessionmaker(bind=engine, expire_on_commit=False)

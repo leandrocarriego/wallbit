@@ -7,6 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.errors import DomainError, NotFoundError
+from app.core.locks import lock_client
 from app.core.periods import period_of
 from app.modules.arca.service import IssueRequest, MockArcaIssuer, MockArcaSource
 from app.modules.audit.service import record
@@ -69,6 +70,7 @@ def enroll(
 def link_arca(
     session: Session, client: Client, *, actor: str, now: datetime, today: date
 ) -> list[Invoice]:
+    lock_client(session, client.id)
     if client.enrolled_at is None:
         raise DomainError("not_enrolled", "Primero hay que adherir al servicio.")
     source = MockArcaSource(session)
@@ -126,6 +128,7 @@ def answer_who_is(
     actor: str,
     now: datetime,
 ) -> UserPrompt:
+    lock_client(session, client.id)
     prompt = _open_prompt(session, client, prompt_id, PromptKind.WHO_IS)
     movement = session.get(Movement, prompt.movement_id)
     assert movement is not None
@@ -173,6 +176,7 @@ def invoice_movement(
     today: date,
 ) -> Invoice:
     """ "Facturar este cobro": issue the invoice in ARCA (mock), import it and reclassify."""
+    lock_client(session, client.id)
     if not client.is_active:
         raise DomainError("not_active", "Hay que adherir y vincular ARCA para facturar.")
     movement = session.get(Movement, movement_id)

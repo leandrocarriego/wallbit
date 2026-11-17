@@ -928,6 +928,11 @@
       "title": "Plataforma",
       "type": "link",
       "url": "/d/cierre-plataforma"
+    },
+    {
+      "title": "Productividad del contador",
+      "type": "link",
+      "url": "/d/cierre-contador"
     }
   ]
 }

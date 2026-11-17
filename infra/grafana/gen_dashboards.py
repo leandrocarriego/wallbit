@@ -49,7 +49,8 @@ def dashboard(uid, title, desc, panels, variables=(), refresh="10s"):
             "time": {"from": "now-1h", "to": "now"}, "templating": {"list": list(variables)},
             "annotations": {"list": []}, "panels": panels, "links": [
                 {"title": "Cierre del mes", "type": "link", "url": "/d/cierre-negocio"},
-                {"title": "Plataforma", "type": "link", "url": "/d/cierre-plataforma"}]}
+                {"title": "Plataforma", "type": "link", "url": "/d/cierre-plataforma"},
+                {"title": "Productividad del contador", "type": "link", "url": "/d/cierre-contador"}]}
 
 RED = [{"color": "green", "value": None}, {"color": "red", "value": 1}]
 AMBER = [{"color": "green", "value": None}, {"color": "orange", "value": 1}]
@@ -128,7 +129,47 @@ platform = dashboard("cierre-plataforma", "Plataforma",
     stat(18, "Postgres arriba", 18, 32, 6, 'max(pg_up)', thresholds=[{"color": "red", "value": None}, {"color": "green", "value": 1}], h=7),
 ])
 
-for name, d in [("cierre-del-mes.json", business), ("plataforma.json", platform)]:
+hours_var = {"name": "horas", "label": "Horas de revisión por contador al mes", "type": "textbox",
+             "query": "16", "current": {"text": "16", "value": "16"}, "hide": 0}
+RS = 'cierre_review_seconds{period="$period",stat="%s"}'
+# Share of closes that needed a person: approved one by one over all approved.
+SHARE = (f'(sum(cierre_approvals{{period="$period",mode="individual"}}) / sum(cierre_approvals{P}))')
+ACCOUNTANTS = f'count(count by (actor) (cierre_accountant_actions{P}))'
+
+accountant = dashboard("cierre-contador", "Productividad del contador",
+    "Cuánto trabajo humano lleva el cierre y cuántos clientes puede atender cada contador. "
+    "Sale de la auditoría: cada apertura de un cierre (close.viewed) y cada acción quedan registradas con quién y cuándo.", [
+    row(1, "Tiempo de revisión", 0),
+    stat(2, "Minutos por revisión (mediana)", 0, 1, 6, f'{RS % "p50"} / 60',
+         "Desde la última vez que el contador abrió el cierre hasta que lo aprobó. Solo cierres aprobados uno por uno.", unit="m"),
+    stat(3, "Minutos por revisión (p90)", 6, 1, 6, f'{RS % "p90"} / 60', "Los casos difíciles.", unit="m"),
+    stat(4, "Cierres revisados a mano", 12, 1, 6, RS % "count", "Aprobados uno por uno con apertura registrada."),
+    stat(5, "% que necesitó al contador", 18, 1, 6, f'100 * {SHARE}',
+         "Aprobados uno por uno sobre el total aprobado. Lo demás salió en lote. Es la palanca principal de escala.", unit="percent",
+         thresholds=[{"color": "green", "value": None}, {"color": "orange", "value": 25}, {"color": "red", "value": 40}]),
+    row(6, "Capacidad", 5),
+    stat(7, "Clientes por contador (capacidad)", 0, 6, 8,
+         f'($horas * 3600) / (sum({RS % "avg"}) * {SHARE})',
+         "Horas de revisión al mes ÷ (minutos promedio por revisión × % que necesita al contador). "
+         "Las horas se ajustan arriba. Referencia de la propuesta: 3,5 min y 24% dan ~1.100 clientes con 16 h.",
+         thresholds=[{"color": "red", "value": None}, {"color": "orange", "value": 500}, {"color": "green", "value": 1000}], h=6),
+    stat(8, "Clientes por contador (hoy)", 8, 6, 8, f'sum(cierre_clients{{stage="active"}}) / {ACCOUNTANTS}',
+         "Usuarios activos ÷ contadores que trabajaron el período.", h=6),
+    stat(9, "Horas hasta el último aviso", 16, 6, 8, f'cierre_period_hours{{period="$period",milestone="last_notification"}}',
+         "Desde que arrancó el cierre (día 1) hasta que salió el último aviso. Objetivo: todo notificado antes del día 7 (~144 h).",
+         unit="h", h=6),
+    row(10, "Quién hizo qué", 12),
+    panel(11, "Acciones por contador", "table", 0, 13, 14, 9,
+          [(f'sum by (actor, action) (cierre_accountant_actions{P})', "")],
+          "close.viewed: aperturas · alert.resolved: alertas resueltas · movement.classified_by_accountant: clasificaciones · close.approved: aprobaciones (incluye cada cierre aprobado dentro de un lote) · close.batch_approved: lotes.",
+          options={"showHeader": True},
+          transformations=[{"id": "organize", "options": {"excludeByName": {"Time": True},
+                            "renameByName": {"actor": "Contador", "action": "Acción", "Value": "Cantidad"}}}]),
+    bars(12, "Aprobaciones por modo", 14, 13, 10, 9, [(f'sum by (mode) (cierre_approvals{P})', "{{mode}}")],
+         "individual: revisados a mano · batch: en lote."),
+], [period_var, hours_var], refresh="30s")
+
+for name, d in [("cierre-del-mes.json", business), ("plataforma.json", platform), ("productividad.json", accountant)]:
     with open(f"{OUT}/{name}", "w") as f:
         json.dump(d, f, ensure_ascii=False, indent=2)
         f.write("\n")

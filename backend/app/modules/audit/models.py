@@ -7,7 +7,7 @@ import uuid
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import PrimaryKeyConstraint, String, func, text
+from sqlalchemy import Index, PrimaryKeyConstraint, String, func, text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.db import Base
@@ -19,6 +19,7 @@ class AuditEvent(Base):
         PrimaryKeyConstraint(
             "id", "created_at", name="pk_audit_events"
         ),  # includes the partition key
+        Index("ix_audit_events_action_period_entity", "action", "period", "entity_id"),
         {"postgresql_partition_by": "RANGE (created_at)"},
     )
 

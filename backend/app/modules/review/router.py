@@ -179,6 +179,12 @@ def message_preview(close_id: uuid.UUID, session: DbSession) -> PreviewOut:
     return PreviewOut(**service.preview(session, service.get_close(session, close_id)))
 
 
+@router.post(P + "/{close_id}/views", status_code=204)
+def viewed(close_id: uuid.UUID, session: DbSession, actor: Actor) -> None:
+    """The console opened this close. Feeds the accountant productivity metrics."""
+    service.record_view(session, service.get_close(session, close_id), actor=actor)
+
+
 @router.post(P + "/{close_id}/approve")
 def approve(close_id: uuid.UUID, body: ApproveIn, session: DbSession, actor: Actor) -> SnapshotOut:
     snapshot = service.approve(

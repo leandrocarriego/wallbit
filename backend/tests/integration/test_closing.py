@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from app.modules.alerts.engine import AlertType, CloseStatus, Severity
 from app.modules.closing import service
 from app.modules.closing.models import CloseAlert, PeriodClose
+from app.modules.prompts.models import PromptKind, PromptStatus, UserPrompt
 
 from .test_user_flow import ACTOR, client_id, onboard
 
@@ -95,6 +96,9 @@ def test_unanswered_question_blocks_after_day_5(seeded: Session, api: TestClient
     assert service.expire_pending_questions(seeded, PERIOD, actor="test") == 1
     service.compute_client_close(seeded, uuid.UUID(martina), PERIOD, today=DAY_6, actor="system")
     assert alerts_of(seeded, close_of(seeded, martina))[AlertType.UNCLASSIFIED] is Severity.BLOCKING
+    # The recompute (under the client lock) is what expires the question.
+    statuses = seeded.scalars(select(UserPrompt.status).where(UserPrompt.kind == PromptKind.WHO_IS))
+    assert list(statuses) == [PromptStatus.EXPIRED]
 
 
 def test_inbox_and_detail_endpoints(seeded: Session, api: TestClient) -> None:
