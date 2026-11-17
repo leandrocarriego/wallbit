@@ -1,0 +1,1024 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cierre · Propuesta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap">
+<style>
+/* Tokens from the "Cierre" design system (light theme: a deck is projected and printed). */
+:root {
+  --bg: #F6F7F9; --surface: #FFFFFF; --surface-muted: #F0F2F5; --border: #DDE1E7; --border-input: #8A93A2;
+  --ink: #131821; --ink-muted: #586171; --ink-subtle: #646C7B;
+  --primary: #1F5FD6; --primary-ink: #FFFFFF; --primary-tint: #E8EFFC;
+  --pending: #8A4B00; --pending-tint: #FDF0D5;
+  --review: #B42318; --review-tint: #FDE7E4;
+  --ready: #5B3CC4; --ready-tint: #EEE9FC;
+  --done: #146C43; --done-tint: #DDF3E7;
+  --night: #131821; --night-2: #1C2230; --night-ink: #E7EAF0; --night-muted: #9AA3B2;
+  --sans: Geist, Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: #0B0E14; }
+body { font-family: var(--sans); color: var(--ink); -webkit-font-smoothing: antialiased; overflow: hidden; }
+
+/* ---------- Deck frame ---------- */
+.stage { position: fixed; inset: 0; display: grid; place-items: center; }
+.deck { position: relative; width: 1280px; height: 720px; transform-origin: center; }
+.slide {
+  position: absolute; inset: 0; background: var(--bg); overflow: hidden;
+  padding: 56px 72px; display: flex; flex-direction: column; gap: 28px;
+  opacity: 0; visibility: hidden; transition: opacity .35s ease, transform .35s ease; transform: translateY(8px);
+}
+.slide.on { opacity: 1; visibility: visible; transform: none; }
+.slide.dark { background: var(--night); color: var(--night-ink); }
+.chrome {
+  position: fixed; left: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: 12px;
+  padding: 10px 16px; font: 500 12px var(--mono); color: #9AA3B2; z-index: 5;
+}
+.chrome button { font: inherit; color: #E7EAF0; background: #1C2230; border: 1px solid #2A303B; border-radius: 6px; padding: 6px 12px; cursor: pointer; }
+.chrome button:hover { border-color: #6E9BF3; }
+.chrome .bar { flex: 1; height: 3px; background: #2A303B; border-radius: 99px; overflow: hidden; }
+.chrome .bar i { display: block; height: 100%; background: #6E9BF3; width: 0; transition: width .3s; }
+.hint { opacity: .7; }
+
+/* ---------- Type ---------- */
+.kicker { font: 600 12px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--primary); }
+.dark .kicker { color: #6E9BF3; }
+h1, h2, h3 { margin: 0; text-wrap: balance; letter-spacing: -.02em; }
+h1 { font-size: 64px; line-height: 1.02; font-weight: 700; }
+h2 { font-size: 40px; line-height: 1.1; font-weight: 650; }
+h3 { font-size: 20px; line-height: 1.25; font-weight: 600; letter-spacing: -.01em; }
+p { margin: 0; }
+.lead { font-size: 22px; line-height: 1.45; color: var(--ink-muted); max-width: 820px; }
+.dark .lead { color: var(--night-muted); }
+.small { font-size: 14px; line-height: 1.45; color: var(--ink-muted); }
+.mono { font-family: var(--mono); }
+.head { display: flex; flex-direction: column; gap: 10px; }
+.foot { margin-top: auto; font-size: 13px; color: var(--ink-subtle); }
+
+/* ---------- Building blocks ---------- */
+.row { display: flex; gap: 20px; }
+.grid { display: grid; gap: 20px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px; }
+.pill { display: inline-flex; align-items: center; gap: 6px; font: 500 13px var(--sans); padding: 4px 10px; border-radius: 99px; white-space: nowrap; }
+.pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.p-pending { color: var(--pending); background: var(--pending-tint); }
+.p-review { color: var(--review); background: var(--review-tint); }
+.p-ready { color: var(--ready); background: var(--ready-tint); }
+.p-done { color: var(--done); background: var(--done-tint); }
+.p-blue { color: var(--primary); background: var(--primary-tint); }
+.icon { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; flex: none; }
+.icon svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.shot { border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 18px 50px rgba(15,20,30,.14); display: block; }
+.tap { cursor: pointer; transition: transform .15s, box-shadow .15s, border-color .15s, background .15s; }
+.tap:hover { transform: translateY(-2px); }
+
+/* ---------- 1 · Cover ---------- */
+.cover { justify-content: center; gap: 32px; }
+.cover .glow { position: absolute; right: -160px; top: -160px; width: 620px; height: 620px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(110,155,243,.22), rgba(110,155,243,0) 65%); }
+.cover h1 span { color: #6E9BF3; }
+.cover .meta { display: flex; gap: 12px; flex-wrap: wrap; }
+.cover .meta .pill { background: #1C2230; color: var(--night-ink); }
+.cover .meta .pill::before { background: #6E9BF3; }
+
+/* ---------- 2 · Problem ---------- */
+.versus { display: grid; grid-template-columns: 1fr 80px 1fr; align-items: stretch; flex: 1; }
+.vs-card { border-radius: 18px; padding: 32px; display: flex; flex-direction: column; gap: 18px; }
+.vs-card.before { background: var(--surface); border: 1px dashed var(--border-input); }
+.vs-card.after { background: var(--night); color: var(--night-ink); }
+.big { font: 600 96px/1 var(--mono); letter-spacing: -.04em; }
+.vs-card ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; font-size: 17px; }
+.vs-card li { display: flex; gap: 10px; align-items: baseline; }
+.vs-card.before li::before { content: "✕"; color: var(--review); font-weight: 700; }
+.vs-card.after li::before { content: "✓"; color: #5FD39A; font-weight: 700; }
+.arrow { display: grid; place-items: center; color: var(--ink-subtle); font-size: 40px; }
+.people { display: flex; flex-wrap: wrap; gap: 4px; }
+.people i { width: 9px; height: 9px; border-radius: 50%; background: var(--border-input); }
+.after .people i { background: #6E9BF3; width: 6px; height: 6px; }
+
+/* ---------- 3 · Idea ---------- */
+.motto { font-size: 44px; line-height: 1.12; font-weight: 650; letter-spacing: -.02em; max-width: 1000px; }
+.motto em { font-style: normal; color: var(--primary); }
+.actors { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.actor { display: flex; flex-direction: column; gap: 14px; }
+.actor ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; font-size: 15px; line-height: 1.4; color: var(--ink-muted); }
+.actor .tag { font: 600 12px var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+
+/* ---------- Dividers ---------- */
+.divider { justify-content: center; }
+.divider .num { font: 600 160px/1 var(--mono); color: #2A303B; letter-spacing: -.05em; }
+.divider h2 { font-size: 60px; }
+
+/* ---------- 5 · Scope ---------- */
+.scope { display: grid; grid-template-columns: 1.35fr 1fr; gap: 24px; flex: 1; }
+.chips { display: flex; flex-wrap: wrap; gap: 10px; align-content: flex-start; }
+.chip { font-size: 15px; padding: 10px 14px; border-radius: 10px; background: var(--surface); border: 1px solid var(--border); display: flex; gap: 8px; align-items: center; }
+.chip b { font-weight: 600; }
+.in .chip { border-color: #B9E3CC; }
+.in .chip::before { content: "✓"; color: var(--done); font-weight: 700; }
+.out .chip { background: transparent; border-style: dashed; color: var(--ink-muted); }
+.out .chip::before { content: "→"; color: var(--ink-subtle); }
+.col-title { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+
+/* ---------- 6 · Weeks ---------- */
+.weeks { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+.week { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 10px; min-height: 182px; text-align: left; font: inherit; color: inherit; }
+.week .n { font: 600 12px var(--mono); color: var(--ink-subtle); letter-spacing: .08em; }
+.week h3 { font-size: 17px; }
+.week p { font-size: 13.5px; line-height: 1.4; color: var(--ink-muted); }
+.week .lane { margin-top: auto; height: 6px; border-radius: 99px; }
+.week.sel { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-tint); }
+.week.launch { background: var(--night); color: var(--night-ink); border-color: var(--night); }
+.week.launch p { color: var(--night-muted); }
+.week.launch .n { color: #6E9BF3; }
+.detail { display: grid; grid-template-columns: 220px 1fr 1fr; gap: 24px; align-items: start; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px 24px; }
+.detail ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; font-size: 15px; line-height: 1.4; }
+.detail .lbl { font: 600 11px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-subtle); margin-bottom: 8px; }
+.legend { display: flex; gap: 16px; font-size: 13px; color: var(--ink-muted); align-items: center; }
+.legend i { display: inline-block; width: 18px; height: 6px; border-radius: 99px; margin-right: 6px; vertical-align: middle; }
+
+/* ---------- 7 · Month timeline ---------- */
+.timeline { position: relative; display: grid; grid-template-columns: 1.4fr repeat(4, 1fr); gap: 0; margin-top: 8px; }
+.timeline::before { content: ""; position: absolute; left: 2%; right: 2%; top: 27px; height: 3px; background: linear-gradient(90deg, var(--border) 0 22%, var(--border-input) 22%); border-radius: 99px; }
+.tl { position: relative; display: flex; flex-direction: column; align-items: center; gap: 10px; background: none; border: 0; font: inherit; color: inherit; padding: 0 6px; }
+.tl .dot { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; background: var(--surface); border: 2px solid var(--border-input); font: 600 15px var(--mono); position: relative; z-index: 1; transition: all .2s; }
+.tl .when { font: 600 13px var(--mono); color: var(--ink-subtle); }
+.tl h3 { font-size: 16px; text-align: center; }
+.tl.sel .dot { background: var(--primary); border-color: var(--primary); color: #fff; transform: scale(1.08); box-shadow: 0 0 0 6px var(--primary-tint); }
+.tl.continuous .dot { border-style: dashed; }
+.who { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.who .card { display: flex; flex-direction: column; gap: 8px; padding: 18px 20px; }
+.who .tag { font: 600 11px var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+.who p { font-size: 16px; line-height: 1.45; }
+
+/* ---------- 8 · Funnel ---------- */
+.funnel { display: flex; flex-direction: column; gap: 9px; flex: 1; }
+.layer { display: grid; grid-template-columns: 270px 1fr 70px; align-items: center; gap: 16px; }
+.layer .name { font-size: 15.5px; font-weight: 600; }
+.layer .name small { display: block; font-weight: 400; color: var(--ink-muted); font-size: 13px; margin-top: 2px; }
+.track { height: 30px; background: var(--surface-muted); border-radius: 8px; overflow: hidden; }
+.fill { height: 100%; border-radius: 8px; width: 0; transition: width 1s cubic-bezier(.2,.8,.2,1); }
+.on .fill { width: var(--w); }
+.layer .val { font: 600 18px var(--mono); text-align: right; }
+.layer.human .name { color: var(--review); }
+
+/* ---------- 10 · Demo screens ---------- */
+.screens { display: grid; grid-template-columns: 210px 1fr 210px; gap: 28px; align-items: center; flex: 1; min-height: 0; }
+.screens figure { margin: 0; display: flex; flex-direction: column; gap: 12px; align-items: center; }
+.screens figcaption { font-size: 14px; color: var(--ink-muted); text-align: center; line-height: 1.4; }
+.screens figcaption b { color: var(--ink); display: block; font-size: 15px; }
+.step { font: 600 12px var(--mono); width: 26px; height: 26px; border-radius: 50%; display: inline-grid; place-items: center; background: var(--night); color: #fff; margin-bottom: 4px; }
+.phone { width: 160px; border-radius: 22px; }
+.desk { width: 100%; }
+
+/* ---------- 11 · Console callouts ---------- */
+.annot { position: relative; flex: 1; min-height: 0; }
+.annot img { width: 760px; position: absolute; left: 0; top: 0; }
+.callouts { position: absolute; right: 0; top: 0; width: 330px; display: flex; flex-direction: column; gap: 12px; }
+.callout { display: flex; gap: 12px; align-items: flex-start; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px; text-align: left; font: inherit; color: inherit; }
+.callout .k { flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--primary); color: #fff; font: 600 13px var(--mono); display: grid; place-items: center; }
+.callout p { font-size: 14px; line-height: 1.4; color: var(--ink-muted); }
+.callout b { color: var(--ink); display: block; font-size: 15px; margin-bottom: 2px; }
+.marker { position: absolute; width: 30px; height: 30px; border-radius: 50%; background: var(--primary); color: #fff; font: 600 14px var(--mono); display: grid; place-items: center; box-shadow: 0 0 0 5px rgba(31,95,214,.22); transition: transform .2s; }
+.callout.sel { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-tint); }
+.marker.sel { transform: scale(1.25); }
+
+/* ---------- 12 · States ---------- */
+.fsm { display: flex; align-items: center; gap: 0; justify-content: space-between; }
+.state { border-radius: 16px; padding: 18px 16px; min-width: 176px; text-align: left; border: 2px solid transparent; font: inherit; display: flex; flex-direction: column; gap: 6px; }
+.state .code { font: 500 11.5px var(--mono); opacity: .8; }
+.state h3 { font-size: 18px; }
+.state.sel { border-color: currentColor; box-shadow: 0 10px 30px rgba(15,20,30,.12); }
+.edge { flex: 1; height: 2px; background: var(--border-input); position: relative; margin: 0 6px; }
+.edge::after { content: ""; position: absolute; right: -2px; top: -5px; border: 6px solid transparent; border-left: 8px solid var(--border-input); border-right: 0; }
+.state-info { display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; }
+.state-info .card { display: flex; flex-direction: column; gap: 10px; }
+.state-info p { font-size: 17px; line-height: 1.5; }
+.rule { display: flex; gap: 14px; align-items: center; background: var(--night); color: var(--night-ink); border-radius: 14px; padding: 18px 22px; font-size: 17px; line-height: 1.45; }
+.rule b { color: #fff; }
+
+/* ---------- 13 · Guarantees ---------- */
+.guar { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; align-content: center; flex: 1; }
+.guar .card { display: flex; gap: 18px; align-items: flex-start; padding: 30px; }
+.guar p { font-size: 17px; line-height: 1.45; color: var(--ink-muted); margin-top: 6px; }
+
+/* ---------- 14 · Scale ---------- */
+.arch { display: flex; align-items: center; gap: 10px; }
+.node { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; font-size: 14px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.node b { font-size: 15px; }
+.node span { color: var(--ink-muted); font-size: 12.5px; }
+.node.db { background: var(--night); color: var(--night-ink); border-color: var(--night); }
+.node.db span { color: var(--night-muted); }
+.link { color: var(--ink-subtle); font: 600 16px var(--mono); }
+.queues { display: flex; flex-direction: column; gap: 4px; }
+.queues .q { font: 500 11.5px var(--mono); background: var(--pending-tint); color: var(--pending); border-radius: 6px; padding: 3px 8px; }
+.bars { display: flex; flex-direction: column; gap: 14px; }
+.bar-row { display: grid; grid-template-columns: 320px 1fr 150px; gap: 16px; align-items: center; }
+.bar-row .lbl { font-size: 15.5px; font-weight: 600; }
+.bar-row .lbl small { display: block; font-weight: 400; font-size: 13px; color: var(--ink-muted); }
+.bar-row .res { font: 600 17px var(--mono); text-align: right; }
+.bar-row .res small { display: block; font: 400 12px var(--sans); color: var(--ink-subtle); }
+
+/* ---------- 15 · Capacity ---------- */
+.cap { display: grid; grid-template-columns: 1fr 1.05fr; gap: 28px; flex: 1; }
+.metric-list { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.metric { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; }
+.metric b { font-size: 15px; }
+.metric span { font-size: 13px; color: var(--ink-muted); line-height: 1.35; }
+.calc { background: var(--night); color: var(--night-ink); border-radius: 18px; padding: 26px 28px; display: flex; flex-direction: column; gap: 18px; }
+.calc label { display: grid; grid-template-columns: 1fr 90px; gap: 6px 12px; font-size: 15px; align-items: center; }
+.calc label output { font: 600 16px var(--mono); text-align: right; color: #fff; }
+.calc input[type=range] { grid-column: 1 / -1; width: 100%; accent-color: #6E9BF3; }
+.result { display: flex; align-items: baseline; gap: 12px; }
+.result .big { font-size: 76px; color: #fff; }
+.compare { display: flex; flex-direction: column; gap: 8px; }
+.compare .cbar { height: 12px; border-radius: 99px; background: #2A303B; overflow: hidden; }
+.compare .cbar i { display: block; height: 100%; border-radius: 99px; transition: width .4s; }
+.compare .crow { display: grid; grid-template-columns: 110px 1fr 64px; gap: 10px; align-items: center; font: 500 13px var(--mono); color: var(--night-muted); }
+
+/* ---------- 17 · Roadmap ---------- */
+.horizons { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; flex: 1; position: relative; }
+.horizon { padding: 26px 26px 24px; display: flex; flex-direction: column; gap: 14px; border-left: 1px solid var(--border); }
+.horizon:first-child { border-left: 0; padding-left: 0; }
+.horizon .when { font: 600 13px var(--mono); color: var(--primary); letter-spacing: .06em; text-transform: uppercase; }
+.horizon h3 { font-size: 24px; }
+.horizon ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.horizon li { font-size: 15.5px; line-height: 1.4; display: flex; gap: 10px; }
+.horizon li::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 2px; background: var(--primary); margin-top: 7px; }
+.horizon .goal { margin-top: auto; font-size: 14px; color: var(--ink-muted); border-top: 1px dashed var(--border); padding-top: 12px; }
+
+/* ---------- 18 · ML ---------- */
+.ml { display: grid; grid-template-columns: 470px 1fr; gap: 32px; flex: 1; align-items: center; }
+.loop { position: relative; width: 470px; height: 470px; }
+.loop svg.ring { position: absolute; inset: 0; }
+.lnode { position: absolute; width: 150px; transform: translate(-50%, -50%); text-align: center; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 12px 10px; font: inherit; color: inherit; display: flex; flex-direction: column; gap: 3px; align-items: center; }
+.lnode b { font-size: 14.5px; }
+.lnode span { font-size: 12px; color: var(--ink-muted); line-height: 1.3; }
+.lnode.sel { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-tint); }
+.lnode.human { background: var(--ready-tint); border-color: #CFC3F6; }
+.loop .center { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); text-align: center; width: 160px; }
+.loop .center b { font-size: 15px; display: block; }
+.loop .center span { font-size: 12.5px; color: var(--ink-muted); }
+.phases { display: flex; flex-direction: column; gap: 10px; }
+.phase { display: grid; grid-template-columns: 34px 1fr; gap: 14px; align-items: start; }
+.phase .k { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font: 600 13px var(--mono); background: var(--surface); border: 1px solid var(--border-input); }
+.phase.now .k { background: var(--done); color: #fff; border-color: var(--done); }
+.phase b { font-size: 16px; }
+.phase p { font-size: 14px; color: var(--ink-muted); line-height: 1.4; margin-top: 2px; }
+.guard { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+
+/* ---------- 19 · Data loop ---------- */
+.cycle { display: flex; align-items: center; gap: 10px; }
+.cstep { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; display: flex; gap: 12px; align-items: center; }
+.cstep .icon { width: 38px; height: 38px; }
+.cstep b { font-size: 16px; display: block; }
+.cstep span { font-size: 13px; color: var(--ink-muted); }
+.cases { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; align-content: center; flex: 1; }
+.case { display: grid; grid-template-columns: 1fr 28px 1fr; gap: 10px; align-items: center; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px 22px; }
+.case .sig { font-size: 16px; line-height: 1.4; }
+.case .sig small, .case .act small { display: block; font: 600 10.5px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-subtle); margin-bottom: 4px; }
+.case .act { font-size: 16px; line-height: 1.4; font-weight: 500; }
+.case .to { color: var(--primary); font-size: 20px; text-align: center; }
+
+/* ---------- 20 · Success ---------- */
+.kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+.kpi .v { font: 600 34px var(--mono); letter-spacing: -.03em; }
+.kpi .v small { font-size: 16px; color: var(--ink-subtle); }
+.kpi b { font-size: 15px; }
+.kpi span { font-size: 13px; color: var(--ink-muted); line-height: 1.35; }
+.risk { display: grid; grid-template-columns: 1fr 1.4fr; gap: 24px; background: var(--review-tint); border-radius: 16px; padding: 22px 26px; align-items: center; }
+.risk h3 { color: var(--review); }
+.risk ul { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 8px 18px; font-size: 14.5px; }
+.risk li::before { content: "→ "; color: var(--review); font-weight: 700; }
+
+/* ---------- Closing ---------- */
+.closing { justify-content: center; gap: 36px; }
+.closing .cmd { font: 500 22px var(--mono); background: var(--night-2); border: 1px solid #2A303B; border-radius: 12px; padding: 18px 22px; display: inline-flex; gap: 14px; align-items: center; width: fit-content; }
+.closing .cmd span { color: #6E9BF3; }
+
+
+/* ---------- Limits ---------- */
+.limits { display: grid; grid-template-columns: 1fr 1fr 0.9fr; gap: 18px; flex: 1; min-height: 0; }
+.lim { display: flex; flex-direction: column; gap: 14px; }
+.lim-h { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.hbars { display: flex; flex-direction: column; gap: 9px; }
+.hb { display: grid; grid-template-columns: 84px 1fr 70px; gap: 8px; align-items: center; font: 500 12.5px var(--mono); color: var(--ink-muted); }
+.hb .t { height: 18px; background: var(--surface-muted); border-radius: 5px; position: relative; }
+.hb .t i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 5px; }
+.hb .t .limit { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--ink); }
+.hb b { font-weight: 600; color: var(--ink); text-align: right; }
+.hb.bad b { color: var(--review); }
+.grow { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; font-size: 14.5px; }
+.grow span { background: var(--surface); border: 1px solid var(--border); border-radius: 99px; padding: 6px 12px; color: var(--ink-muted); }
+
+/* ---------- Dashboards ---------- */
+.dash { display: flex; flex-direction: column; gap: 14px; flex: 1; min-height: 0; }
+.dash-tabs { display: flex; gap: 8px; }
+.dash-tab { font: 500 15px var(--sans); padding: 8px 16px; border-radius: 99px; border: 1px solid var(--border-input); background: var(--surface); color: var(--ink); cursor: pointer; }
+.dash-tab.sel { background: var(--night); color: #fff; border-color: var(--night); }
+.dash-body { display: grid; grid-template-columns: 800px 1fr; gap: 24px; flex: 1; min-height: 0; }
+.dash-body img { width: 800px; height: 490px; object-fit: cover; object-position: top left; }
+.dash-side { display: flex; flex-direction: column; gap: 12px; }
+.dash-side .q { font-size: 19px; font-weight: 600; line-height: 1.3; letter-spacing: -.01em; }
+.dash-side ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.dash-side li { font-size: 14.5px; line-height: 1.4; color: var(--ink-muted); display: flex; gap: 10px; }
+.dash-side li::before { content: ""; flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--primary); margin-top: 7px; }
+.dash-side .note { font-size: 13.5px; line-height: 1.45; color: var(--pending); background: var(--pending-tint); border-radius: 10px; padding: 10px 12px; }
+.dash-side .src { font: 500 12px var(--mono); color: var(--ink-subtle); margin-top: auto; }
+.print-only { display: none !important; }
+
+/* ---------- Budget ---------- */
+.budget { display: grid; grid-template-columns: 1fr 1fr 330px; gap: 18px; flex: 1; min-height: 0; }
+.bcol { display: flex; flex-direction: column; gap: 12px; }
+.bhead { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.lines { display: flex; flex-direction: column; }
+.line { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.line span { font-size: 15px; font-weight: 500; }
+.line small { grid-column: 1; font-size: 12.5px; color: var(--ink-muted); line-height: 1.35; }
+.line b { font: 600 16px var(--mono); text-align: right; grid-row: 1 / span 2; grid-column: 2; align-self: center; }
+.btotal { margin-top: auto; display: flex; justify-content: space-between; align-items: baseline; padding-top: 6px; }
+.btotal span { font-size: 15px; color: var(--ink-muted); }
+.btotal b { font: 600 30px var(--mono); letter-spacing: -.02em; }
+.bside { gap: 16px; padding: 22px 22px; }
+.per { display: flex; flex-direction: column; gap: 2px; margin-top: auto; }
+.per .big { font-size: 56px; color: #fff; }
+
+/* ---------- Print / PDF: every slide on its own page, final state ---------- */
+@page { size: 1280px 720px; margin: 0; }
+@media print {
+  html, body { overflow: visible; background: none; height: auto; }
+  .stage { position: static; display: block; padding: 0 !important; }
+  .deck { transform: none !important; width: auto; height: auto; }
+  .slide { position: relative; opacity: 1; visibility: visible; transform: none; width: 1280px; height: 720px; break-after: page; transition: none; }
+  .fill { width: var(--w); transition: none; }
+  .chrome { display: none; }
+  .print-only { display: flex !important; }
+  .deck > .slide:last-child { break-after: auto; }
+  .dash-tabs { display: none; }
+  .tap:hover { transform: none; }
+}
+</style>
+</head>
+<body>
+<div class="stage"><div class="deck" id="deck">
+
+<!-- 1 · Cover -->
+<section class="slide dark cover">
+  <div class="glow"></div>
+  <div class="kicker">Servicio contable · Wallbit</div>
+  <h1>De 30 a <span>cientos</span> de clientes<br>por contador.</h1>
+  <p class="lead">Cierre: la herramienta con la que el contador cierra el mes de cada freelancer. Qué entra en las primeras 6 semanas, qué muestra el prototipo y hacia dónde va.</p>
+  <div class="meta">
+    <span class="pill">1 · Las primeras 6 semanas</span>
+    <span class="pill">2 · El prototipo</span>
+    <span class="pill">3 · A largo plazo</span>
+  </div>
+</section>
+
+<!-- 2 · Problem -->
+<section class="slide">
+  <div class="head"><div class="kicker">El problema</div><h2>Hoy el contador trabaja cliente por cliente.</h2></div>
+  <div class="versus">
+    <div class="vs-card before">
+      <div class="small mono">HOY</div>
+      <div class="big">30</div>
+      <div class="people" id="ppl30"></div>
+      <ul>
+        <li>Resúmenes y capturas por WhatsApp</li>
+        <li>Separa a mano qué es ingreso</li>
+        <li>Planillas, mes a mes</li>
+      </ul>
+    </div>
+    <div class="arrow">→</div>
+    <div class="vs-card after">
+      <div class="small mono" style="color:var(--night-muted)">CON CIERRE</div>
+      <div class="big">500+</div>
+      <div class="people" id="ppl500"></div>
+      <ul>
+        <li>Los movimientos ya están en Wallbit</li>
+        <li>Las facturas llegan solas desde ARCA (AfipSDK)</li>
+        <li>El contador solo mira excepciones</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 3 · Idea -->
+<section class="slide">
+  <div class="kicker">La idea</div>
+  <p class="motto">La herramienta <em>calcula todo</em>.<br>El contador <em>aprueba excepciones</em>.<br>El usuario <em>deja de preocuparse</em>.</p>
+  <div class="actors">
+    <div class="card actor">
+      <div class="row" style="align-items:center;gap:12px"><div class="icon" style="background:var(--primary-tint);color:var(--primary)"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 9h6v6H9z"/></svg></div><span class="tag" style="color:var(--primary)">La herramienta, sola</span></div>
+      <ul><li>Clasifica cada cobro al llegar</li><li>Cruza cobros con facturas de ARCA</li><li>Calcula la cuota y el tope de 12 meses</li></ul>
+    </div>
+    <div class="card actor">
+      <div class="row" style="align-items:center;gap:12px"><div class="icon" style="background:var(--ready-tint);color:var(--ready)"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg></div><span class="tag" style="color:var(--ready)">El contador</span></div>
+      <ul><li>Resuelve solo lo que la herramienta no puede</li><li>Aprueba en lote lo que está limpio</li><li>Firma todo lo que llega al usuario</li></ul>
+    </div>
+    <div class="card actor">
+      <div class="row" style="align-items:center;gap:12px"><div class="icon" style="background:var(--done-tint);color:var(--done)"><svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2.5"/><path d="M11 18h2"/></svg></div><span class="tag" style="color:var(--done)">El usuario</span></div>
+      <ul><li>Factura o aclara en el momento del cobro</li><li>Recibe cuánto pagar y cuándo</li><li>Siempre revisado por su contador</li></ul>
+    </div>
+  </div>
+</section>
+
+<!-- 4 · Divider 1 -->
+<section class="slide dark divider">
+  <div class="num">01</div>
+  <h2>Las primeras 6 semanas</h2>
+  <p class="lead">Un engineer y un contador. El objetivo: usuarios reales cerrando un mes de verdad.</p>
+</section>
+
+<!-- 5 · Scope -->
+<section class="slide">
+  <div class="head"><div class="kicker">Alcance de la v1</div><h2>Un solo caso, de punta a punta.</h2>
+    <p class="lead" style="font-size:19px">Monotributistas que facturan servicios al exterior con Factura E: la mayoría de los usuarios y un cálculo acotado.</p></div>
+  <div class="scope">
+    <div class="in">
+      <div class="col-title"><span class="pill p-done">Entra</span></div>
+      <div class="chips">
+        <span class="chip"><b>Adhesión</b> + vincular ARCA</span>
+        <span class="chip">Clasificación de cada cobro al llegar</span>
+        <span class="chip">Facturas leídas de ARCA con <b>AfipSDK</b></span>
+        <span class="chip">Avisos al usuario en el momento</span>
+        <span class="chip"><b>Cierre del día 1</b> automático</span>
+        <span class="chip">Motor fiscal del monotributo</span>
+        <span class="chip">Bandeja con plan del día</span>
+        <span class="chip">Revisión guiada con teclado</span>
+        <span class="chip"><b>Aprobación en lote</b></span>
+        <span class="chip">Aviso al usuario aprobado</span>
+        <span class="chip">Auditoría y snapshots</span>
+        <span class="chip">Métricas del contador</span>
+      </div>
+    </div>
+    <div class="out">
+      <div class="col-title"><span class="pill p-blue">Después</span></div>
+      <div class="chips">
+        <span class="chip">Emitir Factura E desde la app (AfipSDK)</span>
+        <span class="chip">Modelo de ML local</span>
+        <span class="chip">Ingresos Brutos</span>
+        <span class="chip">Otros regímenes</span>
+        <span class="chip">Reabrir un cierre</span>
+        <span class="chip">Resolución masiva por contraparte</span>
+        <span class="chip">App nativa</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 · Weeks -->
+<section class="slide" data-weeks>
+  <div class="head"><div class="kicker">Plan · tocá cada semana</div><h2>Seis semanas, un cierre real al final.</h2></div>
+  <div class="weeks" id="weeks"></div>
+  <div class="detail" id="weekDetail"></div>
+  <div class="legend">
+    <span><i style="background:var(--primary)"></i>Construir</span>
+    <span><i style="background:var(--ready)"></i>Con el contador</span>
+    <span><i style="background:var(--done)"></i>Con usuarios reales</span>
+  </div>
+</section>
+
+<!-- 6b · Budget -->
+<section class="slide">
+  <div class="head"><div class="kicker">Presupuesto de AfipSDK · USD · mové la cantidad de usuarios</div><h2>Cuánto cuesta conectarse a ARCA.</h2></div>
+  <div class="budget">
+    <div class="card bcol">
+      <div class="bhead"><h3>Las 6 semanas</h3><span class="pill p-blue">piloto</span></div>
+      <div class="lines">
+        <div class="line"><span>Plan Growth</span><small>Hasta 100 CUITs y 100 mil consultas por mes</small><b>USD 80/mes</b></div>
+        <div class="line"><span>Duración</span><small>Desde la semana 2, cuando se integra ARCA</small><b>1,5 meses</b></div>
+      </div>
+      <div class="btotal"><span>Total del proyecto</span><b>USD 120</b></div>
+    </div>
+    <div class="card bcol">
+      <div class="bhead"><h3>En marcha</h3><span class="pill p-ready">por mes</span></div>
+      <div class="lines" id="afipLines"></div>
+      <div class="btotal"><span>Total mensual</span><b id="afipTotal"></b></div>
+    </div>
+    <div class="calc bside">
+      <label>Usuarios adheridos<output id="oUsers"></output><input type="range" id="iUsers" min="50" max="20000" step="50" value="2000"></label>
+      <div class="per"><span class="big" id="afipPer"></span><span>por usuario por mes</span></div>
+      <p style="font-size:13px;color:var(--night-muted);line-height:1.45">Se elige el plan más barato para cada cantidad. Cada usuario es un CUIT; las consultas (leer sus comprobantes) quedan muy por debajo del límite del plan.</p>
+    </div>
+  </div>
+  <p class="foot">Precios publicados por AfipSDK (afipsdk.com/pricing): Pro USD 25 (10 CUITs, +USD 10 c/u), Growth USD 80 (100 CUITs, +USD 5 c/u), Startup USD 250 (1.000 CUITs, +USD 1 c/u). Emitir Factura E desde la app (meses 2–3) usa Factura SDK, con límites de facturas por plan.</p>
+</section>
+
+<!-- 7 · Month -->
+<section class="slide">
+  <div class="head"><div class="kicker">Cómo se vive un mes · tocá cada momento</div><h2>Prevenir durante el mes, no perseguir el día 1.</h2></div>
+  <div class="timeline" id="timeline"></div>
+  <div class="who" id="who"></div>
+</section>
+
+<!-- 8 · Funnel -->
+<section class="slide">
+  <div class="head"><div class="kicker">Clasificación por capas</div><h2>Cada capa resuelve lo que puede. Al contador llega el resto.</h2></div>
+  <div class="funnel">
+    <div class="layer"><div class="name">Tipo de movimiento<small>tarjeta, conversiones: nunca son ingreso</small></div><div class="track"><div class="fill" style="--w:45%;background:#8A93A2"></div></div><div class="val">45</div></div>
+    <div class="layer"><div class="name">Factura en ARCA<small>el cobro coincide con una Factura E</small></div><div class="track"><div class="fill" style="--w:30%;background:var(--primary)"></div></div><div class="val">30</div></div>
+    <div class="layer"><div class="name">Reglas globales e historial<small>contrapartes ya conocidas</small></div><div class="track"><div class="fill" style="--w:12%;background:#4F7FDF"></div></div><div class="val">12</div></div>
+    <div class="layer"><div class="name">Lo declara el usuario<small>“¿Quién es J. Pérez?”, una sola vez</small></div><div class="track"><div class="fill" style="--w:8%;background:var(--done)"></div></div><div class="val">8</div></div>
+    <div class="layer"><div class="name">Sugerencia pre-cargada<small>el contador confirma con un clic</small></div><div class="track"><div class="fill" style="--w:3%;background:var(--ready)"></div></div><div class="val">3</div></div>
+    <div class="layer human"><div class="name">Decide el contador<small>el usuario no respondió o hay riesgo</small></div><div class="track"><div class="fill" style="--w:2%;background:var(--review)"></div></div><div class="val">2</div></div>
+  </div>
+  <p class="foot">De cada 100 movimientos · ejemplo ilustrativo, las proporciones reales se miden en el piloto. Sin reglas por cliente: el trabajo del contador no crece con cada usuario nuevo.</p>
+</section>
+
+<!-- 9 · Divider 2 -->
+<section class="slide dark divider">
+  <div class="num">02</div>
+  <h2>El prototipo</h2>
+  <p class="lead">Funciona de punta a punta, con datos inventados. <span class="mono" style="color:#6E9BF3">make up && make seed</span></p>
+</section>
+
+<!-- 10 · Demo in 3 screens -->
+<section class="slide">
+  <div class="head"><div class="kicker">La demo en tres pantallas</div><h2>Del cobro sin factura al aviso aprobado.</h2></div>
+  <div class="screens">
+    <figure><img class="shot phone" src="img/app-avisos.png" alt="App del usuario con dos avisos: facturar un cobro y quién es J. Pérez"><figcaption><span class="step">1</span><b>El usuario, en el momento</b>Factura el cobro o dice quién le pagó.</figcaption></figure>
+    <figure><img class="shot desk" src="img/consola-detalle.png" alt="Consola: detalle del cierre de Martina con dos alertas bloqueantes"><figcaption><span class="step">2</span><b>El contador, solo lo que falta</b>Alertas con contexto, sugerencia y conversación con el usuario.</figcaption></figure>
+    <figure><img class="shot phone" src="img/app-aprobado.png" alt="App del usuario: cierre revisado por el contador, a pagar 58.300 pesos"><figcaption><span class="step">3</span><b>El usuario, sin dudas</b>Cuánto pagar y cuándo, revisado por su contador.</figcaption></figure>
+  </div>
+</section>
+
+<!-- 11 · Console -->
+<section class="slide">
+  <div class="head"><div class="kicker">La consola · tocá cada número</div><h2>El día 1, el contador abre un plan, no una pila.</h2></div>
+  <div class="annot">
+    <img class="shot" src="img/consola-bandeja.png" alt="Bandeja del cierre de octubre con plan del día">
+    <div class="marker" data-m="0" style="left:225px;top:92px">1</div>
+    <div class="marker" data-m="1" style="left:300px;top:178px">2</div>
+    <div class="marker" data-m="2" style="left:680px;top:62px">3</div>
+    <div class="marker" data-m="3" style="left:395px;top:283px">4</div>
+    <div class="callouts" id="callouts">
+      <button class="callout tap" data-c="0"><span class="k">1</span><p><b>Plan del día</b>Lo masivo primero: una decisión resuelve muchos clientes.</p></button>
+      <button class="callout tap" data-c="1"><span class="k">2</span><p><b>Estados con color propio</b>En revisión, esperando al usuario, listo, aprobado, notificado.</p></button>
+      <button class="callout tap" data-c="2"><span class="k">3</span><p><b>Tiempo estimado</b>“Te quedan ~10 min”, con tiempos medidos por caso.</p></button>
+      <button class="callout tap" data-c="3"><span class="k">4</span><p><b>Tope de 12 meses</b>Verde, ámbar o rojo según cuánto falta para la categoría.</p></button>
+    </div>
+  </div>
+</section>
+
+<!-- 12 · States -->
+<section class="slide">
+  <div class="head"><div class="kicker">El cierre de cada cliente · tocá cada estado</div><h2>Cinco estados. Ningún atajo.</h2></div>
+  <div class="fsm" id="fsm"></div>
+  <div class="state-info">
+    <div class="card" id="stateInfo"></div>
+    <div class="rule"><div class="icon" style="background:#2A303B;color:#F4897A"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div><p><b>No hay camino a “notificado” sin pasar por “aprobado”.</b> Y no se aprueba con una alerta bloqueante abierta. La regla regulatoria vive en el código, no en la buena voluntad.</p></div>
+  </div>
+</section>
+
+<!-- 13 · Guarantees -->
+<section class="slide">
+  <div class="head"><div class="kicker">Somos una empresa regulada</div><h2>Lo que garantiza el diseño.</h2></div>
+  <div class="guar">
+    <div class="card"><div class="icon" style="background:var(--done-tint);color:var(--done)"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div><div><h3>Nada sin aprobación</h3><p>Cada aviso impositivo sale de una aprobación registrada del contador matriculado, individual o en lote.</p></div></div>
+    <div class="card"><div class="icon" style="background:var(--primary-tint);color:var(--primary)"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></div><div><h3>Snapshot inmutable</h3><p>Al aprobar se congela lo que se aprobó. La base de datos impide modificarlo.</p></div></div>
+    <div class="card"><div class="icon" style="background:var(--ready-tint);color:var(--ready)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><div><h3>Auditoría completa</h3><p>Quién hizo qué y cuándo, sin poder borrar. También sirve para medir el trabajo del contador.</p></div></div>
+    <div class="card"><div class="icon" style="background:var(--pending-tint);color:var(--pending)"><svg viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/></svg></div><div><h3>Los datos no salen</h3><p>Sin LLMs ni APIs externas con datos de usuarios. Lo que aprenda el sistema, aprende adentro.</p></div></div>
+  </div>
+</section>
+
+<!-- 14 · Month under load -->
+<section class="slide">
+  <div class="head"><div class="kicker">Pruebas de carga · k6</div><h2>El mes completo, con 2.000 clientes.</h2></div>
+  <div class="arch">
+    <div class="node"><b>Consola y app</b><span>Next.js</span></div><span class="link">→</span>
+    <div class="node"><b>API</b><span>FastAPI</span></div><span class="link">→</span>
+    <div class="node"><b>Colas</b><div class="queues"><span class="q">cierre del día 1</span><span class="q">recálculos</span><span class="q">notificaciones</span></div></div><span class="link">→</span>
+    <div class="node"><b>Workers</b><span>Celery</span></div><span class="link">→</span>
+    <div class="node db"><b>PostgreSQL</b><span>fuente de verdad</span></div><span class="link">·</span>
+    <div class="node"><b>ARCA</b><span>vía AfipSDK</span></div><span class="link">·</span>
+    <div class="node"><b>Grafana</b><span>métricas en vivo</span></div>
+  </div>
+  <div class="bars">
+    <div class="bar-row"><div class="lbl">Durante el mes: cobros y respuestas<small>p95 de cada request</small></div><div class="track"><div class="fill" style="--w:0.8%;background:var(--done)"></div></div><div class="res">23 ms<small>50 eventos/s</small></div></div>
+    <div class="bar-row"><div class="lbl">Día 1: calcular todos los cierres<small>objetivo: menos de 10 minutos</small></div><div class="track"><div class="fill" style="--w:3.3%;background:var(--done)"></div></div><div class="res">~20 s<small>2.000 cierres</small></div></div>
+    <div class="bar-row"><div class="lbl">Todos responden a la vez<small>478 usuarios</small></div><div class="track"><div class="fill" style="--w:1.3%;background:var(--done)"></div></div><div class="res">8 s<small>todo recalculado</small></div></div>
+    <div class="bar-row"><div class="lbl">Día 5: vencen las preguntas</div><div class="track"><div class="fill" style="--w:2.8%;background:var(--done)"></div></div><div class="res">17 s<small>1.956 recalculados</small></div></div>
+    <div class="bar-row"><div class="lbl">5 contadores trabajando<small>p95 al resolver una alerta</small></div><div class="track"><div class="fill" style="--w:1%;background:var(--done)"></div></div><div class="res">87 ms<small>por acción</small></div></div>
+    <div class="bar-row"><div class="lbl">Aprobación en lote</div><div class="track"><div class="fill" style="--w:0.7%;background:var(--done)"></div></div><div class="res">4 s<small>1.522 cierres</small></div></div>
+  </div>
+  <p class="foot">Barras de los procesos en escala de 10 minutos. 0 errores y ningún mensaje perdido en todas las corridas. Las pruebas encontraron 3 bugs de concurrencia, ya corregidos.</p>
+</section>
+
+<!-- 15 · Limits -->
+<section class="slide">
+  <div class="head"><div class="kicker">¿Hasta cuánto escala?</div><h2>El cálculo sobra. El límite es el contador.</h2></div>
+  <div class="limits">
+    <div class="card lim">
+      <div class="lim-h"><span class="pill p-done">10 a 15 veces hoy</span><h3>Cálculo del día 1</h3></div>
+      <div class="hbars" id="day1chart"></div>
+      <p class="small">Tiempo del día 1 según la cantidad de clientes, en una laptop. La línea marca 10 minutos. Hoy hay 2.000.</p>
+    </div>
+    <div class="card lim">
+      <div class="lim-h"><span class="pill p-done">25 veces el pico</span><h3>Actividad durante el mes</h3></div>
+      <div class="hbars" id="actchart"></div>
+      <p class="small">Eventos por segundo. Con 2.000 usuarios, aun si todos cobraran en la misma hora, serían ~6 por segundo.</p>
+    </div>
+    <div class="card lim" style="background:var(--night);color:var(--night-ink);border-color:var(--night)">
+      <div class="lim-h"><span class="pill" style="background:#33250F;color:#F2B65A">el verdadero límite</span><h3>El contador</h3></div>
+      <div class="big" style="font-size:64px;color:#fff">~1.100</div>
+      <p style="font-size:15px;line-height:1.45;color:var(--night-muted)">clientes por contador con 16 h de revisión al mes, 3,5 min por cierre y 24 % de cierres en revisión. Cada punto que baje ese 24 % suma capacidad.</p>
+    </div>
+  </div>
+  <div class="grow"><b>Para pasar los 30 mil:</b><span>Postgres en su propia máquina + PgBouncer</span><span>más workers y procesos de API</span><span>menos consultas por cierre</span><span>monitoreo sobre una réplica</span></div>
+</section>
+
+<!-- 16 · Dashboards -->
+<section class="slide">
+  <div class="head"><div class="kicker">Grafana · tocá cada dashboard</div><h2>Todo lo que pasa, en vivo.</h2></div>
+  <div class="dash">
+    <div class="dash-tabs" id="dashTabs"></div>
+    <div class="dash-body">
+      <img class="shot" id="dashImg" alt="">
+      <div class="dash-side" id="dashSide"></div>
+    </div>
+  </div>
+</section>
+<section class="slide print-only" data-dash="1"></section>
+<section class="slide print-only" data-dash="2"></section>
+
+<!-- 15 · Capacity -->
+<section class="slide">
+  <div class="head"><div class="kicker">Medir al contador · probá los números</div><h2>¿Cuántos clientes puede atender?</h2></div>
+  <div class="cap">
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <p class="small" style="font-size:16px">Cada acción del contador queda en la auditoría. Un dashboard la convierte en:</p>
+      <div class="metric-list">
+        <div class="metric"><b>Minutos por revisión</b><span>Desde que abre un cierre hasta que lo aprueba</span></div>
+        <div class="metric"><b>% que necesita al contador</b><span>El resto se aprueba en lote</span></div>
+        <div class="metric"><b>Clientes por contador</b><span>Capacidad estimada y real</span></div>
+        <div class="metric"><b>Horas del día 1 al último aviso</b><span>Qué tan rápido termina el mes</span></div>
+      </div>
+      <p class="small">El sistema suma 0,2 s por revisión: el tiempo es todo del contador. Por eso se mide con personas, no con robots.</p>
+    </div>
+    <div class="calc">
+      <label>Horas de revisión al mes<output id="oH">16 h</output><input type="range" id="iH" min="4" max="80" step="1" value="16"></label>
+      <label>Minutos por cierre revisado<output id="oM">3,5</output><input type="range" id="iM" min="1" max="15" step="0.5" value="3.5"></label>
+      <label>% de cierres que necesitan al contador<output id="oS">24 %</output><input type="range" id="iS" min="5" max="100" step="1" value="24"></label>
+      <div class="result"><span class="big" id="cap">1.143</span><span>clientes por contador</span></div>
+      <div class="compare">
+        <div class="crow"><span>Hoy</span><div class="cbar"><i style="width:3%;background:#9AA3B2" id="bToday"></i></div><span>30</span></div>
+        <div class="crow"><span>Con Cierre</span><div class="cbar"><i id="bCap" style="background:#6E9BF3"></i></div><span id="capS">1.143</span></div>
+      </div>
+      <p style="font-size:12.5px;color:var(--night-muted)">24 % es lo que cayó en revisión en la prueba de 2.000 clientes; 3,5 min es la estimación inicial. El piloto los reemplaza por tiempos reales.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 16 · Divider 3 -->
+<section class="slide dark divider">
+  <div class="num">03</div>
+  <h2>A largo plazo</h2>
+  <p class="lead">Con un mes de datos reales, el sistema y el flujo del contador empiezan a mejorar solos.</p>
+</section>
+
+<!-- 17 · Roadmap -->
+<section class="slide">
+  <div class="head"><div class="kicker">Después del lanzamiento</div><h2>Tres horizontes.</h2></div>
+  <div class="horizons">
+    <div class="horizon"><div class="when">Meses 2–3</div><h3>Menos fricción</h3>
+      <ul><li>Emitir Factura E desde la app de Wallbit, con AfipSDK</li><li>Resolver muchos clientes a la vez por contraparte</li><li>Reabrir un cierre con trazabilidad</li><li>Notificaciones push</li></ul>
+      <p class="goal">Menos cobros sin facturar el día 1.</p></div>
+    <div class="horizon"><div class="when">Meses 4–6</div><h3>Aprender de los datos</h3>
+      <ul><li>Modelo de ML local, primero en modo sombra</li><li>Afinar el flujo con la performance del contador</li><li>Varios contadores con cartera asignada</li></ul>
+      <p class="goal">Menos cierres que necesitan al contador.</p></div>
+    <div class="horizon"><div class="when">Meses 6–12</div><h3>Más que monotributo</h3>
+      <ul><li>Recategorización semestral asistida</li><li>Ingresos Brutos por jurisdicción</li><li>Responsables inscriptos y otros regímenes</li></ul>
+      <p class="goal">El servicio llega a todos los que lo necesitan.</p></div>
+  </div>
+</section>
+
+<!-- 18 · ML -->
+<section class="slide">
+  <div class="head"><div class="kicker">ML local · tocá el ciclo</div><h2>Un modelo propio, entrenado adentro.</h2></div>
+  <div class="ml">
+    <div class="loop" id="loop">
+      <svg class="ring" viewBox="0 0 470 470"><defs><marker id="ah" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 10 5 0 10z" fill="#8A93A2"/></marker></defs>
+        <circle cx="235" cy="235" r="168" fill="none" stroke="#DDE1E7" stroke-width="2" stroke-dasharray="4 6"/>
+        <path d="M 330 96 A 168 168 0 0 1 400 200" fill="none" stroke="#8A93A2" stroke-width="2" marker-end="url(#ah)"/>
+        <path d="M 395 300 A 168 168 0 0 1 300 390" fill="none" stroke="#8A93A2" stroke-width="2" marker-end="url(#ah)"/>
+        <path d="M 170 390 A 168 168 0 0 1 75 300" fill="none" stroke="#8A93A2" stroke-width="2" marker-end="url(#ah)"/>
+        <path d="M 70 200 A 168 168 0 0 1 140 96" fill="none" stroke="#8A93A2" stroke-width="2" marker-end="url(#ah)"/>
+      </svg>
+      <div class="center"><b>Cada decisión es una etiqueta</b><span>la v1 ya las guarda</span></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="card" id="loopInfo" style="min-height:118px"></div>
+      <div class="phases">
+        <div class="phase now"><span class="k">✓</span><div><b>Hoy: juntar etiquetas</b><p>Respuestas del usuario y decisiones del contador, con su contexto.</p></div></div>
+        <div class="phase"><span class="k">2</span><div><b>Modo sombra</b><p>Predice sin mostrar nada. Se compara contra lo que decidió el contador.</p></div></div>
+        <div class="phase"><span class="k">3</span><div><b>Sugiere, con su motivo</b><p>Reemplaza la sugerencia actual cuando supera el umbral acordado con el contador.</p></div></div>
+      </div>
+      <div class="guard"><span class="pill p-done">Nunca decide solo</span><span class="pill p-done">Los datos no salen</span><span class="pill p-done">Versionado y explicable</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 19 · Data-driven workflow -->
+<section class="slide">
+  <div class="head"><div class="kicker">Pulir el flujo del contador</div><h2>Medir, encontrar el cuello, cambiar, volver a medir.</h2></div>
+  <div class="cycle">
+    <div class="cstep"><div class="icon" style="background:var(--primary-tint);color:var(--primary)"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></div><div><b>Medir</b><span>Auditoría y dashboard</span></div></div><span class="link">→</span>
+    <div class="cstep"><div class="icon" style="background:var(--review-tint);color:var(--review)"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></div><div><b>Encontrar</b><span>Dónde se va el tiempo</span></div></div><span class="link">→</span>
+    <div class="cstep"><div class="icon" style="background:var(--ready-tint);color:var(--ready)"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.5-2.5z"/></svg></div><div><b>Cambiar</b><span>Automatizar o agrupar</span></div></div><span class="link">↺</span>
+  </div>
+  <div class="cases">
+    <div class="case"><div class="sig"><small>Si vemos</small>“Cobro sin facturar” es la alerta que más tiempo consume</div><div class="to">→</div><div class="act"><small>Hacemos</small>Recordatorio antes del día 1 y emitir la factura desde la app</div></div>
+    <div class="case"><div class="sig"><small>Si vemos</small>La misma contraparte sin clasificar en muchos clientes</div><div class="to">→</div><div class="act"><small>Hacemos</small>Una sola decisión que resuelve a todos</div></div>
+    <div class="case"><div class="sig"><small>Si vemos</small>El contador acepta siempre la misma sugerencia</div><div class="to">→</div><div class="act"><small>Hacemos</small>Proponerle convertirla en regla global, con su aprobación</div></div>
+    <div class="case"><div class="sig"><small>Si vemos</small>Revisiones que tardan mucho más que la mediana</div><div class="to">→</div><div class="act"><small>Hacemos</small>Test de usabilidad con el contador y rediseño de ese paso</div></div>
+  </div>
+</section>
+
+<!-- 20 · Success + risk -->
+<section class="slide">
+  <div class="head"><div class="kicker">Cómo sabríamos si funcionó</div><h2>Cuatro números. Tres ya se miden.</h2></div>
+  <div class="kpis">
+    <div class="kpi"><span class="pill p-done" style="width:fit-content">se mide</span><div class="v">30 <small>→</small> 500+</div><b>Clientes por contador</b><span>La razón de ser del servicio.</span></div>
+    <div class="kpi"><span class="pill p-done" style="width:fit-content">se mide</span><div class="v">&gt; 75<small>%</small></div><b>Cierres sin intervención</b><span>Aprobados en lote, sin revisión individual.</span></div>
+    <div class="kpi"><span class="pill p-done" style="width:fit-content">se mide</span><div class="v">&lt; 4 <small>min</small></div><b>Revisión por cliente</b><span>De abrir el cierre a aprobarlo.</span></div>
+    <div class="kpi"><span class="pill p-pending" style="width:fit-content">a instrumentar</span><div class="v">&gt; 90<small>%</small></div><b>Cobros facturados antes del día 1</b><span>Prevención en lugar de persecución.</span></div>
+  </div>
+  <div class="risk">
+    <div><div class="kicker" style="color:var(--review)">Riesgo más grande</div><h3 style="font-size:24px;margin-top:6px">Que el contador siga siendo el cuello de botella.</h3><p class="small" style="margin-top:6px">Si los usuarios no facturan ni responden a tiempo, todo cae en revisión.</p></div>
+    <ul><li>Avisos en el momento del cobro</li><li>Plan del día con tiempo estimado</li><li>Revisión guiada con teclado</li><li>Aprobación en lote</li></ul>
+  </div>
+  <p class="foot">Los objetivos son hipótesis iniciales: se ajustan con el primer mes real.</p>
+</section>
+
+<!-- 21 · Closing -->
+<section class="slide dark closing">
+  <div class="kicker">Para probarlo</div>
+  <h1 style="font-size:56px">La herramienta calcula todo.<br>El contador aprueba excepciones.</h1>
+  <div class="cmd"><span>$</span> make up && make seed</div>
+  <p class="lead" style="font-size:18px">Consola en localhost:3000/consola · app del usuario en localhost:3000/app · Grafana en localhost:3001</p>
+</section>
+
+</div></div>
+
+<div class="chrome">
+  <button id="prev" aria-label="Anterior">←</button>
+  <span id="count">1 / 24</span>
+  <div class="bar"><i id="progress"></i></div>
+  <span class="hint">← → para moverte</span>
+  <button id="next" aria-label="Siguiente">→</button>
+</div>
+
+<script>
+(() => {
+  const slides = [...document.querySelectorAll(".slide:not(.print-only)")];
+  const deck = document.getElementById("deck");
+  let cur = 0;
+
+  function fit() {
+    const s = Math.min(innerWidth / 1280, (innerHeight - 44) / 720);
+    deck.style.transform = `scale(${s})`;
+    deck.parentElement.style.paddingBottom = "44px";
+  }
+  function go(i) {
+    cur = Math.max(0, Math.min(slides.length - 1, i));
+    slides.forEach((s, k) => s.classList.toggle("on", k === cur));
+    document.getElementById("count").textContent = `${cur + 1} / ${slides.length}`;
+    document.getElementById("progress").style.width = `${((cur + 1) / slides.length) * 100}%`;
+    if (location.hash !== `#${cur + 1}`) history.replaceState(null, "", `#${cur + 1}`);
+  }
+  addEventListener("resize", fit);
+  addEventListener("keydown", (e) => {
+    if (e.target.tagName === "INPUT") return;
+    if (["ArrowRight", "PageDown", " "].includes(e.key)) { e.preventDefault(); go(cur + 1); }
+    if (["ArrowLeft", "PageUp"].includes(e.key)) { e.preventDefault(); go(cur - 1); }
+    if (e.key === "Home") go(0);
+    if (e.key === "End") go(slides.length - 1);
+  });
+  document.getElementById("prev").onclick = () => go(cur - 1);
+  document.getElementById("next").onclick = () => go(cur + 1);
+
+  // Slide 2: dots for clients.
+  const dots = (id, n) => { document.getElementById(id).innerHTML = "<i></i>".repeat(n); };
+  dots("ppl30", 30); dots("ppl500", 500);
+
+  // Slide 6: weeks.
+  const WEEKS = [
+    { t: "Datos y reglas", g: "Movimientos de Wallbit y motor fiscal validado por el contador.", c: "var(--primary)",
+      build: ["Ingesta del evento de movimiento del core", "Modelo del cierre y auditoría", "Motor fiscal con casos de prueba"],
+      acct: ["Valida parámetros, topes y cuotas", "Define las reglas globales de clasificación"] },
+    { t: "ARCA y adhesión", g: "El usuario adhiere, vincula ARCA y sus facturas llegan solas.", c: "var(--primary)",
+      build: ["AfipSDK: leer los comprobantes emitidos de cada CUIT", "Adhesión con consentimiento y delegación en ARCA", "Match cobro ↔ factura"],
+      acct: ["Revisa el texto del consentimiento", "Valida el match con casos reales"] },
+    { t: "Clasificar y avisar", g: "Cada cobro se clasifica al llegar y el usuario resuelve en el momento.", c: "var(--primary)",
+      build: ["Clasificación por capas", "Avisos: facturar este cobro, ¿quién es?", "Plazo del día 5"],
+      acct: ["Revisa las preguntas al usuario", "Decide qué es bloqueante"] },
+    { t: "Consola del contador", g: "Bandeja, revisión guiada, lote y aviso aprobado.", c: "var(--ready)",
+      build: ["Cierre del día 1 en colas", "Bandeja con plan del día", "Aprobación individual y en lote"],
+      acct: ["Usa la consola con datos de prueba", "Aprueba las plantillas de los avisos"] },
+    { t: "Piloto en paralelo", g: "Un mes real con un grupo chico, comparado con la planilla del contador.", c: "var(--done)",
+      build: ["Login del contador y permisos", "Dashboards y alertas operativas", "Pruebas de carga con volumen real"],
+      acct: ["Cierra el mes del piloto con la herramienta y con su planilla", "Marca cada diferencia"] },
+    { t: "Lanzamiento", g: "Usuarios reales reciben su cierre aprobado.", c: "var(--done)", launch: true,
+      build: ["Corregir lo que encontró el piloto", "Apertura gradual a los 2.000 usuarios", "Guardia del primer día 1"],
+      acct: ["Primer cierre real aprobado en lote", "Primer número de clientes por contador"] },
+  ];
+  const wEl = document.getElementById("weeks"), wD = document.getElementById("weekDetail");
+  WEEKS.forEach((w, i) => {
+    const b = document.createElement("button");
+    b.className = "week tap" + (w.launch ? " launch" : "");
+    b.innerHTML = `<span class="n">SEMANA ${i + 1}</span><h3>${w.t}</h3><p>${w.g}</p><span class="lane" style="background:${w.c}"></span>`;
+    b.onclick = () => selWeek(i);
+    wEl.appendChild(b);
+  });
+  function selWeek(i) {
+    [...wEl.children].forEach((c, k) => c.classList.toggle("sel", k === i));
+    const w = WEEKS[i];
+    wD.innerHTML = `<div><div class="lbl">Semana ${i + 1}</div><h3>${w.t}</h3></div>
+      <div><div class="lbl">Engineer</div><ul>${w.build.map((x) => `<li>${x}</li>`).join("")}</ul></div>
+      <div><div class="lbl">Contador</div><ul>${w.acct.map((x) => `<li>${x}</li>`).join("")}</ul></div>`;
+  }
+  selWeek(4);
+
+  // Slide 7: month timeline.
+  const MOMENTS = [
+    { when: "1 → 31", t: "Durante el mes", dot: "∞", cont: true,
+      tool: "Clasifica cada cobro apenas llega y lo cruza con las facturas de ARCA.",
+      acct: "Nada. No hay nada que perseguir todavía.",
+      user: "“Cobraste USD 1.200 y no tiene factura”: la emite en el momento." },
+    { when: "Día 1", t: "Se calcula todo", dot: "1",
+      tool: "Calcula los cierres de todos los clientes en segundos y arma el plan del día.",
+      acct: "Abre la bandeja: ve qué está listo y qué lo espera.",
+      user: "Si le falta algo, sigue con el aviso abierto." },
+    { when: "Día 5", t: "Vence el plazo", dot: "5",
+      tool: "Las preguntas sin respuesta pasan al contador con una sugerencia.",
+      acct: "Recibe solo lo que el usuario no pudo resolver.",
+      user: "Ya no le preguntamos más: lo resuelve su contador." },
+    { when: "Día 5 → 7", t: "Revisa y aprueba", dot: "✓",
+      tool: "Congela un snapshot inmutable por cada aprobación.",
+      acct: "Resuelve excepciones y aprueba el resto en lote.",
+      user: "Puede conversar con su contador desde la app." },
+    { when: "Antes del 20", t: "El usuario paga", dot: "$",
+      tool: "Envía el aviso aprobado y recuerda el vencimiento.",
+      acct: "Ve en Grafana cuántos ya fueron avisados.",
+      user: "“Tenés que pagar $ 58.300 antes del 20/11.”" },
+  ];
+  const tl = document.getElementById("timeline"), who = document.getElementById("who");
+  MOMENTS.forEach((m, i) => {
+    const b = document.createElement("button");
+    b.className = "tl tap" + (m.cont ? " continuous" : "");
+    b.innerHTML = `<span class="dot">${m.dot}</span><span class="when">${m.when}</span><h3>${m.t}</h3>`;
+    b.onclick = () => selMoment(i);
+    tl.appendChild(b);
+  });
+  function selMoment(i) {
+    [...tl.children].forEach((c, k) => c.classList.toggle("sel", k === i));
+    const m = MOMENTS[i];
+    who.innerHTML = [["La herramienta", "var(--primary)", m.tool], ["El contador", "var(--ready)", m.acct], ["El usuario", "var(--done)", m.user]]
+      .map(([k, c, v]) => `<div class="card"><span class="tag" style="color:${c}">${k}</span><p>${v}</p></div>`).join("");
+  }
+  selMoment(0);
+
+  // Slide 11: console callouts.
+  const callouts = [...document.querySelectorAll(".callout")], markers = [...document.querySelectorAll(".marker")];
+  const selCallout = (i) => { callouts.forEach((c, k) => c.classList.toggle("sel", k === i)); markers.forEach((m, k) => m.classList.toggle("sel", k === i)); };
+  callouts.forEach((c, i) => (c.onclick = () => selCallout(i)));
+  markers.forEach((m, i) => (m.onclick = () => selCallout(i)));
+  selCallout(0);
+
+  // Slide 12: states.
+  const STATES = [
+    { code: "PENDING_DATA", t: "Esperando al usuario", cls: "p-pending", d: "Falta una respuesta del usuario: una factura o quién le pagó. Tiene hasta el día 5; después pasa al contador.", next: "→ el usuario responde, o vence el día 5" },
+    { code: "IN_REVIEW", t: "En revisión", cls: "p-review", d: "Hay al menos una alerta bloqueante. Solo el contador puede resolverla: clasificar, pedirle algo al usuario o marcarla resuelta.", next: "→ el contador resuelve todas las alertas" },
+    { code: "READY", t: "Listo", cls: "p-ready", d: "Todo cuadra. Se puede aprobar en lote junto con cientos de otros cierres limpios.", next: "→ el contador aprueba, uno por uno o en lote" },
+    { code: "APPROVED", t: "Aprobado", cls: "p-done", d: "El contador firmó. Se congela un snapshot inmutable con las cifras y el mensaje exacto que verá el usuario.", next: "→ sale la notificación" },
+    { code: "NOTIFIED", t: "Notificado", cls: "p-done", d: "El usuario ya sabe cuánto pagar y cuándo. Todo queda en la auditoría.", next: "Fin del mes para este cliente" },
+  ];
+  const fsm = document.getElementById("fsm"), sInfo = document.getElementById("stateInfo");
+  STATES.forEach((s, i) => {
+    if (i) { const e = document.createElement("span"); e.className = "edge"; fsm.appendChild(e); }
+    const b = document.createElement("button");
+    b.className = `state tap ${s.cls}`;
+    b.innerHTML = `<span class="code">${s.code}</span><h3>${s.t}</h3>`;
+    b.onclick = () => selState(i);
+    fsm.appendChild(b);
+  });
+  function selState(i) {
+    [...fsm.querySelectorAll(".state")].forEach((c, k) => c.classList.toggle("sel", k === i));
+    const s = STATES[i];
+    sInfo.innerHTML = `<span class="pill ${s.cls}" style="width:fit-content">${s.t}</span><p>${s.d}</p><p class="small mono">${s.next}</p>`;
+  }
+  selState(1);
+
+  // Slide 15: capacity calculator.
+  const fmt = (n) => Math.round(n).toLocaleString("es-AR");
+  const iH = document.getElementById("iH"), iM = document.getElementById("iM"), iS = document.getElementById("iS");
+  function calc() {
+    const h = +iH.value, m = +iM.value, s = +iS.value / 100;
+    const cap = (h * 60) / (m * s);
+    document.getElementById("oH").textContent = `${h} h`;
+    document.getElementById("oM").textContent = String(m).replace(".", ",");
+    document.getElementById("oS").textContent = `${iS.value} %`;
+    document.getElementById("cap").textContent = fmt(cap);
+    document.getElementById("capS").textContent = fmt(cap);
+    const scale = Math.max(cap, 30) * 1.05;
+    document.getElementById("bToday").style.width = `${Math.max(1.5, (30 / scale) * 100)}%`;
+    document.getElementById("bCap").style.width = `${(cap / scale) * 100}%`;
+  }
+  [iH, iM, iS].forEach((el) => el.addEventListener("input", calc));
+  calc();
+
+  // Slide 18: ML loop.
+  const LOOP = [
+    { t: "Movimiento nuevo", s: "llega de Wallbit", x: 235, y: 62,
+      d: "Contraparte, país de origen, monto, recurrencia, tipo y referencia. Señales que ya están en Wallbit, sin pedir nada nuevo." },
+    { t: "Modelo local", s: "predice con un motivo", x: 412, y: 235,
+      d: "Un modelo simple y explicable, entrenado en nuestra infraestructura y versionado como los parámetros fiscales. Toma el lugar de la sugerencia actual: misma interfaz, mejor puntería." },
+    { t: "Usuario o contador", s: "confirma o corrige", x: 235, y: 408, human: true,
+      d: "La sugerencia pre-completa la pregunta al usuario o la alerta del contador. La decisión sigue siendo de una persona." },
+    { t: "Nueva etiqueta", s: "vuelve al entrenamiento", x: 58, y: 235,
+      d: "Cada confirmación o corrección queda auditada y se suma al set de entrenamiento. Cuanto más se usa, menos pregunta." },
+  ];
+  const loop = document.getElementById("loop"), lInfo = document.getElementById("loopInfo");
+  LOOP.forEach((n, i) => {
+    const b = document.createElement("button");
+    b.className = "lnode tap" + (n.human ? " human" : "");
+    b.style.left = `${n.x}px`; b.style.top = `${n.y}px`;
+    b.innerHTML = `<b>${n.t}</b><span>${n.s}</span>`;
+    b.onclick = () => selLoop(i);
+    loop.appendChild(b);
+  });
+  function selLoop(i) {
+    [...loop.querySelectorAll(".lnode")].forEach((c, k) => c.classList.toggle("sel", k === i));
+    lInfo.innerHTML = `<h3 style="margin-bottom:8px">${LOOP[i].t}</h3><p style="font-size:15.5px;line-height:1.5;color:var(--ink-muted)">${LOOP[i].d}</p>`;
+  }
+  selLoop(1);
+
+  // Slide: scale limits.
+  const hbars = (id, rows, max, limit) => {
+    document.getElementById(id).innerHTML = rows.map(([l, v, txt, ok]) =>
+      `<div class="hb${ok ? "" : " bad"}"><span>${l}</span><span class="t"><i style="width:${Math.min(100, (v / max) * 100)}%;background:${ok ? "var(--done)" : "var(--review)"}"></i>${limit ? `<span class="limit" style="left:${(limit / max) * 100}%"></span>` : ""}</span><b>${txt}</b></div>`).join("");
+  };
+  hbars("day1chart", [["2.000", 15, "15 s", 1], ["10.000", 63, "63 s", 1], ["25.000", 362, "6 min", 1], ["50.000", 1260, "> 21 min", 0]], 1260, 600);
+  hbars("actchart", [["necesario", 6, "~6/s", 1], ["1 proceso", 55, "55/s", 1], ["4 procesos", 150, "150/s", 1]], 160);
+
+  // Slide: Grafana dashboards (tabs on screen, one page each in the PDF).
+  const DASH = [
+    { t: "Cierre del mes", img: "img/grafana-cierre.png", q: "¿Llegamos a avisarles a todos antes del vencimiento?", n: "Al final del mes simulado con 2.000 clientes: 1.906 avisados (95 %) y 94 todavía en revisión.",
+      m: ["Cierres por estado, minuto a minuto", "Usuarios por etapa: oferta, vincular ARCA, activos", "Alertas abiertas por tipo y bloqueantes", "Aprobaciones individuales y en lote", "Avisos al usuario y notificaciones enviadas"] },
+    { t: "Productividad del contador", img: "img/grafana-productividad.png", q: "¿Cuántos clientes puede atender cada contador?", n: "En la prueba de carga los contadores son robots: revisan en milisegundos y la capacidad sale irreal. Con personas, este es el número que importa.",
+      m: ["Minutos por revisión: mediana y casos difíciles", "% de cierres que necesitaron al contador", "Capacidad estimada contra clientes de hoy", "Horas del día 1 al último aviso", "Acciones por contador y por tipo"] },
+    { t: "Plataforma", img: "img/grafana-plataforma.png", q: "¿El sistema aguanta la ráfaga del día 1?", n: "Se ven las dos ráfagas: el día 1 (cola de cierre) y las respuestas (recálculos). 0 errores y 0 mensajes muertos.",
+      m: ["Requests y latencia p95 por ruta", "Mensajes esperando en cada cola", "Tareas por segundo, duración y reintentos", "Mensajes muertos y tareas fallidas", "Conexiones y tamaño de Postgres"] },
+  ];
+  const side = (d) => `<p class="q">${d.q}</p><ul>${d.m.map((x) => `<li>${x}</li>`).join("")}</ul><p class="note">${d.n}</p><p class="src">Se calcula desde la base y la auditoría: sin planillas.</p>`;
+  const tabs = document.getElementById("dashTabs");
+  DASH.forEach((d, i) => {
+    const b = document.createElement("button");
+    b.className = "dash-tab"; b.textContent = d.t; b.onclick = () => selDash(i);
+    tabs.appendChild(b);
+  });
+  function selDash(i) {
+    [...tabs.children].forEach((c, k) => c.classList.toggle("sel", k === i));
+    const img = document.getElementById("dashImg");
+    img.src = DASH[i].img; img.alt = `Dashboard ${DASH[i].t} en Grafana`;
+    document.getElementById("dashSide").innerHTML = `<h3>${DASH[i].t}</h3>` + side(DASH[i]);
+  }
+  selDash(0);
+  document.querySelectorAll("[data-dash]").forEach((el) => {
+    const d = DASH[+el.dataset.dash];
+    el.innerHTML = `<div class="head"><div class="kicker">Grafana</div><h2>${d.t}</h2></div>
+      <div class="dash-body"><img class="shot" src="${d.img}" alt="Dashboard ${d.t} en Grafana"><div class="dash-side">${side(d)}</div></div>`;
+  });
+
+  // Slide: AfipSDK budget (cheapest published plan for N CUITs).
+  const usd = (n) => "USD " + Math.round(n).toLocaleString("es-AR");
+  const PLANS = [["Pro", 25, 10, 10], ["Growth", 80, 100, 5], ["Startup", 250, 1000, 1]];
+  const iUsers = document.getElementById("iUsers");
+  function afip() {
+    const n = +iUsers.value;
+    const [name, base, incl, extra] = PLANS.map((p) => [...p]).sort((x, y) =>
+      (x[1] + Math.max(0, n - x[2]) * x[3]) - (y[1] + Math.max(0, n - y[2]) * y[3]))[0];
+    const over = Math.max(0, n - incl), total = base + over * extra;
+    document.getElementById("oUsers").textContent = n.toLocaleString("es-AR");
+    document.getElementById("afipLines").innerHTML =
+      `<div class="line"><span>Plan ${name}</span><small>Incluye ${incl.toLocaleString("es-AR")} CUITs</small><b>${usd(base)}</b></div>` +
+      `<div class="line"><span>CUITs extra</span><small>${over.toLocaleString("es-AR")} × USD ${extra}</small><b>${usd(over * extra)}</b></div>`;
+    document.getElementById("afipTotal").textContent = usd(total);
+    document.getElementById("afipPer").textContent = "USD " + (total / n).toFixed(2).replace(".", ",");
+  }
+  iUsers.addEventListener("input", afip);
+  afip();
+
+  fit();
+  go((parseInt(location.hash.slice(1), 10) || 1) - 1);
+})();
+</script>
+</body>
+</html>
