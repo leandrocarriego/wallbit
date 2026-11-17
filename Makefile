@@ -108,5 +108,16 @@ typecheck: ## Type check (mypy + tsc)
 api-client: ## Regenerate the TS client from the API OpenAPI
 	$(WEB) npx openapi-typescript http://api:8000/api/v1/openapi.json -o src/lib/api/schema.d.ts
 
-load: ## k6 load test: make load scenario=month_close_burst (then accountant_inbox)
-	docker run --rm -i --network cierre_default -v $(CURDIR)/tests/load:/scripts grafana/k6:0.54.0 run /scripts/$(or $(scenario),month_close_burst).js
+load: ## k6 load test: make load scenario=<name> [rate= duration= vus= max=] (see docs/TESTING.md)
+	docker run --rm -i --network cierre_default -v $(CURDIR)/tests/load:/scripts \
+		$(if $(rate),-e RATE=$(rate)) $(if $(duration),-e DURATION=$(duration)) \
+		$(if $(vus),-e VUS=$(vus)) $(if $(max),-e MAX=$(max)) \
+		grafana/k6:0.54.0 run /scripts/$(or $(scenario),month_close_burst).js
+
+load-all: ## Full month under load on the volume seed: activity, day 1, answers, day 5, accountants
+	$(MAKE) seed-volume n=$(or $(n),2000)
+	-$(MAKE) load scenario=user_activity rate=$(or $(rate),20)
+	-$(MAKE) load scenario=month_close_burst
+	-$(MAKE) load scenario=late_answers
+	-$(MAKE) load scenario=day_5_expiry
+	-$(MAKE) load scenario=accountant_workday

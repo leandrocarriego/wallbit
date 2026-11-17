@@ -94,7 +94,7 @@ Clasificaciones del mes ─▶ Motor fiscal ─▶ Alertas ─▶ Cierre (estado
 
 **Clasificación continua, cierre mensual** (decisión 20): cada movimiento se clasifica cuando llega (y al vincular ARCA, los del mes en curso). Así el usuario factura o aclara en el momento, y lo que el día 1 le llega al contador es solo lo que quedó sin resolver. Una clasificación se recalcula si llega una factura, una respuesta del usuario o una regla global nueva; el cierre del día 1 toma el estado final.
 
-1. **Ingesta**: adaptador read-only sobre movimientos de Wallbit (en el prototipo, el seed). Cobros, transferencias, conversiones a stablecoin, gastos con tarjeta, con tipo de cambio de cada operación.
+1. **Ingesta**: adaptador read-only sobre movimientos de Wallbit. En producción consume los eventos de movimientos del core; en el prototipo vienen del seed y del endpoint `POST /api/v1/movements`, que simula ese evento (idempotente por `external_id`) y es el que usan las pruebas de carga. Cobros, transferencias, conversiones a stablecoin, gastos con tarjeta, con tipo de cambio de cada operación.
 2. **Clasificación**: función pura `classify(movement, ctx) -> Classification + Trace`, capas en orden (gana el primer match). **No hay reglas por cliente**: lo que solo sabe el usuario lo declara el usuario; el contador valida por excepción.
    1. **Estructural** (tipo de movimiento de Wallbit: conversión, tarjeta, interés, transferencia interna).
    2. **Reglas globales** (pocas, las mantiene el contador): plataformas conocidas (Deel, Upwork…), nombre del ordenante = titular (Payoneer/PayPal/Wise → `platform_withdrawal`; otro banco → `own_transfer`).
@@ -157,11 +157,18 @@ APPROVED/NOTIFIED ──(reabrir, con motivo)──▶ IN_REVIEW
 
 RabbitMQ no es cuello a esta escala.
 
+**Concurrencia en la API y los workers** (encontrado con k6, ver [TESTING](TESTING.md)):
+
+- **Requests en vuelo = conexiones del pool.** FastAPI corre los endpoints síncronos y también la validación de su respuesta en el mismo pool de 40 threads. Con 10 conexiones por proceso, a 100 eventos/s la API se congelaba: 40 requests esperaban una conexión y los 10 que la tenían no conseguían thread para terminar. Ahora un middleware (`app/core/concurrency.py`) admite tantos requests como conexiones y encola el resto en el event loop. Bajo sobrecarga la latencia sube, pero la API no se cae y se recupera sola.
+- **Un lock por cliente** (`app/core/locks.py`, advisory lock de transacción). Dos escrituras simultáneas del mismo cliente (un cobro que llega mientras el usuario responde, o el worker recalculando) clasificaban dos veces los mismos movimientos y una fallaba por clave única. Cada caso de uso que escribe toma primero el lock de su cliente, así el orden de locks es siempre cliente → filas y no hay deadlocks.
+- **El día 5 solo marca para recálculo:** cada recálculo vence las preguntas de su cliente, bajo su lock. Vencerlas todas en una sola transacción se cruzaba con un usuario respondiendo en ese momento.
+
 ## 6. Observabilidad
 
 Dashboards provisionados en Grafana (carpeta *Cierre*), generados como código con `infra/grafana/gen_dashboards.py`:
 
 - **Cierre del mes** (home de Grafana): usuarios por etapa de adhesión, cierres por estado y su evolución, % notificado, alertas abiertas por tipo, alertas bloqueantes, cierres recalculándose, aprobaciones individuales vs. en lote, avisos al usuario (respondidos en el momento vs. vencidos al día 5) y notificaciones. Las métricas `cierre_*` las calcula la API en cada scrape leyendo Postgres (`app/core/business_metrics.py`): cifras exactas, sin contadores que se desincronicen.
+- **Productividad del contador**: minutos por revisión (mediana y p90), % de cierres que necesitó al contador, capacidad en clientes por contador, clientes por contador hoy, horas desde el día 1 hasta el último aviso y acciones por contador. Sale de la auditoría: la consola registra `close.viewed` cada vez que el contador abre un cierre. El tiempo de revisión va desde la última apertura hasta la aprobación, y solo cuenta los cierres aprobados uno por uno.
 - **Plataforma**: servicios arriba, workers de Celery, mensajes en la DLQ (debe ser 0), requests y latencia p95 por ruta, errores 5xx, mensajes esperando por cola (`closing`, `recompute`, `notifications`), tareas por segundo, duración p95 y fallas por tarea, conexiones y tamaño de Postgres.
 
 Fuentes: API (`/metrics`), RabbitMQ (`/metrics/per-object`, por cola), celery-exporter y postgres-exporter.

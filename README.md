@@ -25,7 +25,7 @@ La primera vez tarda unos minutos porque construye las imágenes. Las migracione
 | API (Swagger) | http://localhost:8000/docs |
 | Flower (tareas de Celery) | http://localhost:5555 |
 | RabbitMQ | http://localhost:15672 (wallbit / wallbit) |
-| Grafana: dashboards *Cierre del mes* y *Plataforma* | http://localhost:3001 |
+| Grafana: dashboards *Cierre del mes*, *Productividad del contador* y *Plataforma* | http://localhost:3001 |
 | Prometheus | http://localhost:9090 |
 
 `make seed` deja los datos como al principio de la demo; se puede correr las veces que haga falta. `make down` apaga todo y `make clean` además borra los datos.
@@ -76,20 +76,29 @@ Documentación en [`docs/`](docs/):
 ## Tests
 
 ```bash
-make test-back   # 67 tests: dominio puro con golden cases + integración contra Postgres real
+make test-back   # 72 tests: dominio puro con golden cases + integración contra Postgres real
 make e2e         # la demo completa en un navegador real (Playwright); reinicia los datos
 make lint        # ruff
 make typecheck   # mypy estricto + tsc
 ```
 
-**Carga (k6), con 2.000 clientes:**
+**Carga (k6), con 2.000 clientes.** `make load-all` corre el mes entero en orden:
 
 ```bash
 make seed-volume n=2000                  # 2.000 clientes activos con casos borde
-make load scenario=month_close_burst     # día 1: medido en 15 s (objetivo < 10 min)
+make load scenario=user_activity rate=50 # cobros llegando y usuarios respondiendo: p95 23 ms
+make load scenario=month_close_burst     # día 1: 2.000 cierres en ~20 s (objetivo < 10 min)
+make load scenario=late_answers          # 478 respuestas a la vez: todo recalculado en 8 s
+make load scenario=day_5_expiry          # día 5: 1.956 cierres recalculados en 17 s
+make load scenario=accountant_workday    # 5 contadores + lote de 1.522 cierres en 4 s
 make load scenario=accountant_inbox      # bandeja p95 115 ms (objetivo < 300 ms)
 make seed                                # volver a la demo
 ```
+
+Límites medidos en la laptop:
+- **Día 1:** ~25–30 mil clientes en menos de 10 minutos.
+- **Actividad de usuarios:** ~55 eventos/s por proceso de API.
+- **Trabajo del contador:** se mide en el dashboard *Productividad del contador*.
 
 Detalle de qué está implementado y qué queda como plan: [docs/TESTING.md](docs/TESTING.md). La CI (`.github/workflows/ci.yml`) corre lint, tipos, tests y e2e.
 
