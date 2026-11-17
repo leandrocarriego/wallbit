@@ -1,13 +1,15 @@
 from datetime import date
 
-from fastapi import APIRouter
+from fastapi import APIRouter, status
 from pydantic import BaseModel
 
 from app.core.http import Actor, DbSession
 from app.core.periods import first_day, period_of, shift
+from app.modules.audit.service import record
 from app.modules.closing import service as closing
 from app.modules.closing.schemas import DayOut
 from app.modules.demo import service
+from seeds import run as demo_seed
 
 router = APIRouter(prefix="/api/v1/demo", tags=["demo"])
 
@@ -46,3 +48,10 @@ def simulate_day_5(session: DbSession, actor: Actor) -> DayOut:
     service.set_today(session, new_today, actor=actor)
     closing.expire_pending_questions(session, period, actor=actor)
     return DayOut(today=new_today, period=period)
+
+
+@router.post("/reset", status_code=status.HTTP_204_NO_CONTENT)
+def reset_demo(session: DbSession, actor: Actor) -> None:
+    """Same as `make seed`: wipe all data and reload the demo, to run the walkthrough again."""
+    demo_seed.seed_demo(session)
+    record(session, actor=actor, action="demo.reset", entity_type="demo_clock")

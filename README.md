@@ -28,7 +28,7 @@ La primera vez tarda unos minutos porque construye las imágenes. Las migracione
 | Grafana: dashboards *Cierre del mes*, *Productividad del contador* y *Plataforma* | http://localhost:3001 |
 | Prometheus | http://localhost:9090 |
 
-`make seed` deja los datos como al principio de la demo; se puede correr las veces que haga falta. `make down` apaga todo y `make clean` además borra los datos.
+`make seed` deja los datos como al principio de la demo; se puede correr las veces que haga falta. Desde la consola, el botón *Restablecer demo* de la barra de modo demo hace lo mismo. `make down` apaga todo y `make clean` además borra los datos.
 
 ## Guion de la demo (unos 5 minutos)
 
@@ -76,7 +76,7 @@ Documentación en [`docs/`](docs/):
 ## Tests
 
 ```bash
-make test-back   # 72 tests: dominio puro con golden cases + integración contra Postgres real
+make test-back   # 73 tests: dominio puro con golden cases + integración contra Postgres real
 make e2e         # la demo completa en un navegador real (Playwright); reinicia los datos
 make lint        # ruff
 make typecheck   # mypy estricto + tsc

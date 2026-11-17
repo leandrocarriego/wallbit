@@ -52,6 +52,7 @@ TABLES = [
 
 
 def reset(session: Session) -> None:
+    session.flush()  # raw SQL does not autoflush: pending rows would survive the wipe
     # TRUNCATE skips the row-level append-only trigger on audit_events: demo reset only.
     session.execute(text(f"TRUNCATE {', '.join(TABLES)} RESTART IDENTITY CASCADE"))
 
@@ -400,15 +401,20 @@ def seed_templates(session: Session) -> None:
     )
 
 
+def seed_demo(session: Session) -> None:
+    """Wipe everything and load the demo from scratch. Shared by `make seed` and the console."""
+    reset(session)
+    seed_parameters(session)
+    seed_rules(session)
+    seed_templates(session)
+    seed_martina(session)
+    seed_mateo(session)
+    session.add(DemoClock(id=1, today=DEMO_TODAY))
+
+
 def run() -> None:
     with SessionLocal() as session, session.begin():
-        reset(session)
-        seed_parameters(session)
-        seed_rules(session)
-        seed_templates(session)
-        seed_martina(session)
-        seed_mateo(session)
-        session.add(DemoClock(id=1, today=DEMO_TODAY))
+        seed_demo(session)
     print(f"Seed listo: 2 usuarios sin adherir, fecha simulada {DEMO_TODAY:%d/%m/%Y}.")
 
 

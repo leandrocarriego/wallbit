@@ -181,6 +181,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/demo/reset": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reset Demo
+         * @description Same as `make seed`: wipe all data and reload the demo, to run the walkthrough again.
+         */
+        post: operations["reset_demo_api_v1_demo_reset_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/period-closes/{close_id}/alerts/{alert_id}/resolve": {
         parameters: {
             query?: never;
@@ -267,6 +287,26 @@ export interface paths {
         get: operations["message_preview_api_v1_period_closes__close_id__message_preview_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/period-closes/{close_id}/views": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Viewed
+         * @description The console opened this close. Feeds the accountant productivity metrics.
+         */
+        post: operations["viewed_api_v1_period_closes__close_id__views_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -409,6 +449,23 @@ export interface paths {
         get: operations["detail_api_v1_period_closes__close_id__get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/movements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ingest */
+        post: operations["ingest_api_v1_movements_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -631,6 +688,11 @@ export interface components {
             /** Period */
             period: string;
         };
+        /**
+         * Direction
+         * @enum {string}
+         */
+        Direction: "in" | "out";
         /** EnrollmentIn */
         EnrollmentIn: {
             /** Consent Version */
@@ -710,6 +772,20 @@ export interface components {
             cap_usage_pct: string | null;
             /** Alerts */
             alerts: components["schemas"]["AlertOut"][];
+        };
+        /** IngestOut */
+        IngestOut: {
+            /**
+             * Movement Id
+             * Format: uuid
+             */
+            movement_id: string;
+            /** Period */
+            period: string;
+            /** Created */
+            created: boolean;
+            /** Prompts */
+            prompts: components["schemas"]["PromptOut"][];
         };
         /** InvoiceOut */
         InvoiceOut: {
@@ -806,6 +882,38 @@ export interface components {
          * @enum {string}
          */
         MonotributoCategory: "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K";
+        /** MovementIn */
+        MovementIn: {
+            /**
+             * Client Id
+             * Format: uuid
+             */
+            client_id: string;
+            /** External Id */
+            external_id: string;
+            /**
+             * Occurred At
+             * Format: date-time
+             */
+            occurred_at: string;
+            type: components["schemas"]["MovementType"];
+            direction: components["schemas"]["Direction"];
+            /** Amount */
+            amount: number | string;
+            currency: components["schemas"]["Currency"];
+            /** Fx Rate Ars */
+            fx_rate_ars: number | string;
+            /** Counterparty */
+            counterparty?: string | null;
+            /** Origin Country */
+            origin_country?: string | null;
+            /** Origin Provider */
+            origin_provider?: string | null;
+            /** Origin Holder Name */
+            origin_holder_name?: string | null;
+            /** Memo */
+            memo?: string | null;
+        };
         /** MovementOut */
         MovementOut: {
             /**
@@ -842,6 +950,11 @@ export interface components {
                 [key: string]: string;
             }[];
         };
+        /**
+         * MovementType
+         * @enum {string}
+         */
+        MovementType: "incoming_transfer" | "outgoing_transfer" | "internal_transfer" | "card_payment" | "conversion" | "yield_credit" | "refund";
         /** NotificationOut */
         NotificationOut: {
             /**
@@ -1324,6 +1437,35 @@ export interface operations {
             };
         };
     };
+    reset_demo_api_v1_demo_reset_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-actor"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     resolve_api_v1_period_closes__close_id__alerts__alert_id__resolve_post: {
         parameters: {
             query?: never;
@@ -1523,6 +1665,37 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["PreviewOut"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    viewed_api_v1_period_closes__close_id__views_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-actor"?: string | null;
+            };
+            path: {
+                close_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {
@@ -1793,6 +1966,41 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CloseDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    ingest_api_v1_movements_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-actor"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MovementIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IngestOut"];
                 };
             };
             /** @description Validation Error */
